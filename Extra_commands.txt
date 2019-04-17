@@ -1,0 +1,13 @@
+Test
+sed 's/foo/\[ "\/bin\/bash", "-c", "--" \]/' edge*
+
+Inline
+sed -i 's/foo/\[ "\/bin\/bash", "-c", "--" \]/' edge*
+
+Test
+sed 's/bar/\[ "while true; do sleep 30; done;" \]/' edge1.yaml
+
+Inline
+sed -i 's/bar/\[ "while true; do sleep 30; done;" \]/' edge*
+
+Similarly, repeat for fog

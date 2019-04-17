@@ -1,0 +1,45 @@
+Optimal path from path a to b, may not have any traffic lights or lightly loaded.
+Detecting where the ambulance is is done by the tracking logic.
+Will there be any issue if there is a GPS module added to the ambulance.
+Response : The whole point here is to track, GPS will act as a source of data to track.
+If we have a GPS we don't need anveshak.
+
+Use case : Transferring money from one place to another
+Picked ambulance for social cause.
+Ambulances are not centrally controlled, each ambulance is controlled by separate hospitals.
+
+Multiple ambulances are in the traffic junction.
+We need no information from the camera.
+
+WE show that anveshak takes less time than the non-anveshak setup.
+Google map came with a update recently on the heat-intensity of traffic in the map.
+
+Bangalore map : 89000 nodes, 242k edges. average street length of 81m. (There are 20000Km of roads, 15million people)
+How many traffic lights
+Size of roads. Pruned, highways.
+all are bi-directional edges.
+Ambulances are not right now allowed in one way, we are not considering that.
+In fact, if ambulances would go fast and reach quickly if we follow anveshak shortest path than going against in one way.
+
+Dividers are not covered.
+U-turns are not considered.
+
+Loading map vs rendering (will it load the whole bangalore map.)
+
+Backend, kubernetes orchestrating both rigel and polaris. 
+20 nodes of rigel. Each edge device is a camera. (needs more than half a core)
+Targetting at least 5000 camera max 10000 camera.
+
+Put cameras on higher degree nodes.
+
+10K containers on Rigel. 500 per node. (Right now tried 100 containers with 64MB , 55 to 60)
+Frame size that we were using 168kb.
+
+Above 400 conrainers, network issues spring up. (Check for all to all ping)
+Multiple hour test on a weekly basis.
+
+MQTT, messages can be lost.
+
+Major questions to expect:
+* why not GPS?
+* Identical Ambulances.

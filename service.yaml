@@ -1,0 +1,8 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: edge1
+spec:
+  selector:
+    k8s-app: edge1
+  clusterIP: None

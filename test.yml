@@ -1,0 +1,1492 @@
+version: '3.1'
+services:
+    edge0_0:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge0
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node1
+    edge1_1:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge1
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node1
+    edge2_2:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge2
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node1
+    edge3_3:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge3
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node1
+    edge4_4:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge4
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node1
+    edge5_5:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge5
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node1
+    edge6_6:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge6
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node1
+    edge7_7:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge7
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node1
+    edge8_0:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge8
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node1
+    edge9_1:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge9
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node1
+    edge10_2:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge10
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node1
+    edge11_3:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge11
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node1
+    edge12_4:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge12
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node1
+    edge13_5:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge13
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node1
+    edge14_6:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge14
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node1
+    edge15_7:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge15
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node1
+    edge16_0:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge16
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node1
+    edge17_1:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge17
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node1
+    edge18_2:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge18
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node1
+    edge19_3:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge19
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node1
+    fog1:
+        image: anvdocker:latest
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        command: [ '/startscript.sh' ]
+        hostname: fog1
+        deploy:
+            resources:
+                limits:
+                    cpus: '1.0'
+                    memory: 4096M
+            placement:
+                constraints:
+                   - node.hostname == node1
+    edge20_4:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge20
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node2
+    edge21_5:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge21
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node2
+    edge22_6:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge22
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node2
+    edge23_7:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge23
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node2
+    edge24_0:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge24
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node2
+    edge25_1:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge25
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node2
+    edge26_2:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge26
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node2
+    edge27_3:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge27
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node2
+    edge28_4:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge28
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node2
+    edge29_5:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge29
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node2
+    edge30_6:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge30
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node2
+    edge31_7:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge31
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node2
+    edge32_0:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge32
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node2
+    edge33_1:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge33
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node2
+    edge34_2:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge34
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node2
+    edge35_3:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge35
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node2
+    edge36_4:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge36
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node2
+    edge37_5:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge37
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node2
+    edge38_6:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge38
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node2
+    edge39_7:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge39
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node2
+    fog2:
+        image: anvdocker:latest
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        command: [ '/startscript.sh' ]
+        hostname: fog2
+        deploy:
+            resources:
+                limits:
+                    cpus: '1.0'
+                    memory: 4096M
+            placement:
+                constraints:
+                   - node.hostname == node2
+    edge40_0:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge40
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node3
+    edge41_1:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge41
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node3
+    edge42_2:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge42
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node3
+    edge43_3:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge43
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node3
+    edge44_4:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge44
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node3
+    edge45_5:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge45
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node3
+    edge46_6:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge46
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node3
+    edge47_7:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge47
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node3
+    edge48_0:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge48
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node3
+    edge49_1:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge49
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node3
+    edge50_2:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge50
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node3
+    edge51_3:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge51
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node3
+    edge52_4:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge52
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node3
+    edge53_5:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge53
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node3
+    edge54_6:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge54
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node3
+    edge55_7:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge55
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node3
+    edge56_0:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge56
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node3
+    edge57_1:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge57
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node3
+    edge58_2:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge58
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node3
+    edge59_3:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge59
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node3
+    fog3:
+        image: anvdocker:latest
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        command: [ '/startscript.sh' ]
+        hostname: fog3
+        deploy:
+            resources:
+                limits:
+                    cpus: '1.0'
+                    memory: 4096M
+            placement:
+                constraints:
+                   - node.hostname == node3
+    edge60_4:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge60
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node4
+    edge61_5:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge61
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node4
+    edge62_6:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge62
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node4
+    edge63_7:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge63
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node4
+    edge64_0:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge64
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node4
+    edge65_1:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge65
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node4
+    edge66_2:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge66
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node4
+    edge67_3:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge67
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node4
+    edge68_4:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge68
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node4
+    edge69_5:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge69
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node4
+    edge70_6:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge70
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node4
+    edge71_7:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge71
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node4
+    edge72_0:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge72
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node4
+    edge73_1:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge73
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node4
+    edge74_2:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge74
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node4
+    edge75_3:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge75
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node4
+    edge76_4:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge76
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node4
+    edge77_5:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge77
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node4
+    edge78_6:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge78
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node4
+    edge79_7:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge79
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node4
+    fog4:
+        image: anvdocker:latest
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        command: [ '/startscript.sh' ]
+        hostname: fog4
+        deploy:
+            resources:
+                limits:
+                    cpus: '1.0'
+                    memory: 4096M
+            placement:
+                constraints:
+                   - node.hostname == node4
+    edge80_0:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge80
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node5
+    edge81_1:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge81
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node5
+    edge82_2:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge82
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node5
+    edge83_3:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge83
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node5
+    edge84_4:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge84
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node5
+    edge85_5:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge85
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node5
+    edge86_6:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge86
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node5
+    edge87_7:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge87
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node5
+    edge88_0:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge88
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node5
+    edge89_1:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge89
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node5
+    edge90_2:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge90
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node5
+    edge91_3:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge91
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node5
+    edge92_4:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge92
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node5
+    edge93_5:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge93
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node5
+    edge94_6:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge94
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node5
+    edge95_7:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge95
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node5
+    edge96_0:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge96
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node5
+    edge97_1:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge97
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node5
+    edge98_2:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge98
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node5
+    edge99_3:
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        image: anvdocker:latest
+        command: [ '/startscript.sh' ]
+        hostname: edge99
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: 1024M
+            placement:
+                constraints:
+                   - node.hostname == node5
+    fog5:
+        image: anvdocker:latest
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        command: [ '/startscript.sh' ]
+        hostname: fog5
+        deploy:
+            resources:
+                limits:
+                    cpus: '1.0'
+                    memory: 4096M
+            placement:
+                constraints:
+                   - node.hostname == node5
+    cloud1:
+        image: anvdocker:latest
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        command: [ '/startscript.sh' ]
+        hostname: cloud1
+        deploy:
+            placement:
+                constraints:
+                   - node.hostname == node6
+    headnode:
+        image: anvdocker:latest
+        volumes:
+            - /scratch/aravindhan:/scratch/aravindhan
+        command: [ '/usr/sbin/sshd', '-D' ]
+        hostname: headnode
+        deploy:
+            placement:
+                constraints:
+                   - node.hostname == headnode

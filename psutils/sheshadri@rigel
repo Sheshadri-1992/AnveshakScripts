@@ -1,0 +1,55 @@
+from __future__ import print_function
+import paho.mqtt.client as mqtt
+import psutil
+
+broker_address="10.24.24.2" 
+
+# Set the transport mode to WebSockets.
+tTransport = "websockets"
+tPort = 9001
+
+client = mqtt.Client("P1", transport=tTransport)
+client.connect(broker_address, port=tPort, keepalive=60, bind_address="")
+
+
+# Create the topic string.
+resourceTopic = "resource/"
+
+# A method to create payload
+def createPayload():
+
+	# get the system performance data over 2 seconds.
+	cpuPercent = psutil.cpu_percent(interval=2)
+	ramPercent = psutil.virtual_memory().percent
+	ramTotalMB = (psutil.virtual_memory().total)/(1024.0*1024.0)
+	ramAvailableMB = psutil.virtual_memory().available/(1024.0*1024.0)
+	ramUsedMB = psutil.virtual_memory().used/(1024.0*1024.0)
+
+	cpuCores = psutil.cpu_count()
+
+	# build the payload string.
+	payload = "cpupercent=" + str(cpuPercent)+";" +"cpucores=" + str(cpuCores) + ";" +"rampercent=" + str(round(ramPercent,2)) +";" +"ramtotalmb="+str(round(ramTotalMB,2))
+	payload = payload+";"+"ramavailablemb="+str(round(ramAvailableMB,2))+";"+"ramusedmb="+str(round(ramUsedMB,2))
+
+	return payload
+
+
+def sendPayload():
+
+	while True:
+		
+		payload = createPayload()
+		print("payload about to be sent ",payload)
+
+		# attempt to publish this data to the topic.
+		try:
+			client.publish(resourceTopic, payload)	
+			print("Hello")		
+
+		except (KeyboardInterrupt):
+			break
+		except:
+			print ("There was an error while publishing the data.")
+
+
+sendPayload()			

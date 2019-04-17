@@ -1,0 +1,28 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: edge1
+spec:
+  selector:
+    matchLabels:
+      k8s-app: edge1
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: edge1
+    spec:
+      hostname: edge1
+      containers:
+      - name: cloud
+        image: aakashkhochare/anvdocker:latest
+        command: foo
+        args: bar
+        securityContext:
+          privileged: true        
+        resources:
+           limits:
+             cpu: "0.2"
+             memory: 1024Mi
+      nodeSelector:
+        name: node1

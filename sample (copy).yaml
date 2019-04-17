@@ -1,0 +1,26 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: edge1
+spec:
+  selector:
+    matchLabels:
+      k8s-app: edge1
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: edge1
+    spec:
+      hostname: edge1      
+      containers:
+      - name: edge1
+        image: aakashkhochare/anvdocker:latest
+        command: [ "/bin/bash", "-c", "--" ]
+        args: [ "while true; do sleep 30; done;" ]
+        securityContext:
+          privileged: true        
+        resources:
+           limits:
+             cpu: "0.2"
+             memory: 1024Mi  

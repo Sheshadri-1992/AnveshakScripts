@@ -1,0 +1,15 @@
+edgeFogArray=`ls EdgeFogYamlFiles/ | awk '{print $1}'`
+edgeFogArray=(`echo $edgeFogArray `)
+
+counter=0
+for i in "${edgeFogArray[@]}"
+do
+	echo "starting container for "$i
+	if [ $counter -ge 10];then
+		echo "Node2"
+	else
+		echo "Node1"
+
+	kubectl apply -f $i
+	let counter = counter + 1
+done	

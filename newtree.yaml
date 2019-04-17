@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shesh
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: shesh1
+  template:
+    metadata:
+      labels:
+        k8s-app: shesh2
+    spec:
+      containers:
+      - args: bar
+        command: foo
+        image: aakashkhochare/anvdocker:latest
+        name: cloud
+        resources:
+          limits:
+            cpu: '0.2'
+            memory: 1024Mi
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /scratch/aravindhan
+          name: scratch
+      hostname: shesh3
+      nodeSelector:
+        hostname: node1
+      volumes:
+      - hostPath:
+          path: /scratch/aravindhan
+          type: Directory
+        name: scratch
