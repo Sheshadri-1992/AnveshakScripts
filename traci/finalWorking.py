@@ -6,6 +6,8 @@ import os, sys
 import traci
 import time
 
+# tmux new -s jsr
+# tmux attach -t jsr
 ############################ SUMO INIT COMMANDS & PATH ############################
 sumoBinary = "/home/dreamlab/sumo/bin/sumo"
 sumoCmd = [sumoBinary, "-c", "testconfig.sumocfg"]
