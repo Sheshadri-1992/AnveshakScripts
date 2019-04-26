@@ -1,6 +1,7 @@
-from flask import Flask, request, current_app, Blueprint
-from flask_cors import CORS
 import json
+
+from flask import Flask, current_app, Blueprint
+from flask_cors import CORS
 
 app = Blueprint('scale_app', 'scale_api', url_prefix='/')
 
@@ -38,7 +39,6 @@ def start():
 
     # get the ambulance path (which is a set of edges )
     edge_list = my_state.get_ambulance_path()
-    print("the edge list is ", edge_list)
 
     my_state.start_publishing_data()
     return json.dumps({'ambulancepath': edge_list})

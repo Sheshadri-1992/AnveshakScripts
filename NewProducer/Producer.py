@@ -1,19 +1,16 @@
 from __future__ import print_function
+
+import json
+import logging
 # import paho.mqtt.client as mqtt
 import threading
-import socket
-import json
-import os
-import sys
-import random
-import Query
 # import traci
 import time
-import logging
-import Queue
-from random import randint
-from Query import QueryStruct
 from datetime import datetime
+from random import randint
+import Queue
+from MqttPublish import MqttPublish
+from Query import QueryStruct
 
 ############################################ QUEUES ############################################
 large_queue = Queue.Queue()
@@ -24,7 +21,7 @@ edge_list = []
 ################################################################################################
 
 logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-9s) %(message)s', )
-MAX_BATCH = 15
+MAX_BATCH = 4000
 
 
 ############################################ LARGE PRODUCER ####################################
@@ -100,7 +97,7 @@ class SmallProducer(threading.Thread):
                 item = QueryStruct(3, "edgeid")
                 small_queue.put(item)
                 logging.debug('Putting item : ' + str(small_queue.qsize()) + ' items in small queue')
-                time.sleep(0.1)
+                time.sleep(0.01)
                 # break
             else:
                 logging.debug("queue is full ")
@@ -112,7 +109,6 @@ class SmallProducer(threading.Thread):
 ############################################ CONSUMER THREAD ####################################
 
 class ConsumerThread(threading.Thread):
-    traciQueue = None
 
     def __init__(self, group=None, target=None, name=None,
                  args=(), kwargs=None, verbose=None):
@@ -122,37 +118,65 @@ class ConsumerThread(threading.Thread):
         return
 
     def run(self):
+        mqtt_object = MqttPublish()
+        mqtt_object.print_variables()
+
+        num_edges = len(edge_list)
+        index = 0
 
         while True:
-
+            my_dict = {}
+            edge_dict = {}
             batch_count = 0
             currtime = datetime.now()
 
             # Run simulation step here
 
-            while not small_queue.empty():
+            # while not small_queue.empty():
+            #
+            #     item = small_queue.get()
+            #     if (batch_count < MAX_BATCH) and (item.timestamp >= currtime):
+            #         # item.print_members()
+            #         my_dict[str(edge_list[batch_count % 4000])] = randint(0, 2)
+            #         batch_count = batch_count + 1
+            #
+            # while not medium_queue.empty():
+            #
+            #     item = medium_queue.get()
+            #     if batch_count < MAX_BATCH and (item.timestamp >= currtime):
+            #         # item.print_members()
+            #         my_dict[str(edge_list[batch_count % 4000])] = randint(0, 2)
+            #         batch_count = batch_count + 1
+            #
+            # while not large_queue.empty():
+            #
+            #     item = large_queue.get()
+            #     if batch_count < MAX_BATCH and (item.timestamp >= currtime):
+            #         # item.print_members()
+            #         my_dict[str(edge_list[batch_count % 4000])] = randint(0, 2)
+            #         batch_count = batch_count + 1
 
-                item = small_queue.get()
-                if (batch_count < MAX_BATCH) and (item.timestamp >= currtime):
-                    item.print_members()
-                    batch_count = batch_count + 1
+            # Need to call the broker here
 
-            while not medium_queue.empty():
+            for i in range(0, 1500):
+                if index == num_edges:
+                    index = 0
 
-                item = medium_queue.get()
-                if batch_count < MAX_BATCH and (item.timestamp >= currtime):
-                    item.print_members()
-                    batch_count = batch_count + 1
+                logging.debug("The index is "+str(index))
+                edge = edge_list[index % num_edges]
+                edge_dict[edge] = randint(0, 2)
+                index = index + 1
 
-            while not large_queue.empty():
+            logging.debug("The number of edgers are " + str(len(edge_list)))
+            logging.debug("The number of keys are " + str(len(edge_dict.keys())))
 
-                item = large_queue.get()
-                if batch_count < MAX_BATCH and (item.timestamp >= currtime):
-                    item.print_members()
-                    batch_count = batch_count + 1
+            mqtt_object.connect_to_broker()
+            mqtt_object.send_vertex_message(None)
+            mqtt_object.send_edge_message(json.dumps(edge_dict))
+
+            mqtt_object.disconnect_broker()
 
             time.sleep(1)
-            # break
 
 
 ################################################################################################
@@ -161,7 +185,6 @@ class ConsumerThread(threading.Thread):
 class ProducerConsumer:
 
     def __init__(self):
-
         logging.debug("Producer Consumer object has been initiated")
 
     def get_ambulance_path(self):
@@ -187,14 +210,14 @@ class ProducerConsumer:
         starts all the threads which publish data at regular intervals to mqtt broker
         :return: Nothing
         """
-        large_thread = LargeProducer(name='large-producer')
-        large_thread.start()
-
-        medium_thread = MediumProducer(name="medium-producer")
-        medium_thread.start()
-
-        small_thread = SmallProducer(name="small-producer")
-        small_thread.start()
+        # large_thread = LargeProducer(name='large-producer')
+        # large_thread.start()
+        #
+        # medium_thread = MediumProducer(name="medium-producer")
+        # medium_thread.start()
+        #
+        # small_thread = SmallProducer(name="small-producer")
+        # small_thread.start()
 
         consumer_thread = ConsumerThread(name='consumer')
         consumer_thread.start()

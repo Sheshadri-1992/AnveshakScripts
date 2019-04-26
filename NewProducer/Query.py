@@ -1,4 +1,3 @@
-import sys
 import time
 from datetime import datetime
 from datetime import timedelta
@@ -12,7 +11,6 @@ class QueryType(Enum):
 
 
 class QueryStruct:
-
     querytype = QueryType(QueryType.smallview)
     arguments = ""
     prevtime = datetime.now()
@@ -20,7 +18,7 @@ class QueryStruct:
 
     def __init__(self, enumtype, args):
 
-        print "creating new object "
+        print("creating new object ")
 
         self.querytype = QueryType(enumtype)
         self.arguments = args
@@ -46,7 +44,7 @@ class QueryStruct:
         """
 
         ans = (self.timestamp - self.prevtime)
-        print self.querytype, " ", self.timestamp, " ", self.arguments, " ", ans.seconds
+        print("here ", self.querytype, " ", self.timestamp, " ", self.arguments, " ", ans.seconds)
         return "printed"
 
 # test code

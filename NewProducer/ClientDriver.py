@@ -1,12 +1,13 @@
-from producer import ProducerConsumer
 import time
+
+from Producer import ProducerConsumer
+
 import Rest
 
 my_state = ProducerConsumer()
 
 
 def initialize_state():
-
     my_state.load_json()
 
 
