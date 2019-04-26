@@ -60,13 +60,10 @@ class MqttPublish:
         self.client_edge.on_publish = self.on_publish_edge
         self.client_edge.connect(self.broker_address, port=self.tPort, keepalive=60, bind_address="")
 
-        # self.client_edge.loop_forever()
-
         self.client_vertex = mqtt.Client("P3", transport=self.tTransport)
         self.client_vertex.username_pw_set(username="dreamlabanveshak", password="dream119")
         self.client_vertex.on_publish = self.on_publish_vertex
         self.client_vertex.connect(self.broker_address, port=self.tPort, keepalive=60, bind_address="")
-        # self.client_vertex.loop_start()
 
     def disconnect_broker(self):
         """

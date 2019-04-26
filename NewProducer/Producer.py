@@ -9,6 +9,7 @@ import time
 from datetime import datetime
 from random import randint
 import Queue
+import numpy as np
 from MqttPublish import MqttPublish
 from Query import QueryStruct
 
@@ -18,6 +19,7 @@ medium_queue = Queue.Queue()
 small_queue = Queue.Queue()
 vehicle_queue = Queue.Queue()
 edge_list = []
+my_dict = {}
 ################################################################################################
 
 logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-9s) %(message)s', )
@@ -117,6 +119,39 @@ class ConsumerThread(threading.Thread):
         self.name = name
         return
 
+    def generate_rand_prob(self):
+
+        number = np.random.choice([0, 1], 1, p=[0.5, 0.5])
+        choice = list(number)[0]
+
+        print("choice ", int(choice))
+
+        if choice == 0:
+            logging.debug(" choice is don't change")
+        else:
+            logging.debug(" choice is change")
+
+        return choice
+
+    def get_edge_color(self, index):
+
+        choice = self.generate_rand_prob()
+        changed = False
+        edge = edge_list[index]
+
+        if edge not in my_dict:
+            my_dict[edge] = randint(0, 2)
+            changed = True
+
+        elif choice == 1:
+
+            color = randint(0, 2)
+            if my_dict[edge] != color:
+                my_dict[edge] = color
+                changed = True
+
+        return changed
+
     def run(self):
         mqtt_object = MqttPublish()
         mqtt_object.print_variables()
@@ -124,8 +159,10 @@ class ConsumerThread(threading.Thread):
         num_edges = len(edge_list)
         index = 0
 
+        my_file_handler = open("edge_count.txt", 'a')
+
         while True:
-            my_dict = {}
+
             edge_dict = {}
             batch_count = 0
             currtime = datetime.now()
@@ -162,13 +199,19 @@ class ConsumerThread(threading.Thread):
                 if index == num_edges:
                     index = 0
 
-                logging.debug("The index is "+str(index))
-                edge = edge_list[index % num_edges]
-                edge_dict[edge] = randint(0, 2)
+                logging.debug("The index is " + str(index))
+                changed = self.get_edge_color(index)
+
+                edge = edge_list[index]
+                if changed:
+                    edge_dict[edge] = my_dict[edge]
+
                 index = index + 1
 
-            logging.debug("The number of edgers are " + str(len(edge_list)))
+            logging.debug("The number of edges are " + str(len(edge_list)))
             logging.debug("The number of keys are " + str(len(edge_dict.keys())))
+
+            my_file_handler.write(str(len(edge_dict.keys()))+"\n")
 
             mqtt_object.connect_to_broker()
             mqtt_object.send_vertex_message(None)
