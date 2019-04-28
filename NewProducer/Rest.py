@@ -54,6 +54,9 @@ def start_simulation():
     :return: nothing
     """
     logging.debug("In the start simulation method")
+    my_state = current_app.config['state']
+    my_state.start_simulation()
+
     return "Success"
 
 

@@ -124,7 +124,7 @@ class Sumo(threading.Thread):
         This should be run on a separate thread
         :return:
         """
-
+        logging.debug("Starting the simulation..")
         try:
             step = 0
             while step < 1000:
