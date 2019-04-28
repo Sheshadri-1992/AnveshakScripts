@@ -69,7 +69,7 @@ class Sumo(threading.Thread):
 
         return ambulance_id
 
-    def return_vehicle_stats(self):
+    def get_vehicle_stats(self):
         """
         Make a traci call and return the ambulance speed and position
         :return: the ambulance speed and position
@@ -108,7 +108,7 @@ class Sumo(threading.Thread):
 
         try:
 
-            for edge in self.edge_list:
+            for edge in arg_edge_list:
                 self.lock.acquire()
                 num_vehicles = traci.edge.getLastStepVehicleNumber(edge)
                 self.lock.release()

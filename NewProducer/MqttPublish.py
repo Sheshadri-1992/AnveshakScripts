@@ -73,25 +73,27 @@ class MqttPublish:
         self.client_edge.disconnect()
         self.client_vertex.disconnect()
 
-    def send_vertex_message(self, vertex_json):
+    def send_vertex_message(self, vertex_json, topic):
         """
         the client publishes the message to the broker , the message is vehicle speed and position
         :param vertex_json: the json that has to be sent
+        :param topic: the topic for vertex which is sent by consumer
         :return: nothing to return
         """
         logging.debug("Sending vehicle position and speed")
-        ret = self.client_vertex.publish(self.vehicle_topic, vertex_json, qos=0)
+        ret = self.client_vertex.publish(topic, vertex_json, qos=0)
         ret.wait_for_publish()
         logging.debug("The ret is " + str(ret))
 
-    def send_edge_message(self, edge_json):
+    def send_edge_message(self, edge_json, topic):
         """
 
         :param edge_json: the edge json which contains the edgeid and number of vehicles
+        :param topic: the topic for edge which is sent by consumer
         :return: nothing to return
         """
 
         logging.debug("Sending edge id and position " + edge_json + " topic is " + self.edge_topic)
-        ret = self.client_edge.publish(self.edge_topic, edge_json, qos=0)
+        ret = self.client_edge.publish(topic, edge_json, qos=0)
         ret.wait_for_publish()
         logging.debug("The ret is " + str(ret))

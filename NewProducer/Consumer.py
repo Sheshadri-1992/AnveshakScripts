@@ -26,6 +26,7 @@ class ConsumerThread(threading.Thread):
         self.target = target
         self.name = name
         self.edge_list = []
+        self.sumo_obj = None
 
         self.large_thread = LargeProducer(name='large-producer')
         self.medium_thread = MediumProducer(name="medium-producer")
@@ -37,6 +38,13 @@ class ConsumerThread(threading.Thread):
 
         logging.debug("Started all the producers...")
 
+    def update_sumo_object(self, sumo_obj):
+        """
+        Assign the sumo object so that it can retrieve traffic density
+        :return: nothing
+        """
+        self.sumo_obj = sumo_obj
+
     def update_edge_list(self, edge_list):
         """
 
@@ -45,21 +53,23 @@ class ConsumerThread(threading.Thread):
         """
         self.edge_list = edge_list
 
-    def get_edge_color(self, index):
+    @staticmethod
+    def get_edge_color(edge_traffic_dict):
 
-        changed = False
-
-        return changed
-
-    def get_edge_color_buckets(self, candidate_edges):
-        """
-        Returns color bucket dictionary
-        :param candidate_edges: The list of edges that are supposed to be sent to the mqtt broker
-        :return: a dictionary where key is edge id and value is color bucket
-        """
         edgeid_color_dict = {}
 
-        return edgeid_color_dict 
+        for edge in edge_traffic_dict:
+
+            num_vehicles = edge_traffic_dict[edge]
+
+            if num_vehicles < 5:
+                edgeid_color_dict[edge] = 0
+            elif 5 < num_vehicles <= 10:
+                edgeid_color_dict[edge] = 1
+            else:
+                edgeid_color_dict[edge] = 2
+
+        return edgeid_color_dict
 
     def run(self):
         mqtt_object = MqttPublish()
@@ -68,37 +78,50 @@ class ConsumerThread(threading.Thread):
         while True:
 
             batch_count = 0
-            candidate_edges = []
-            currtime = datetime.now()
+            small_candidate_edges = []
+            medium_candidate_edges = []
+            large_candidate_edges = []
+            curr_time = datetime.now()
 
             # Run simulation step here
 
             while not self.small_thread.small_queue.empty():
 
                 item = self.small_thread.get_element_from_queue()
-                if (batch_count < MAX_BATCH) and (item.timestamp >= currtime):
-                    candidate_edges.append(item.get_edge_id())
+                if (batch_count < MAX_BATCH) and (item.timestamp >= curr_time):
+                    small_candidate_edges.append(item.get_edge_id())
                     batch_count = batch_count + 1
 
             while not self.medium_thread.medium_queue.empty():
 
                 item = self.medium_thread.get_element_from_queue()
-                if batch_count < MAX_BATCH and (item.timestamp >= currtime):
-                    candidate_edges.append(item.get_edge_id())
+                if batch_count < MAX_BATCH and (item.timestamp >= curr_time):
+                    medium_candidate_edges.append(item.get_edge_id())
                     batch_count = batch_count + 1
 
             while not self.large_thread.large_queue.empty():
 
                 item = self.large_thread.get_element_from_queue
-                if batch_count < MAX_BATCH and (item.timestamp >= currtime):
-                    candidate_edges.append(item.get_edge_id())
+                if batch_count < MAX_BATCH and (item.timestamp >= curr_time):
+                    large_candidate_edges.append(item.get_edge_id())
                     batch_count = batch_count + 1
 
-            logging.debug("The number of edges are " + str(len(candidate_edges)))
+            logging.debug("The small candidate edges are " + str(len(small_candidate_edges)))
+            logging.debug("The medium candidate edges are " + str(len(medium_candidate_edges)))
+            logging.debug("The large candidate edges are" + str(len(large_candidate_edges)))
+
+            small_dict = self.sumo_obj.return_traffic_density(small_candidate_edges)
+            medium_dict = self.sumo_obj.return_traffic_density(medium_candidate_edges)
+            large_dict = self.sumo_obj.return_traffic_density(large_candidate_edges)
+            vehicle_stat_dict = self.sumo_obj.get_vehicle_stats()
+
+            color_small = self.get_edge_color(small_dict)
+            color_medium = self.get_edge_color(medium_dict)
+            color_large = self.get_edge_color(large_dict)
 
             mqtt_object.connect_to_broker()
-            mqtt_object.send_vertex_message(None)
-            mqtt_object.send_edge_message(None)
+            mqtt_object.send_vertex_message(json.dumps(vehicle_stat_dict))
+            mqtt_object.send_edge_message(json.dumps(color_small))
+            mqtt_object.send_edge_message(json.dumps(color_medium))
+            mqtt_object.send_edge_message(json.dumps(color_large))
             mqtt_object.disconnect_broker()
-
-            time.sleep(1)
