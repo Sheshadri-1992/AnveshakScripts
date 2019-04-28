@@ -1,6 +1,6 @@
 import time
 
-from Producer import ProducerConsumer
+from ProcessEdges import ProducerConsumer
 
 import Rest
 

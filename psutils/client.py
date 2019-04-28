@@ -6,6 +6,9 @@ import socket
 import json
 import time
 
+def on_connect(client, userdata, rc):
+	print("Connected with result code "+str(rc))
+
 def on_subscribe(client, userdata, message):
 
 	print("here")
@@ -20,11 +23,13 @@ broker_address="10.24.24.2"
 tTransport = "websockets"
 tPort = 10001
 
+print("I am here ")
 client = mqtt.Client("P5",protocol=mqtt.MQTTv31, transport=tTransport)
+client.username_pw_set(username="dreamlabanveshak", password="dream119")
 client.on_message=on_message
 
 client.connect(broker_address, port=tPort, keepalive=60, bind_address="")
-client.loop_start()
-client.subscribe("vechiclestats/")
+
+client.subscribe("trafficstats")
 client.on_subscribe = on_subscribe
-time.sleep(4)
+client.loop_forever()

@@ -47,6 +47,12 @@ class QueryStruct:
         print("here ", self.querytype, " ", self.timestamp, " ", self.arguments, " ", ans.seconds)
         return "printed"
 
+    def get_edge_id(self):
+        """
+        Returns the edge id
+        :return: the edge id
+        """
+
 # test code
 # myObj = Query(2,"hello")
 # myObj.print_members()
