@@ -23,6 +23,7 @@ class QueryStruct:
         self.querytype = QueryType(enumtype)
         self.edgeid = args
         self.prevtime = datetime.now()
+        self.timestamp = datetime.now()
 
         if self.querytype == QueryType.largeview:
             self.timestamp = datetime.now() + timedelta(seconds=10)
@@ -51,6 +52,10 @@ class QueryStruct:
         """
 
         return self.edgeid
+
+    def get_timestamp(self):
+
+        return self.timestamp
 
 # test code
 # myObj = Query(2,"hello")

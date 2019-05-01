@@ -32,6 +32,8 @@ class ProducerConsumer:
         """
         # start simulation
         self.sumo_obj.start()
+        self.start_producing_content()
+        # self.start_publishing_data()
 
     def start_producing_content(self):
         """
@@ -39,6 +41,7 @@ class ProducerConsumer:
         :return:
         """
         self.consumer_thread.start_producers()
+        self.consumer_thread.start()
 
     def get_ambulance_path(self):
         """

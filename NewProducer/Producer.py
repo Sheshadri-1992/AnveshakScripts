@@ -1,5 +1,5 @@
 from __future__ import print_function
-
+import json
 import logging
 import threading
 import time
@@ -22,17 +22,27 @@ class LargeProducer(threading.Thread):
         self.target = target
         self.name = name
         self.large_queue = Queue.Queue()
-        self.edge_list
+        self.large_edge_list = []
+
+        logging.debug("Loading the high_ways json ")
+        with open("./input/high_ways.json") as json_file:
+            data_dict = json.load(json_file)
+
+        self.large_edge_list = list(data_dict.keys())
+        logging.debug("The number of edges are " + str(len(self.large_edge_list)))
 
     def run(self):
 
         # print("I am  here in large producer ")
+        length = len(self.large_edge_list)
+        index = 0
         while True:
             if not self.large_queue.full():
 
-                item = QueryStruct(1, "edgeid")
+                item = QueryStruct(1, self.large_edge_list[index % length])
                 self.large_queue.put(item)
-                logging.debug('Putting item : ' + str(self.large_queue.qsize()) + ' items in large queue')
+                logging.debug("Putting item : edge " + item.get_edge_id() + " : qsize " + str(
+                    self.large_queue.qsize()) + " items in large queue")
                 time.sleep(10)
 
             else:
@@ -62,15 +72,27 @@ class MediumProducer(threading.Thread):
         self.target = target
         self.name = name
         self.medium_queue = Queue.Queue()
+        self.medium_edge_list = []
+
+        logging.debug("Loading the mid_ways json ")
+        with open("./input/mid_ways.json") as json_file:
+            data_dict = json.load(json_file)
+
+        self.medium_edge_list = list(data_dict.keys())
+        logging.debug("The number of edges are " + str(len(self.medium_edge_list)))
 
     def run(self):
 
+        index = 0
+        length = len(self.medium_edge_list)
         # print("I am  here in medium producer ")
         while True:
             if not self.medium_queue.full():
-                item = QueryStruct(2, "edgeid")
+                item = QueryStruct(2, self.medium_edge_list[index % length])
                 self.medium_queue.put(item)
-                logging.debug('Putting ' + ' : ' + str(self.medium_queue.qsize()) + ' items in medium queue')
+                logging.debug("Putting item : edge " + item.get_edge_id() + " : qsize " + str(
+                    self.medium_queue.qsize()) + " items in medium queue")
+                index = index + 1
                 time.sleep(5)
                 # break
             else:
@@ -100,16 +122,28 @@ class SmallProducer(threading.Thread):
         self.target = target
         self.name = name
         self.small_queue = Queue.Queue()
+        self.small_edge_list = []
+
+        logging.debug("Loading the low_ways json ")
+        with open("./input/low_ways.json") as json_file:
+            data_dict = json.load(json_file)
+
+        self.small_edge_list = list(data_dict.keys())
+        logging.debug("The number of edges are " + str(len(self.small_edge_list)))
 
     def run(self):
 
+        index = 0
+        length = len(self.small_edge_list)
         # print("I am  here in small producer ")
         while True:
             if not self.small_queue.full():
-                item = QueryStruct(3, "edgeid")
+                item = QueryStruct(3, self.small_edge_list[index % length])
                 self.small_queue.put(item)
-                logging.debug('Putting item : ' + str(self.small_queue.qsize()) + ' items in small queue')
-                time.sleep(0.01)
+                logging.debug("Putting item : edge " + item.get_edge_id() + " : qsize " + str(
+                    self.small_queue.qsize()) + " items in small queue")
+                index = index + 1
+                time.sleep(0.1)
                 # break
             else:
                 logging.debug("queue is full ")
@@ -121,7 +155,7 @@ class SmallProducer(threading.Thread):
 
         :return: return a object if exists else return None
         """
-
+        logging.debug("Got a call ")
         # check for queue not being empty
         if not self.small_queue.empty():
             item = self.small_queue.get()

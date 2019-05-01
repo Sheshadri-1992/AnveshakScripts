@@ -51,12 +51,12 @@ class Sumo(threading.Thread):
 
         logging.debug("The number of edges in traci is " + str(len(self.edge_list)))
 
-    def return_ambulance_id(self, vehicle_id):
+    def set_ambulance_id(self, vehicle_id):
         """
         Returns the ambulance Id, this may not be needed
         :return:
         """
-
+        logging.debug("Got the ambulance id "+vehicle_id)
         self.ambulance_id = vehicle_id
 
         self.lock.acquire()
@@ -66,6 +66,8 @@ class Sumo(threading.Thread):
         ambulance_id = ""
         if vehicle_id_list is not None:
             ambulance_id = vehicle_id_list[0]
+            logging.debug("Set the ambulance id "+ str(self.ambulance_id))
+            self.ambulance_id = ambulance_id
 
         return ambulance_id
 
@@ -74,6 +76,7 @@ class Sumo(threading.Thread):
         Make a traci call and return the ambulance speed and position
         :return: the ambulance speed and position
         """
+        logging.debug("Sending the stats for the ambulance "+self.ambulance_id)
         ambulance_dict = {}
 
         try:

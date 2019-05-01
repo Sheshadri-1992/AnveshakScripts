@@ -97,7 +97,7 @@ def update_view_port_traffic():
     q = request.args.get('q', default=0.0, type=float)
     graphid = request.args.get('graphid', default=0, type=int)
 
-    logging.debug("The parameters recevied are " + str(p) + "  :  " + str(q) + "  :  " + str(graphid))
+    logging.debug("The parameters received are " + str(p) + "  :  " + str(q) + "  :  " + str(graphid))
     return "Success"
 
 @app.route('stop_sim', methods=['GET'])

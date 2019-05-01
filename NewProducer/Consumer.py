@@ -121,15 +121,19 @@ class ConsumerThread(threading.Thread):
             small_dict = self.sumo_obj.return_traffic_density(small_candidate_edges)
             medium_dict = self.sumo_obj.return_traffic_density(medium_candidate_edges)
             large_dict = self.sumo_obj.return_traffic_density(large_candidate_edges)
+
+            self.sumo_obj.set_ambulance_id("dummy_ambulance_id")
             vehicle_stat_dict = self.sumo_obj.get_vehicle_stats()
 
             color_small = self.get_edge_color(small_dict)
             color_medium = self.get_edge_color(medium_dict)
             color_large = self.get_edge_color(large_dict)
 
+            logging.debug("The vehicle payload is ")
+
             mqtt_object.connect_to_broker()
-            mqtt_object.send_vertex_message(json.dumps(None))
-            mqtt_object.send_edge_message(json.dumps(None))
-            mqtt_object.send_edge_message(json.dumps(None))
-            mqtt_object.send_edge_message(json.dumps(None))
+            mqtt_object.send_vertex_message(json.dumps(vehicle_stat_dict))
+            mqtt_object.send_edge_message(json.dumps(color_small))
+            mqtt_object.send_edge_message(json.dumps(color_medium))
+            mqtt_object.send_edge_message(json.dumps(color_large))
             mqtt_object.disconnect_broker()
