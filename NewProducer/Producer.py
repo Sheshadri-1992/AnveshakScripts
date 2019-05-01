@@ -49,7 +49,6 @@ class LargeProducer(threading.Thread):
                 logging.debug("queue is full ")
                 time.sleep(10)
 
-    @property
     def get_element_from_queue(self):
         """
 
@@ -99,7 +98,6 @@ class MediumProducer(threading.Thread):
                 logging.debug("queue is full ")
                 time.sleep(5)
 
-    @property
     def get_element_from_queue(self):
         """
 
@@ -149,16 +147,18 @@ class SmallProducer(threading.Thread):
                 logging.debug("queue is full ")
                 time.sleep(1)
 
-    @property
     def get_element_from_queue(self):
         """
 
         :return: return a object if exists else return None
         """
-        logging.debug("Got a call ")
+
         # check for queue not being empty
         if not self.small_queue.empty():
+	    logging.debug("Size before "+str(self.small_queue.qsize()))
             item = self.small_queue.get()
+	    logging.debug("The item is "+str(item.timestamp)+" The edge id is "+str(item.edgeid))
+	    logging.debug("Size after "+str(self.small_queue.qsize()))
             return item
 
         return None

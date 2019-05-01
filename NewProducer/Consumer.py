@@ -96,6 +96,7 @@ class ConsumerThread(threading.Thread):
             while not self.small_thread.small_queue.empty():
 
                 item = self.small_thread.get_element_from_queue()
+		print(type(item))
                 if (batch_count < MAX_BATCH) and (item.timestamp >= curr_time):
                     small_candidate_edges.append(item.get_edge_id())
                     batch_count = batch_count + 1
@@ -109,12 +110,12 @@ class ConsumerThread(threading.Thread):
 
             while not self.large_thread.large_queue.empty():
 
-                item = self.large_thread.get_element_from_queue
+                item = self.large_thread.get_element_from_queue()
                 if batch_count < MAX_BATCH and (item.timestamp >= curr_time):
                     large_candidate_edges.append(item.get_edge_id())
                     batch_count = batch_count + 1
 
-            logging.debug("The small candidate edges are " + str(len(small_candidate_edges)))
+            logging.debug("The small candidate edges are " + str(len(small_candidate_edges)) + "Edges are "+str(small_candidate_edges[0] ))
             logging.debug("The medium candidate edges are " + str(len(medium_candidate_edges)))
             logging.debug("The large candidate edges are" + str(len(large_candidate_edges)))
 
