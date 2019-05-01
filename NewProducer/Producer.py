@@ -9,6 +9,9 @@ from MqttPublish import MqttPublish
 from Query import QueryStruct
 
 logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-9s) %(message)s', )
+low_ways = "./input/low_ways.json"
+mid_ways = "./input/mid_ways.json"
+high_ways = "./input/low_ways.json"
 
 
 class LargeProducer(threading.Thread):
@@ -19,6 +22,7 @@ class LargeProducer(threading.Thread):
         self.target = target
         self.name = name
         self.large_queue = Queue.Queue()
+        self.edge_list
 
     def run(self):
 

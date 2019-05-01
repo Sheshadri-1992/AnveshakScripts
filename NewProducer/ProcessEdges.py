@@ -7,16 +7,11 @@ from random import randint
 import Queue
 from Consumer import ConsumerThread
 import numpy as np
-from MqttPublish import MqttPublish
-from Producer import LargeProducer, MediumProducer, SmallProducer
-from Query import QueryStruct
 from Sumo import Sumo
 
 # Global variables & constants
 vehicle_queue = Queue.Queue()
-edge_list = []
 my_dict = {}
-
 
 # logging template
 logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-9s) %(message)s', )
@@ -28,6 +23,7 @@ class ProducerConsumer:
         logging.debug("Producer Consumer object has been initiated")
         self.sumo_obj = Sumo()
         self.consumer_thread = ConsumerThread(name='consumer')
+        self.consumer_thread.update_sumo_object(self.sumo_obj)
 
     def start_simulation(self):
         """
@@ -36,6 +32,13 @@ class ProducerConsumer:
         """
         # start simulation
         self.sumo_obj.start()
+
+    def start_producing_content(self):
+        """
+
+        :return:
+        """
+        self.consumer_thread.start_producers()
 
     def get_ambulance_path(self):
         """
@@ -48,9 +51,9 @@ class ProducerConsumer:
 
         edge_dict = {}
 
-        for i in range(0, len(edge_list)):
-            edge = edge_list[i]
-            edge_dict[edge] = randint(0, 2)
+        # for i in range(0, len(edge_list)):
+        #     edge = edge_list[i]
+        #     edge_dict[edge] = randint(0, 2)
 
         payload = json.dumps(edge_dict)
         return payload
@@ -69,10 +72,23 @@ class ProducerConsumer:
         :return: nothing
         """
 
-        logging.debug("Loading the json")
-        with open("low_ways.json") as json_file:
+        logging.debug("Loading the low_ways json ")
+        with open("./input/low_ways.json") as json_file:
             data_dict = json.load(json_file)
 
-        global edge_list
-        edge_list = list(data_dict.keys())
-        logging.debug("The number of edges are " + str(len(edge_list)))
+        low_edge_list = list(data_dict.keys())
+        logging.debug("The number of edges are " + str(len(low_edge_list)))
+
+        logging.debug("Loading the mid_ways json ")
+        with open("./input/mid_ways.json") as json_file:
+            data_dict = json.load(json_file)
+
+        mid_edge_list = list(data_dict.keys())
+        logging.debug("The number of edges are " + str(len(mid_edge_list)))
+
+        logging.debug("Loading the high_ways json ")
+        with open("./input/high_ways.json") as json_file:
+            data_dict = json.load(json_file)
+
+        high_edge_list = list(data_dict.keys())
+        logging.debug("The number of edges are " + str(len(high_edge_list)))

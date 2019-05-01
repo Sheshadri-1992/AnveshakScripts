@@ -12,7 +12,7 @@ class QueryType(Enum):
 
 class QueryStruct:
     querytype = QueryType(QueryType.smallview)
-    arguments = ""
+    edgeid = ""
     prevtime = datetime.now()
     timestamp = time.time()
 
@@ -21,30 +21,27 @@ class QueryStruct:
         print("creating new object ")
 
         self.querytype = QueryType(enumtype)
-        self.arguments = args
+        self.edgeid = args
         self.prevtime = datetime.now()
 
         if self.querytype == QueryType.largeview:
-
             self.timestamp = datetime.now() + timedelta(seconds=10)
 
         elif self.querytype == QueryType.mediumview:
-
             self.timestamp = datetime.now() + timedelta(seconds=5)
 
         else:
-
             self.timestamp = datetime.now() + timedelta(seconds=1)
 
     def print_members(self):
 
         """
-
-        :return:
+        A utility function to print all the members of the Query
+        :return: nothing
         """
 
         ans = (self.timestamp - self.prevtime)
-        print("here ", self.querytype, " ", self.timestamp, " ", self.arguments, " ", ans.seconds)
+        print("here ", self.querytype, " ", self.timestamp, " ", self.edgeid, " ", ans.seconds)
         return "printed"
 
     def get_edge_id(self):
@@ -52,6 +49,8 @@ class QueryStruct:
         Returns the edge id
         :return: the edge id
         """
+
+        return self.edgeid
 
 # test code
 # myObj = Query(2,"hello")

@@ -32,17 +32,24 @@ class ConsumerThread(threading.Thread):
         self.medium_thread = MediumProducer(name="medium-producer")
         self.small_thread = SmallProducer(name="small-producer")
 
+        logging.debug("Started all the producers...")
+
+    def start_producers(self):
+        """
+        start producing items from all queues
+        :return:
+        """
+        logging.debug("Started producing...")
         self.large_thread.start()
         self.medium_thread.start()
         self.small_thread.start()
-
-        logging.debug("Started all the producers...")
 
     def update_sumo_object(self, sumo_obj):
         """
         Assign the sumo object so that it can retrieve traffic density
         :return: nothing
         """
+        logging.debug("updated sumo object")
         self.sumo_obj = sumo_obj
 
     def update_edge_list(self, edge_list):
@@ -62,6 +69,7 @@ class ConsumerThread(threading.Thread):
 
             num_vehicles = edge_traffic_dict[edge]
 
+            # color bucker logic
             if num_vehicles < 5:
                 edgeid_color_dict[edge] = 0
             elif 5 < num_vehicles <= 10:
@@ -120,8 +128,8 @@ class ConsumerThread(threading.Thread):
             color_large = self.get_edge_color(large_dict)
 
             mqtt_object.connect_to_broker()
-            mqtt_object.send_vertex_message(json.dumps(vehicle_stat_dict))
-            mqtt_object.send_edge_message(json.dumps(color_small))
-            mqtt_object.send_edge_message(json.dumps(color_medium))
-            mqtt_object.send_edge_message(json.dumps(color_large))
+            mqtt_object.send_vertex_message(json.dumps(None))
+            mqtt_object.send_edge_message(json.dumps(None))
+            mqtt_object.send_edge_message(json.dumps(None))
+            mqtt_object.send_edge_message(json.dumps(None))
             mqtt_object.disconnect_broker()
