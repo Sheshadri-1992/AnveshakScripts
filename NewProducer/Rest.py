@@ -76,6 +76,9 @@ def start_view_port_traffic():
     graphid = request.args.get('graphid', default=0, type=int)
     resource_topic = request.args.get('topic', default='low', type=str)
 
+    my_state = current_app.config['state']
+    my_state.register_topic(p,q, graphid, resource_topic)
+
     logging.debug(
         "The parameters recevied are " + str(p) + "  :  " + str(q) + "  :  " + str(graphid) + "  :  " + resource_topic)
 

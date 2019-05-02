@@ -28,8 +28,19 @@ class ConsumerThread(threading.Thread):
         self.edge_list = []
         self.sumo_obj = None
 
-        self.large_thread = LargeProducer(name='large-producer')
-        self.medium_thread = MediumProducer(name="medium-producer")
+        logging.debug("Loading the low_ways json ")
+        with open("./input/osm_sumo.json") as json_file:
+            osm_sumo = json.load(json_file)
+
+        self.edge_lane_dict = osm_sumo
+
+        logging.debug("Loading the low_ways json ")
+        with open("./input/sumo_osm.json") as json_file:
+            sumo_osm = json.load(json_file)
+        self.lane_edge_dict = sumo_osm
+
+        self.large_thread = LargeProducer(self.edge_lane_dict,name='large-producer')
+        self.medium_thread = MediumProducer(self.edge_lane_dict,name="medium-producer")
         # self.small_thread = SmallProducer(name="small-producer")
         self.large_topic = "large"
         self.medium_topic = "medium"
@@ -56,7 +67,7 @@ class ConsumerThread(threading.Thread):
         logging.debug("updated sumo object")
         self.sumo_obj = sumo_obj
 
-    def register_topic(self, p, q , topic, graphid):
+    def register_topic_and_produce(self, p, q , topic, graphid):
 
         if(int(graphid)==0):
             self.large_topic = topic
@@ -77,6 +88,28 @@ class ConsumerThread(threading.Thread):
         :return: nothing
         """
         self.edge_list = edge_list
+
+    def aggregate_edge_id_traffic(self, road_dict):
+        """
+
+        :param road_dict:
+        :return:
+        """
+        new_dict = {}
+        if(road_dict==None):
+            return  None
+
+        for lane in road_dict:
+
+            edge_id = self.lane_edge_dict[lane]
+
+            if edge_id not in new_dict :
+                new_dict[edge_id] = road_dict[lane]
+            else:
+                new_dict[edge_id] =  new_dict[edge_id] + road_dict[lane]
+
+        return  road_dict
+
 
     @staticmethod
     def get_edge_color(edge_traffic_dict):
@@ -143,6 +176,9 @@ class ConsumerThread(threading.Thread):
             large_dict = self.sumo_obj.return_traffic_density(large_candidate_edges)
 
             # aggregate stuff needed here
+            medium_dict = self.aggregate_edge_id_traffic(medium_dict)
+            large_dict = self.aggregate_edge_id_traffic(large_dict)
+
 
             self.sumo_obj.set_ambulance_id("dummy_ambulance_id")
             vehicle_stat_dict = self.sumo_obj.get_vehicle_stats()
@@ -154,8 +190,8 @@ class ConsumerThread(threading.Thread):
             logging.debug("The vehicle payload is ")
 
             mqtt_object.connect_to_broker()
-            mqtt_object.send_vertex_message(json.dumps(vehicle_stat_dict))
+            mqtt_object.send_vertex_message(json.dumps(vehicle_stat_dict), self.vehicle_topic)
             # mqtt_object.send_edge_message(json.dumps(color_small))
-            mqtt_object.send_edge_message(json.dumps(color_medium))
-            mqtt_object.send_edge_message(json.dumps(color_large))
+            mqtt_object.send_edge_message(json.dumps(color_medium), self.medium_topic)
+            mqtt_object.send_edge_message(json.dumps(color_large), self.large_topic)
             mqtt_object.disconnect_broker()

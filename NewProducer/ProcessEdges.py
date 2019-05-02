@@ -32,11 +32,10 @@ class ProducerConsumer:
         """
         # start simulation
         self.sumo_obj.start()
-        self.start_producing_content()
 
     def register_topic(self, p, q, topic, graphid):
 
-        self.consumer_thread.register_topic(p,q,topic,graphid)
+        self.consumer_thread.register_topic_and_produce(p,q,topic,graphid)
 
     def start_producing_content(self):
         """
