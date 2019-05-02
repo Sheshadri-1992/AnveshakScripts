@@ -29,13 +29,13 @@ class ConsumerThread(threading.Thread):
         self.sumo_obj = None
 
         logging.debug("Loading the low_ways json ")
-        with open("./input/osm_sumo.json") as json_file:
+        with open("./InputFiles/osm_sumo.json") as json_file:
             osm_sumo = json.load(json_file)
 
         self.edge_lane_dict = osm_sumo
 
         logging.debug("Loading the low_ways json ")
-        with open("./input/sumo_osm.json") as json_file:
+        with open("./InputFiles/sumo_osm.json") as json_file:
             sumo_osm = json.load(json_file)
         self.lane_edge_dict = sumo_osm
 
@@ -108,7 +108,7 @@ class ConsumerThread(threading.Thread):
             else:
                 new_dict[edge_id] =  new_dict[edge_id] + road_dict[lane]
 
-        return  road_dict
+        return  new_dict
 
 
     @staticmethod
@@ -187,7 +187,7 @@ class ConsumerThread(threading.Thread):
             color_medium = self.get_edge_color(medium_dict)
             color_large = self.get_edge_color(large_dict)
 
-            logging.debug("The vehicle payload is ")
+            logging.debug("The vehicle payload is "+json.dumps(vehicle_stat_dict))
 
             mqtt_object.connect_to_broker()
             mqtt_object.send_vertex_message(json.dumps(vehicle_stat_dict), self.vehicle_topic)
