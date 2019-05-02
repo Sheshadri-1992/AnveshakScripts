@@ -62,12 +62,12 @@ class Sumo(threading.Thread):
         self.lock.acquire()
         vehicle_id_list = traci.vehicle.getIDList()
         self.lock.release()
-	logging.debug("The number of vehicles are "+str(len(vehicle_id_list)))
+        logging.debug("The number of vehicles are " + str(len(vehicle_id_list)))
 
         ambulance_id = ""
         if vehicle_id_list != None:
             ambulance_id = vehicle_id_list[0]
-	    self.ambulance_id = ambulance_id
+            self.ambulance_id = ambulance_id
             logging.debug("Set the ambulance id " + str(self.ambulance_id))
 
         return ambulance_id
@@ -119,8 +119,8 @@ class Sumo(threading.Thread):
             for edge in arg_edge_list:
                 self.lock.acquire()
                 num_vehicles = traci.edge.getLastStepVehicleNumber(edge)
-		if num_vehicles > 0 :
-			logging.debug("The number of vehicles are "+str(num_vehicles)+" edgeid is "+str(edge))
+                if num_vehicles > 0:
+                    logging.debug("The number of vehicles are " + str(num_vehicles) + " edgeid is " + str(edge))
                 self.lock.release()
                 edge_dict[edge] = num_vehicles
         except:
@@ -142,12 +142,12 @@ class Sumo(threading.Thread):
                 traci.simulationStep()  # this is an important step
                 self.lock.release()
 
-		logging.debug("simulation step "+str(step))
+                logging.debug("simulation step " + str(step))
 
                 step = step + 1  # this is an important step
-	
-		#if step > 20000:	
-		time.sleep(1)
+
+                # if step > 20000:
+                time.sleep(1)
         except:
 
             logging.debug("Exception in start simulation method")

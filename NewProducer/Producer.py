@@ -9,9 +9,6 @@ from MqttPublish import MqttPublish
 from Query import QueryStruct
 
 logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-9s) %(message)s', )
-low_ways = "./input/low_ways.json"
-mid_ways = "./input/mid_ways.json"
-high_ways = "./input/low_ways.json"
 
 
 class LargeProducer(threading.Thread):
@@ -41,18 +38,13 @@ class LargeProducer(threading.Thread):
             if not self.large_queue.full():
 
                 while index < length:
-
                     edge_id = self.large_edge_list[index % length]
-
-                    for lane in self.global_edge_dict[edge_id]:
-                        item = QueryStruct(1, lane)
-                        self.large_queue.put(item)
-#                        logging.debug("Putting item : edge " + item.get_edge_id() + " : qsize " + str(
-#                            self.large_queue.qsize()) + " items in large queue")
-
+                    item = QueryStruct(1, edge_id)
+                    self.large_queue.put(1, item)
                     index = index + 1
-		logging.debug("index id is "+str(index))
-		index = 0
+
+                logging.debug("index id is " + str(index))
+                index = 0
                 time.sleep(10)
 
             else:
@@ -102,16 +94,11 @@ class MediumProducer(threading.Thread):
                 while index < length:
 
                     edge_id = self.medium_edge_list[index % length]
-
-                    for lane in self.global_edge_dict[edge_id]:
-                        item = QueryStruct(2, lane)
-                        self.medium_queue.put(item)
- #                       logging.debug("Putting item : edge " + item.get_edge_id() + " : qsize " + str(
- #                           self.medium_queue.qsize()) + " items in medium queue")
-
+                    item = QueryStruct(2, edge_id)
+                    self.medium_queue.put(item)
                     index = index + 1
 
-		index = 0
+                index = 0
                 time.sleep(5)
 
             else:
@@ -162,7 +149,7 @@ class SmallProducer(threading.Thread):
                     self.small_queue.qsize()) + " items in small queue")
                 index = index + 1
                 time.sleep(0.1)
-                # break
+
             else:
                 logging.debug("queue is full ")
                 time.sleep(1)
@@ -182,3 +169,10 @@ class SmallProducer(threading.Thread):
             return item
 
         return None
+
+
+#                       logging.debug("Putting item : edge " + item.get_edge_id() + " : qsize " + str(
+                    #                           self.medium_queue.qsize()) + " items in medium queue")
+
+ #                        logging.debug("Putting item : edge " + item.get_edge_id() + " : qsize " + str(
+                    #                            self.large_queue.qsize()) + " items in large queue")

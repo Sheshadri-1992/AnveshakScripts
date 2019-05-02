@@ -39,8 +39,8 @@ class ConsumerThread(threading.Thread):
             sumo_osm = json.load(json_file)
         self.lane_edge_dict = sumo_osm
 
-        self.large_thread = LargeProducer(self.edge_lane_dict,name='large-producer')
-        self.medium_thread = MediumProducer(self.edge_lane_dict,name="medium-producer")
+        self.large_thread = LargeProducer(self.edge_lane_dict, name='large-producer')
+        self.medium_thread = MediumProducer(self.edge_lane_dict, name="medium-producer")
         # self.small_thread = SmallProducer(name="small-producer")
         self.large_topic = "large"
         self.medium_topic = "medium"
@@ -67,19 +67,18 @@ class ConsumerThread(threading.Thread):
         logging.debug("updated sumo object")
         self.sumo_obj = sumo_obj
 
-    def register_topic_and_produce(self, p, q , topic, graphid):
+    def register_topic_and_produce(self, p, q, topic, graphid):
 
-        if(int(graphid)==0):
+        if (int(graphid) == 0):
             self.large_topic = topic
             self.large_thread.start()
-        elif(int(graphid)==1):
+        elif (int(graphid) == 1):
             self.medium_topic = topic
             self.medium_thread.start()
-        elif(int(graphid)==2):
+        elif (int(graphid) == 2):
             self.small_topic = topic
         else:
             self.vehicle_topic = topic
-
 
     def update_edge_list(self, edge_list):
         """
@@ -96,20 +95,19 @@ class ConsumerThread(threading.Thread):
         :return:
         """
         new_dict = {}
-        if(road_dict==None):
-            return  None
+        if (road_dict == None):
+            return None
 
         for lane in road_dict:
 
             edge_id = self.lane_edge_dict[lane]
 
-            if edge_id not in new_dict :
+            if edge_id not in new_dict:
                 new_dict[edge_id] = road_dict[lane]
             else:
-                new_dict[edge_id] =  new_dict[edge_id] + road_dict[lane]
+                new_dict[edge_id] = new_dict[edge_id] + road_dict[lane]
 
-        return  new_dict
-
+        return new_dict
 
     @staticmethod
     def get_edge_color(edge_traffic_dict):
@@ -122,7 +120,7 @@ class ConsumerThread(threading.Thread):
 
             # color bucker logic
             if num_vehicles < 5:
-                edgeid_color_dict[edge] = 0 
+                edgeid_color_dict[edge] = 0
             elif 5 < num_vehicles <= 10:
                 edgeid_color_dict[edge] = 1
             else:
@@ -136,7 +134,7 @@ class ConsumerThread(threading.Thread):
 
         while True:
 
-	    logging.debug("Entered the consumer..")
+            logging.debug("Entered the consumer..")
 
             batch_count = 0
             small_candidate_edges = []
@@ -180,7 +178,6 @@ class ConsumerThread(threading.Thread):
             # aggregate stuff needed here
             medium_dict = self.aggregate_edge_id_traffic(medium_dict)
             large_dict = self.aggregate_edge_id_traffic(large_dict)
-
 
             self.sumo_obj.set_ambulance_id("dummy_ambulance_id")
             vehicle_stat_dict = self.sumo_obj.get_vehicle_stats()
