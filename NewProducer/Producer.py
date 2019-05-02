@@ -40,7 +40,7 @@ class LargeProducer(threading.Thread):
                 while index < length:
                     edge_id = self.large_edge_list[index % length]
                     item = QueryStruct(1, edge_id)
-                    self.large_queue.put(1, item)
+                    self.large_queue.put(item)
                     index = index + 1
 
                 logging.debug("index id is " + str(index))
