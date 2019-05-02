@@ -22,7 +22,7 @@ class ProducerConsumer:
     def __init__(self):
         logging.debug("Producer Consumer object has been initiated")
         self.sumo_obj = Sumo()
-	self.flag = True
+        self.flag = True
         self.consumer_thread = ConsumerThread(name='consumer')
         self.consumer_thread.update_sumo_object(self.sumo_obj)
 
@@ -35,10 +35,13 @@ class ProducerConsumer:
         self.sumo_obj.start()
 
     def register_topic(self, lat, lon, topic, graphid):
-
         logging.debug("Entered register topic")
-	self.consumer_thread.register_topic_and_produce(lat,lon,topic,graphid)
-	self.consumer_thread.start()
+        self.consumer_thread.register_topic_and_produce(lat, lon, topic, graphid)
+
+        if self.flag == True:
+            self.flag = False
+            logging.debug("Calling thread only once")
+            self.consumer_thread.start()
 
     def start_producing_content(self):
         """
@@ -46,10 +49,9 @@ class ProducerConsumer:
         :return:
         """
         self.consumer_thread.start_producers()
-	if self.flag == True:
-		self.flag = False
-	        self.consumer_thread.start()
-		
+        if self.flag == True:
+            self.flag = False
+            self.consumer_thread.start()
 
     def load_json(self):
         """

@@ -88,6 +88,24 @@ class ConsumerThread(threading.Thread):
         """
         self.edge_list = edge_list
 
+    def prepare_candidate_edges(self, candidate_edge_list):
+        """
+
+        :param candidate_edge_list: the edges will be just plain osm id, we need to convert into sumo id and
+               then make traci calls
+        :return: return traci complaint edge id
+        """
+        candidate_list = []
+
+        for edge_id in candidate_edge_list:
+
+            if edge_id in self.edge_lane_dict:
+                lane_list = self.edge_lane_dict[edge_id]
+                candidate_list = candidate_list + lane_list
+
+        logging.debug("Number of edges in candidate list " + str(len(candidate_list)))
+        return candidate_list
+
     def aggregate_edge_id_traffic(self, road_dict):
         """
 
@@ -118,7 +136,7 @@ class ConsumerThread(threading.Thread):
 
             num_vehicles = edge_traffic_dict[edge]
 
-            # color bucker logic
+            # color bucket logic
             if num_vehicles < 5:
                 edgeid_color_dict[edge] = 0
             elif 5 < num_vehicles <= 10:
@@ -166,10 +184,12 @@ class ConsumerThread(threading.Thread):
                     large_candidate_edges.append(item.get_edge_id())
                     batch_count = batch_count + 1
 
-            # logging.debug("The small candidate edges are " + str(len(small_candidate_edges)) + "Edges are " + str(
-            #     small_candidate_edges[0]))
             logging.debug("The medium candidate edges are " + str(len(medium_candidate_edges)))
             logging.debug("The large candidate edges are" + str(len(large_candidate_edges)))
+
+            # The original candidate id do not contain lane id
+            medium_candidate_edges = self.prepare_candidate_edges(medium_candidate_edges)
+            large_candidate_edges = self.prepare_candidate_edges(large_candidate_edges)
 
             # small_dict = self.sumo_obj.return_traffic_density(small_candidate_edges)
             medium_dict = self.sumo_obj.return_traffic_density(medium_candidate_edges)

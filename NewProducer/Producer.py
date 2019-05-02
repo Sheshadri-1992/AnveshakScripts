@@ -92,7 +92,6 @@ class MediumProducer(threading.Thread):
             if not self.medium_queue.full():
 
                 while index < length:
-
                     edge_id = self.medium_edge_list[index % length]
                     item = QueryStruct(2, edge_id)
                     self.medium_queue.put(item)
@@ -170,9 +169,8 @@ class SmallProducer(threading.Thread):
 
         return None
 
+#   logging.debug("Putting item : edge " + item.get_edge_id() + " : qsize " + str(
+#   self.medium_queue.qsize()) + " items in medium queue")
 
-#                       logging.debug("Putting item : edge " + item.get_edge_id() + " : qsize " + str(
-                    #                           self.medium_queue.qsize()) + " items in medium queue")
-
- #                        logging.debug("Putting item : edge " + item.get_edge_id() + " : qsize " + str(
-                    #                            self.large_queue.qsize()) + " items in large queue")
+#   logging.debug("Putting item : edge " + item.get_edge_id() + " : qsize " + str(
+#   self.large_queue.qsize()) + " items in large queue")
