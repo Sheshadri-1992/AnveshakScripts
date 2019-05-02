@@ -11,10 +11,10 @@ class QueryType(Enum):
 
 
 class QueryStruct:
-    querytype = QueryType(QueryType.smallview)
-    edgeid = ""
-    prevtime = datetime.now()
-    timestamp = time.time()
+    # querytype = QueryType(QueryType.smallview)
+    # edgeid = ""
+    # prevtime = datetime.now()
+    # timestamp = time.time()
 
     def __init__(self, enumtype, args):
 

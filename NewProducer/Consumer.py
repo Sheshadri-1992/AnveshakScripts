@@ -30,7 +30,11 @@ class ConsumerThread(threading.Thread):
 
         self.large_thread = LargeProducer(name='large-producer')
         self.medium_thread = MediumProducer(name="medium-producer")
-        self.small_thread = SmallProducer(name="small-producer")
+        # self.small_thread = SmallProducer(name="small-producer")
+        self.large_topic = "large"
+        self.medium_topic = "medium"
+        self.small_topic = "small"
+        self.vehicle_topic = "ambulance"
 
         logging.debug("Started all the producers...")
 
@@ -42,7 +46,7 @@ class ConsumerThread(threading.Thread):
         logging.debug("Started producing...")
         self.large_thread.start()
         self.medium_thread.start()
-        self.small_thread.start()
+        # self.small_thread.start()
 
     def update_sumo_object(self, sumo_obj):
         """
@@ -51,6 +55,20 @@ class ConsumerThread(threading.Thread):
         """
         logging.debug("updated sumo object")
         self.sumo_obj = sumo_obj
+
+    def register_topic(self, p, q , topic, graphid):
+
+        if(int(graphid)==0):
+            self.large_topic = topic
+            self.large_thread.start()
+        elif(int(graphid)==1):
+            self.medium_topic = topic
+            self.medium_thread.start()
+        elif(int(graphid)==2):
+            self.small_topic = topic
+        else:
+            self.vehicle_topic = topic
+
 
     def update_edge_list(self, edge_list):
         """
@@ -93,13 +111,13 @@ class ConsumerThread(threading.Thread):
 
             # Run simulation step here
 
-            while not self.small_thread.small_queue.empty():
-
-                item = self.small_thread.get_element_from_queue()
-		print(type(item))
-                if (batch_count < MAX_BATCH) and (item.timestamp >= curr_time):
-                    small_candidate_edges.append(item.get_edge_id())
-                    batch_count = batch_count + 1
+            # while not self.small_thread.small_queue.empty():
+            #
+            #     item = self.small_thread.get_element_from_queue()
+            #     print(type(item))
+            #     if (batch_count < MAX_BATCH) and (item.timestamp >= curr_time):
+            #         small_candidate_edges.append(item.get_edge_id())
+            #         batch_count = batch_count + 1
 
             while not self.medium_thread.medium_queue.empty():
 
@@ -115,18 +133,21 @@ class ConsumerThread(threading.Thread):
                     large_candidate_edges.append(item.get_edge_id())
                     batch_count = batch_count + 1
 
-            logging.debug("The small candidate edges are " + str(len(small_candidate_edges)) + "Edges are "+str(small_candidate_edges[0] ))
+            # logging.debug("The small candidate edges are " + str(len(small_candidate_edges)) + "Edges are " + str(
+            #     small_candidate_edges[0]))
             logging.debug("The medium candidate edges are " + str(len(medium_candidate_edges)))
             logging.debug("The large candidate edges are" + str(len(large_candidate_edges)))
 
-            small_dict = self.sumo_obj.return_traffic_density(small_candidate_edges)
+            # small_dict = self.sumo_obj.return_traffic_density(small_candidate_edges)
             medium_dict = self.sumo_obj.return_traffic_density(medium_candidate_edges)
             large_dict = self.sumo_obj.return_traffic_density(large_candidate_edges)
+
+            # aggregate stuff needed here
 
             self.sumo_obj.set_ambulance_id("dummy_ambulance_id")
             vehicle_stat_dict = self.sumo_obj.get_vehicle_stats()
 
-            color_small = self.get_edge_color(small_dict)
+            # color_small = self.get_edge_color(small_dict)
             color_medium = self.get_edge_color(medium_dict)
             color_large = self.get_edge_color(large_dict)
 
@@ -134,7 +155,7 @@ class ConsumerThread(threading.Thread):
 
             mqtt_object.connect_to_broker()
             mqtt_object.send_vertex_message(json.dumps(vehicle_stat_dict))
-            mqtt_object.send_edge_message(json.dumps(color_small))
+            # mqtt_object.send_edge_message(json.dumps(color_small))
             mqtt_object.send_edge_message(json.dumps(color_medium))
             mqtt_object.send_edge_message(json.dumps(color_large))
             mqtt_object.disconnect_broker()

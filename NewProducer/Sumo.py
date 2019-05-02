@@ -56,7 +56,7 @@ class Sumo(threading.Thread):
         Returns the ambulance Id, this may not be needed
         :return:
         """
-        logging.debug("Got the ambulance id "+vehicle_id)
+        logging.debug("Got the ambulance id " + vehicle_id)
         self.ambulance_id = vehicle_id
 
         self.lock.acquire()
@@ -66,7 +66,7 @@ class Sumo(threading.Thread):
         ambulance_id = ""
         if vehicle_id_list is not None:
             ambulance_id = vehicle_id_list[0]
-            logging.debug("Set the ambulance id "+ str(self.ambulance_id))
+            logging.debug("Set the ambulance id " + str(self.ambulance_id))
             self.ambulance_id = ambulance_id
 
         return ambulance_id
@@ -76,7 +76,7 @@ class Sumo(threading.Thread):
         Make a traci call and return the ambulance speed and position
         :return: the ambulance speed and position
         """
-        logging.debug("Sending the stats for the ambulance "+self.ambulance_id)
+        logging.debug("Sending the stats for the ambulance " + self.ambulance_id)
         ambulance_dict = {}
 
         try:
@@ -109,6 +109,10 @@ class Sumo(threading.Thread):
         """
         edge_dict = {}
 
+        if arg_edge_list is None:
+            logging.debug("Empty list sent")
+            return edge_dict
+
         try:
 
             for edge in arg_edge_list:
@@ -135,7 +139,7 @@ class Sumo(threading.Thread):
                 traci.simulationStep()  # this is an important step
                 self.lock.release()
 
-                step = step + 1 # this is an important step
+                step = step + 1  # this is an important step
                 time.sleep(1)
         except:
 

@@ -8,6 +8,7 @@ my_state = ProducerConsumer()
 
 
 def initialize_state():
+    # Utility/test function call
     my_state.load_json()
 
 

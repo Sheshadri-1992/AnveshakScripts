@@ -33,7 +33,10 @@ class ProducerConsumer:
         # start simulation
         self.sumo_obj.start()
         self.start_producing_content()
-        # self.start_publishing_data()
+
+    def register_topic(self, p, q, topic, graphid):
+
+        self.consumer_thread.register_topic(p,q,topic,graphid)
 
     def start_producing_content(self):
         """
@@ -43,35 +46,9 @@ class ProducerConsumer:
         self.consumer_thread.start_producers()
         self.consumer_thread.start()
 
-    def get_ambulance_path(self):
-        """
-        returns a dictionary with key value pairs where key is edgeID, value is vehicles
-
-        Here we need to increment a simulation step only once,
-        :return: dictionary containing the (key,value) => key is edgeID, value is num vehicles
-        """
-        print("The set of edge ids in the ambulance path ")
-
-        edge_dict = {}
-
-        # for i in range(0, len(edge_list)):
-        #     edge = edge_list[i]
-        #     edge_dict[edge] = randint(0, 2)
-
-        payload = json.dumps(edge_dict)
-        return payload
-
-    def start_publishing_data(self):
-        """
-        starts all the threads which publish data at regular intervals to mqtt broker
-        :return: Nothing
-        """
-
-        self.consumer_thread.start()
-
     def load_json(self):
         """
-        load all the edgeid from the json file
+        test/utility method to see file loading etc.,
         :return: nothing
         """
 
