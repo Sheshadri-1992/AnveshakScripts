@@ -23,6 +23,7 @@ class LargeProducer(threading.Thread):
         self.name = name
         self.large_queue = Queue.Queue()
         self.large_edge_list = []
+        self.global_edge_dict = edge_dict
 
         logging.debug("Loading the high_ways json ")
         with open("./input/high_ways_p.json") as json_file:
@@ -39,10 +40,18 @@ class LargeProducer(threading.Thread):
         while True:
             if not self.large_queue.full():
 
-                item = QueryStruct(1, self.large_edge_list[index % length])
-                self.large_queue.put(item)
-                logging.debug("Putting item : edge " + item.get_edge_id() + " : qsize " + str(
-                    self.large_queue.qsize()) + " items in large queue")
+                while index < length:
+
+                    edge_id = self.large_edge_list[index % length]
+
+                    for lane in self.global_edge_dict[edge_id]:
+                        item = QueryStruct(1, lane)
+                        self.large_queue.put(item)
+                        logging.debug("Putting item : edge " + item.get_edge_id() + " : qsize " + str(
+                            self.large_queue.qsize()) + " items in large queue")
+
+                    index = index + 1
+
                 time.sleep(10)
 
             else:
@@ -65,13 +74,14 @@ class LargeProducer(threading.Thread):
 
 class MediumProducer(threading.Thread):
 
-    def __init__(self, group=None, target=None, name=None, args=(), kwargs=None, verbose=None):
+    def __init__(self, edge_dict, group=None, target=None, name=None, args=(), kwargs=None, verbose=None):
 
         super(MediumProducer, self).__init__()
         self.target = target
         self.name = name
         self.medium_queue = Queue.Queue()
         self.medium_edge_list = []
+        self.global_edge_dict = edge_dict
 
         logging.debug("Loading the mid_ways json ")
         with open("./input/mid_ways_p.json") as json_file:
@@ -87,13 +97,21 @@ class MediumProducer(threading.Thread):
         # print("I am  here in medium producer ")
         while True:
             if not self.medium_queue.full():
-                item = QueryStruct(2, self.medium_edge_list[index % length])
-                self.medium_queue.put(item)
-                logging.debug("Putting item : edge " + item.get_edge_id() + " : qsize " + str(
-                    self.medium_queue.qsize()) + " items in medium queue")
-                index = index + 1
+
+                while index < length:
+
+                    edge_id = self.medium_edge_list[index % length]
+
+                    for lane in self.global_edge_dict[edge_id]:
+                        item = QueryStruct(2, lane)
+                        self.medium_queue.put(item)
+                        logging.debug("Putting item : edge " + item.get_edge_id() + " : qsize " + str(
+                            self.medium_queue.qsize()) + " items in medium queue")
+
+                    index = index + 1
+
                 time.sleep(5)
-                # break
+
             else:
                 logging.debug("queue is full ")
                 time.sleep(5)
