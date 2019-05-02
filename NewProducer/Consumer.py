@@ -69,6 +69,8 @@ class ConsumerThread(threading.Thread):
 
     def register_topic_and_produce(self, p, q, topic, graphid):
 
+        logging.debug("The graph id is "+str(graphid)+" the topic is "+topic)
+
         if (int(graphid) == 0):
             self.large_topic = topic
             self.large_thread.start()

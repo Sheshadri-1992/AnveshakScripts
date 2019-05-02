@@ -119,8 +119,6 @@ class Sumo(threading.Thread):
             for edge in arg_edge_list:
                 self.lock.acquire()
                 num_vehicles = traci.edge.getLastStepVehicleNumber(edge)
-                if num_vehicles > 0:
-                    logging.debug("The number of vehicles are " + str(num_vehicles) + " edgeid is " + str(edge))
                 self.lock.release()
                 edge_dict[edge] = num_vehicles
         except:

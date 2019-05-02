@@ -38,7 +38,7 @@ class ProducerConsumer:
         logging.debug("Entered register topic")
         self.consumer_thread.register_topic_and_produce(lat, lon, topic, graphid)
 
-        if self.flag == True:
+        if self.flag:
             self.flag = False
             logging.debug("Calling thread only once")
             self.consumer_thread.start()
