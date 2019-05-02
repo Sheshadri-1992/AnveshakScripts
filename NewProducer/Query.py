@@ -18,8 +18,6 @@ class QueryStruct:
 
     def __init__(self, enumtype, args):
 
-        print("creating new object ")
-
         self.querytype = QueryType(enumtype)
         self.edgeid = args
         self.prevtime = datetime.now()

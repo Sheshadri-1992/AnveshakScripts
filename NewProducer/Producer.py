@@ -26,7 +26,7 @@ class LargeProducer(threading.Thread):
         self.global_edge_dict = edge_dict
 
         logging.debug("Loading the high_ways json ")
-        with open("./input/high_ways_p.json") as json_file:
+        with open("./InputFiles/high_ways_p.json") as json_file:
             data_dict = json.load(json_file)
 
         self.large_edge_list = list(data_dict.keys())
@@ -47,11 +47,12 @@ class LargeProducer(threading.Thread):
                     for lane in self.global_edge_dict[edge_id]:
                         item = QueryStruct(1, lane)
                         self.large_queue.put(item)
-                        logging.debug("Putting item : edge " + item.get_edge_id() + " : qsize " + str(
-                            self.large_queue.qsize()) + " items in large queue")
+#                        logging.debug("Putting item : edge " + item.get_edge_id() + " : qsize " + str(
+#                            self.large_queue.qsize()) + " items in large queue")
 
                     index = index + 1
-
+		logging.debug("index id is "+str(index))
+		index = 0
                 time.sleep(10)
 
             else:
@@ -84,7 +85,7 @@ class MediumProducer(threading.Thread):
         self.global_edge_dict = edge_dict
 
         logging.debug("Loading the mid_ways json ")
-        with open("./input/mid_ways_p.json") as json_file:
+        with open("./InputFiles/mid_ways_p.json") as json_file:
             data_dict = json.load(json_file)
 
         self.medium_edge_list = list(data_dict.keys())
@@ -105,11 +106,12 @@ class MediumProducer(threading.Thread):
                     for lane in self.global_edge_dict[edge_id]:
                         item = QueryStruct(2, lane)
                         self.medium_queue.put(item)
-                        logging.debug("Putting item : edge " + item.get_edge_id() + " : qsize " + str(
-                            self.medium_queue.qsize()) + " items in medium queue")
+ #                       logging.debug("Putting item : edge " + item.get_edge_id() + " : qsize " + str(
+ #                           self.medium_queue.qsize()) + " items in medium queue")
 
                     index = index + 1
 
+		index = 0
                 time.sleep(5)
 
             else:
@@ -141,7 +143,7 @@ class SmallProducer(threading.Thread):
         self.small_edge_list = []
 
         logging.debug("Loading the low_ways json ")
-        with open("./input/low_ways_p.json") as json_file:
+        with open("./InputFiles/low_ways_p.json") as json_file:
             data_dict = json.load(json_file)
 
         self.small_edge_list = list(data_dict.keys())

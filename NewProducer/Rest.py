@@ -47,8 +47,8 @@ def start():
     return json.dumps({'ambulancepath': edge_list})
 
 
-@app.route('start_sim', methods=['GET'])
-def start_simulation():
+@app.route('start_sumo', methods=['GET'])
+def start_sumo():
     """
     This method will trigger the sumo simulation
     :return: nothing
@@ -57,11 +57,11 @@ def start_simulation():
     my_state = current_app.config['state']
     my_state.start_simulation()
 
-    return "Success"
+    return json.dumps({'message': 'Success'}) 
 
 
-@app.route('start_view_port', methods=['GET'])
-def start_view_port_traffic():
+@app.route('start_global_viewport', methods=['GET'])
+def start_global_viewport():
     """
     Return updates for all the edges in the viewport traffic
     :param p: The first diagonal point
@@ -71,18 +71,18 @@ def start_view_port_traffic():
     :return: nothing
     """
     logging.debug("In the start view port traffic method")
-    p = request.args.get('p', default=0.0, type=float)
-    q = request.args.get('q', default=0.0, type=float)
+    lat = request.args.get('lat', default=0.0, type=float)
+    lon = request.args.get('long', default=0.0, type=float)
     graphid = request.args.get('graphid', default=0, type=int)
     resource_topic = request.args.get('topic', default='low', type=str)
 
     my_state = current_app.config['state']
-    my_state.register_topic(p,q, graphid, resource_topic)
+    my_state.register_topic(lat,lon, resource_topic, graphid)
 
     logging.debug(
-        "The parameters recevied are " + str(p) + "  :  " + str(q) + "  :  " + str(graphid) + "  :  " + resource_topic)
+        "The parameters recevied are " + str(lat) + "  :  " + str(lon) + "  :  " + str(graphid) + "  :  " + resource_topic)
 
-    return "Success"
+    return json.dumps({'message': 'Success'}) 
 
 
 @app.route('update_view_port', methods=['GET'])
@@ -101,7 +101,7 @@ def update_view_port_traffic():
     graphid = request.args.get('graphid', default=0, type=int)
 
     logging.debug("The parameters received are " + str(p) + "  :  " + str(q) + "  :  " + str(graphid))
-    return "Success"
+    return json.dumps({'message': 'Success'}) 
 
 @app.route('stop_sim', methods=['GET'])
 def stop_sumo():
@@ -110,4 +110,4 @@ def stop_sumo():
     :return:
     """
     logging.debug("In the stop simulation method")
-    return "Success"
+    return json.dumps({'message': 'Success'}) 

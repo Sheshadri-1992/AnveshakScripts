@@ -12,7 +12,7 @@ from Query import QueryStruct
 
 from Sumo import Sumo
 
-MAX_BATCH = 4000
+MAX_BATCH = 10000
 
 # logging template
 logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-9s) %(message)s', )
@@ -122,7 +122,7 @@ class ConsumerThread(threading.Thread):
 
             # color bucker logic
             if num_vehicles < 5:
-                edgeid_color_dict[edge] = 0
+                edgeid_color_dict[edge] = 0 
             elif 5 < num_vehicles <= 10:
                 edgeid_color_dict[edge] = 1
             else:
@@ -135,6 +135,8 @@ class ConsumerThread(threading.Thread):
         mqtt_object.print_variables()
 
         while True:
+
+	    logging.debug("Entered the consumer..")
 
             batch_count = 0
             small_candidate_edges = []
@@ -187,7 +189,7 @@ class ConsumerThread(threading.Thread):
             color_medium = self.get_edge_color(medium_dict)
             color_large = self.get_edge_color(large_dict)
 
-            logging.debug("The vehicle payload is "+json.dumps(vehicle_stat_dict))
+            logging.debug("The vehicle payload is ")
 
             mqtt_object.connect_to_broker()
             mqtt_object.send_vertex_message(json.dumps(vehicle_stat_dict), self.vehicle_topic)
