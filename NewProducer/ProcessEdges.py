@@ -72,7 +72,8 @@ class ProducerConsumer:
         close the simulation
         :return:
         """
-        self.sumo_obj.stop()
+        result = self.sumo_obj.stop()
+        return result
 
     def load_json(self):
         """

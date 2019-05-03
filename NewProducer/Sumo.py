@@ -192,4 +192,4 @@ class Sumo(threading.Thread):
         """
         logging.debug("Request to stop simulation")
         traci.stop()
-        return "success"
+        return "Sumo stopped"
