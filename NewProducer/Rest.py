@@ -111,16 +111,22 @@ def start_ambulance():
     The request parameter has source and destination of the route map
     :return:
     """
-    logging.debug("In the start ambulance method ")
-    src = request.args.get('src', default=0.0, type=float)
-    dest = request.args.get('dest', default=0.0, type=float)
-    batch_size = request.args.get('batchsize', default=0.0, type=float)
-    max_latency = request.args.get('maxlatency', default=0.0, type=float)
+    my_json =request.get_json()
+    my_dict = json.loads(my_json)
 
-    logging.debug("The parameters received are " + str(src) + "," + str(dest) + " , " + str(batch_size) + " , " + str(
-        max_latency))
+
+    logging.debug("In the start ambulance method ")
+    # src = request.args.get('src', default=0.0, type=float)
+    # dest = request.args.get('dest', default=0.0, type=float)
+    # batch_size = request.args.get('batchsize', default=0.0, type=float)
+    # max_latency = request.args.get('maxlatency', default=0.0, type=float)
+    # logging.debug("The parameters received are " + str(src) + "," + str(dest) + " , " + str(batch_size) + " , " + str(
+    #     max_latency))
+
+    logging.debug("The post request is "+str(my_dict))
+
     my_state = current_app.config['state']
-    result = my_state.set_ambulance_co_ordinates(src, dest, 10)  # 10 is the session id
+    result = my_state.set_ambulance_co_ordinates(my_dict)  # 10 is the session id
     return json.dumps({'message': str(result)})
 
 

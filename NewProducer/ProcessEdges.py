@@ -23,6 +23,7 @@ class ProducerConsumer:
         logging.debug("Producer Consumer object has been initiated")
         self.sumo_obj = Sumo()
         self.flag = True
+        self.sumo_flag = True
         self.consumer_thread = ConsumerThread(name='consumer')
         self.consumer_thread.update_sumo_object(self.sumo_obj)
 
@@ -54,18 +55,26 @@ class ProducerConsumer:
             self.flag = False
             self.consumer_thread.start()
 
-    def set_ambulance_co_ordinates(self, pointa, pointb, sessionid=0):
+    def set_ambulance_co_ordinates(self, ambulance_dict):
         """
 
-        :param pointa: The start point of ambulance
-        :param pointb: The destination of ambulance
+        :param ambulance: The start point of ambulance
+        :param hospital: The destination of ambulance
         :param sessionid: Used to remember a connection
+        :param latency: max latency
+        :param topic: the topic where vehicle stats have to be sent
         :return:nothing
         """
 
-        logging.debug("Ambulance co-ordinates received " + str(pointa) + " , " + str(pointb))
-        message = self.sumo_obj.add_new_vehicle(50000, [])  # the second argument is a list of short edges
-        return message
+        logging.debug("The ambulance dict is "+str(ambulance_dict))
+
+        # logging.debug(
+        #     "Ambulance co-ordinates received " + str(ambulance) + " , " + str(hospital) + " , " + str(
+        #         sessionid) + " , latency " + str(latency) + " , batchsize " + str(batchsize)+" , topic "+str(topic))
+
+        # message = self.sumo_obj.add_new_vehicle(50000, [])  # the second argument is a list of short edges
+
+        return "New vehicle will be added"
 
     def stop_sumo(self):
         """
@@ -80,24 +89,25 @@ class ProducerConsumer:
         test/utility method to see file loading etc.,
         :return: nothing
         """
+        return "Test Success"
 
-        logging.debug("Loading the low_ways json ")
-        with open("./InputFiles/low_ways_p.json") as json_file:
-            data_dict = json.load(json_file)
-
-        low_edge_list = list(data_dict.keys())
-        logging.debug("The number of edges are " + str(len(low_edge_list)))
-
-        logging.debug("Loading the mid_ways json ")
-        with open("./InputFiles/mid_ways_p.json") as json_file:
-            data_dict = json.load(json_file)
-
-        mid_edge_list = list(data_dict.keys())
-        logging.debug("The number of edges are " + str(len(mid_edge_list)))
-
-        logging.debug("Loading the high_ways json ")
-        with open("./InputFiles/high_ways_p.json") as json_file:
-            data_dict = json.load(json_file)
-
-        high_edge_list = list(data_dict.keys())
-        logging.debug("The number of edges are " + str(len(high_edge_list)))
+    # logging.debug("Loading the low_ways json ")
+    # with open("./InputFiles/low_ways_p.json") as json_file:
+    #     data_dict = json.load(json_file)
+    #
+    # low_edge_list = list(data_dict.keys())
+    # logging.debug("The number of edges are " + str(len(low_edge_list)))
+    #
+    # logging.debug("Loading the mid_ways json ")
+    # with open("./InputFiles/mid_ways_p.json") as json_file:
+    #     data_dict = json.load(json_file)
+    #
+    # mid_edge_list = list(data_dict.keys())
+    # logging.debug("The number of edges are " + str(len(mid_edge_list)))
+    #
+    # logging.debug("Loading the high_ways json ")
+    # with open("./InputFiles/high_ways_p.json") as json_file:
+    #     data_dict = json.load(json_file)
+    #
+    # high_edge_list = list(data_dict.keys())
+    # logging.debug("The number of edges are " + str(len(high_edge_list)))

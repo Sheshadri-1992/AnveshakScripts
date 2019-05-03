@@ -191,5 +191,5 @@ class Sumo(threading.Thread):
         :return:
         """
         logging.debug("Request to stop simulation")
-        traci.stop()
+        traci.close()
         return "Sumo stopped"
