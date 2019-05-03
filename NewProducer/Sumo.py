@@ -93,9 +93,16 @@ class Sumo(threading.Thread):
             position = traci.vehicle.getPosition(self.ambulance_id)
             self.lock.release()
 
+            pos_x = position[0]
+            pos_y = position[1]
+
+            self.lock.acquire()
+            geo_co_ord = traci.simulation.convertGeo(pos_x, pos_y, fromGeo=False)
+            self.lock.release()
+
             ambulance_dict["vehicleid"] = str(self.ambulance_id)
             ambulance_dict["speed"] = speed
-            ambulance_dict["position"] = position
+            ambulance_dict["position"] = geo_co_ord
 
             logging.debug("The dictionary is " + str(ambulance_dict))
 
