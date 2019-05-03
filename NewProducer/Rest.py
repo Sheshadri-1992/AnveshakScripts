@@ -104,7 +104,8 @@ def update_view_port_traffic():
     logging.debug("The parameters received are " + str(p) + "  :  " + str(q) + "  :  " + str(graphid))
     return json.dumps({'message': 'Success'})
 
-@app.route('start_ambulance', methods=['GET'])
+
+@app.route('start_ambulance', methods=['POST'])
 def start_ambulance():
     """
     The request parameter has source and destination of the route map
@@ -113,10 +114,13 @@ def start_ambulance():
     logging.debug("In the start ambulance method ")
     src = request.args.get('src', default=0.0, type=float)
     dest = request.args.get('dest', default=0.0, type=float)
+    batch_size = request.args.get('batchsize', default=0.0, type=float)
+    max_latency = request.args.get('maxlatency', default=0.0, type=float)
 
-    logging.debug("The parameters received are "+str(src)+"," + str(dest))
+    logging.debug("The parameters received are " + str(src) + "," + str(dest) + " , " + str(batch_size) + " , " + str(
+        max_latency))
     my_state = current_app.config['state']
-    result = my_state.set_ambulance_co_ordinates(src, dest, 10) # 10 is the session id
+    result = my_state.set_ambulance_co_ordinates(src, dest, 10)  # 10 is the session id
     return json.dumps({'message': str(result)})
 
 
@@ -128,6 +132,5 @@ def stop_sumo():
     """
     logging.debug("In the stop simulation method")
     return json.dumps({'message': 'Success'})
-
 
 # 308453207 3451683332

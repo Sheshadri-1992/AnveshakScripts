@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-9s) %(message)s'
 
 
 class Sumo(threading.Thread):
-    sumo_binary = "/home/dreamlab/sumo/bin/sumo"
+    # sumo_binary = "/home/dreamlab/sumo/bin/sumo"
     sumo_cmd = None
     lock = None
     edge_list = None
@@ -24,9 +24,12 @@ class Sumo(threading.Thread):
 
         super(Sumo, self).__init__()
         logging.debug("Initialised sumo path")
-        self.sumo_binary = "/home/dreamlab/sumo/bin/sumo"
+        # self.sumo_binary = "/home/dreamlab/sumo/bin/sumo"
+        self.sumo_binary = "/usr/bin/sumo/"  # local sumo path
         self.sumo_cmd = [self.sumo_binary, "-c", "testconfig.sumocfg"]
         self.lock = threading.Lock()
+        self.edge_list = []
+        self.ambulance_id = ""
 
         # start the simulation here
         traci.start(self.sumo_cmd)
@@ -137,16 +140,16 @@ class Sumo(threading.Thread):
         """
 
         self.lock.acquire()
-        all_routes = traci.RouteDomain.getIDList()
+        all_routes = traci.route.getIDList()
         self.lock.release()
 
         logging.debug("There are " + str(len(all_routes)) + " number of routes")
         random_route_id = all_routes[0]
-        logging.debug("The random route that we are going to assign is "+str(random_route_id))
+        logging.debug("The random route that we are going to assign is " + str(random_route_id))
 
         # adding a vehicle in the new route
         self.lock.acquire()
-        traci.VehicleDomain.add(vehicle_id, random_route_id)
+        traci.vehicle.add(vehicle_id, random_route_id)
         self.lock.release()
 
         logging.debug("Added a vehicle successfully")
