@@ -93,7 +93,7 @@ class MqttPublish:
         :return: nothing to return
         """
 
-        logging.debug("Sending edge id and position " + str(len(edge_json)) + " topic is " + topic)
+        logging.debug("Sending edge id " + str(len(edge_json)) + " topic is " + topic)
         ret = self.client_edge.publish(topic, edge_json, qos=0)
         ret.wait_for_publish()
         logging.debug("The ret is " + str(ret))

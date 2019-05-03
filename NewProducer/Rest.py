@@ -57,7 +57,7 @@ def start_sumo():
     my_state = current_app.config['state']
     my_state.start_simulation()
 
-    return json.dumps({'message': 'Success'}) 
+    return json.dumps({'message': 'Success'})
 
 
 @app.route('start_global_viewport', methods=['GET'])
@@ -77,12 +77,13 @@ def start_global_viewport():
     resource_topic = request.args.get('topic', default='low', type=str)
 
     my_state = current_app.config['state']
-    my_state.register_topic(lat,lon, resource_topic, graphid)
+    my_state.register_topic(lat, lon, resource_topic, graphid)
 
     logging.debug(
-        "The parameters recevied are " + str(lat) + "  :  " + str(lon) + "  :  " + str(graphid) + "  :  " + resource_topic)
+        "The parameters recevied are " + str(lat) + "  :  " + str(lon) + "  :  " + str(
+            graphid) + "  :  " + resource_topic)
 
-    return json.dumps({'message': 'Success'}) 
+    return json.dumps({'message': 'Success'})
 
 
 @app.route('update_view_port', methods=['GET'])
@@ -101,7 +102,8 @@ def update_view_port_traffic():
     graphid = request.args.get('graphid', default=0, type=int)
 
     logging.debug("The parameters received are " + str(p) + "  :  " + str(q) + "  :  " + str(graphid))
-    return json.dumps({'message': 'Success'}) 
+    return json.dumps({'message': 'Success'})
+
 
 @app.route('stop_sim', methods=['GET'])
 def stop_sumo():
@@ -110,4 +112,4 @@ def stop_sumo():
     :return:
     """
     logging.debug("In the stop simulation method")
-    return json.dumps({'message': 'Success'}) 
+    return json.dumps({'message': 'Success'})
