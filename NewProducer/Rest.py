@@ -74,7 +74,7 @@ def start_global_viewport():
     lat = request.args.get('lat', default=0.0, type=float)
     lon = request.args.get('long', default=0.0, type=float)
     graphid = request.args.get('graphid', default=0, type=int)
-    resource_topic = request.args.get('topic', default='low', type=str)
+    resource_topic = request.args.get('topic', default='medium', type=str)
 
     my_state = current_app.config['state']
     my_state.register_topic(lat, lon, resource_topic, graphid)

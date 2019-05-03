@@ -12,7 +12,7 @@ from Query import QueryStruct
 
 from Sumo import Sumo
 
-MAX_BATCH = 10000
+MAX_BATCH = 3700
 
 # logging template
 logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-9s) %(message)s', )
@@ -42,10 +42,15 @@ class ConsumerThread(threading.Thread):
         self.large_thread = LargeProducer(self.edge_lane_dict, name='large-producer')
         self.medium_thread = MediumProducer(self.edge_lane_dict, name="medium-producer")
         # self.small_thread = SmallProducer(name="small-producer")
+
+        # default registration topic
         self.large_topic = "large"
         self.medium_topic = "medium"
         self.small_topic = "small"
         self.vehicle_topic = "ambulance"
+
+        # registration dictionary
+        self.register_dict = {}
 
         logging.debug("Started all the producers...")
 
@@ -69,15 +74,23 @@ class ConsumerThread(threading.Thread):
 
     def register_topic_and_produce(self, p, q, topic, graphid):
 
-        logging.debug("The graph id is "+str(graphid)+" the topic is "+topic)
+        logging.debug("The graph id is " + str(graphid) + " the topic is " + topic)
 
         if (int(graphid) == 0):
+
             self.large_topic = topic
+            self.register_dict[self.large_topic] = True
             self.large_thread.start()
+
         elif (int(graphid) == 1):
+
             self.medium_topic = topic
+            self.register_dict[self.medium_topic] = True
             self.medium_thread.start()
+
         elif (int(graphid) == 2):
+
+            self.register_dict[topic] = True
             self.small_topic = topic
         else:
             self.vehicle_topic = topic
@@ -213,6 +226,11 @@ class ConsumerThread(threading.Thread):
             mqtt_object.connect_to_broker()
             mqtt_object.send_vertex_message(json.dumps(vehicle_stat_dict), self.vehicle_topic)
             # mqtt_object.send_edge_message(json.dumps(color_small))
-            mqtt_object.send_edge_message(json.dumps(color_medium), self.medium_topic)
-            mqtt_object.send_edge_message(json.dumps(color_large), self.large_topic)
+
+            if self.medium_topic in self.register_dict:
+                mqtt_object.send_edge_message(json.dumps(color_medium), self.medium_topic)
+
+            if self.large_topic in self.register_dict:
+                mqtt_object.send_edge_message(json.dumps(color_large), self.large_topic)
+
             mqtt_object.disconnect_broker()

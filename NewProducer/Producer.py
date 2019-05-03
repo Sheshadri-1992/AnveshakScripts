@@ -27,7 +27,7 @@ class LargeProducer(threading.Thread):
             data_dict = json.load(json_file)
 
         self.large_edge_list = list(data_dict.keys())
-        logging.debug("The number of edges are " + str(len(self.large_edge_list)))
+        logging.debug("The number of high way edges are " + str(len(self.large_edge_list)))
 
     def run(self):
 
@@ -81,7 +81,7 @@ class MediumProducer(threading.Thread):
             data_dict = json.load(json_file)
 
         self.medium_edge_list = list(data_dict.keys())
-        logging.debug("The number of edges are " + str(len(self.medium_edge_list)))
+        logging.debug("The number of medium way edges are " + str(len(self.medium_edge_list)))
 
     def run(self):
 
@@ -133,7 +133,7 @@ class SmallProducer(threading.Thread):
             data_dict = json.load(json_file)
 
         self.small_edge_list = list(data_dict.keys())
-        logging.debug("The number of edges are " + str(len(self.small_edge_list)))
+        logging.debug("The number of low way edges are " + str(len(self.small_edge_list)))
 
     def run(self):
 
