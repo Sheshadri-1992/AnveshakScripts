@@ -149,3 +149,13 @@ class Sumo(threading.Thread):
         except:
 
             logging.debug("Exception in start simulation method")
+
+
+    def stop(self):
+        """
+        stop the simulation
+        :return:
+        """
+        logging.debug("Request to stop simulation")
+        traci.stop()
+        return "success"

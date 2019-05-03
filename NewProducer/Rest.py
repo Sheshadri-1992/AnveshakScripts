@@ -104,6 +104,21 @@ def update_view_port_traffic():
     logging.debug("The parameters received are " + str(p) + "  :  " + str(q) + "  :  " + str(graphid))
     return json.dumps({'message': 'Success'})
 
+@app.route('start_ambulance', methods=['GET'])
+def start_ambulance():
+    """
+    The request parameter has source and destination of the route map
+    :return:
+    """
+    logging.debug("In the start ambulance method ")
+    src = request.args.get('src', default=0.0, type=float)
+    dest = request.args.get('dest', default=0.0, type=float)
+
+    logging.debug("The parameters received are "+str(src)+"," + str(dest))
+    my_state = current_app.config['state']
+    result = my_state.set_ambulance_co_ordinates(src, dest, 10) # 10 is the session id
+    return json.dumps({'message': str(result)})
+
 
 @app.route('stop_sim', methods=['GET'])
 def stop_sumo():

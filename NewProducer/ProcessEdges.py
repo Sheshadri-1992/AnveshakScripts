@@ -33,6 +33,7 @@ class ProducerConsumer:
         """
         # start simulation
         self.sumo_obj.start()
+        return "success"
 
     def register_topic(self, lat, lon, topic, graphid):
         logging.debug("Entered register topic")
@@ -52,6 +53,25 @@ class ProducerConsumer:
         if self.flag == True:
             self.flag = False
             self.consumer_thread.start()
+
+    def set_ambulance_co_ordinates(self, pointa, pointb, sessionid=0):
+        """
+
+        :param pointa: The start point of ambulance
+        :param pointb: The destination of ambulance
+        :param sessionid: Used to remember a connection
+        :return:nothing
+        """
+
+        logging.debug("Ambulance co-ordinates received " + str(pointa) + " , " + str(pointb))
+        return "Success"
+
+    def stop_sumo(self):
+        """
+        close the simulation
+        :return:
+        """
+        self.sumo_obj.stop()
 
     def load_json(self):
         """
