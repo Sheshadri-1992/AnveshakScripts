@@ -127,6 +127,31 @@ class Sumo(threading.Thread):
 
         return edge_dict
 
+    def add_new_vehicle(self, vehicle_id, edge_id_list):
+        """
+        This method needs to add a vehicle and a set of routes it will follow
+        The vehicle is an ambulance, the new route is the set of sumo edges
+        :param vehicle_id: id of the ambulance
+        :param edge_id: the road to which vehicle
+        :return:
+        """
+
+        self.lock.acquire()
+        all_routes = traci.RouteDomain.getIDList()
+        self.lock.release()
+
+        logging.debug("There are " + str(len(all_routes)) + " number of routes")
+        random_route_id = all_routes[0]
+        logging.debug("The random route that we are going to assign is "+str(random_route_id))
+
+        # adding a vehicle in the new route
+        self.lock.acquire()
+        traci.VehicleDomain.add(vehicle_id, random_route_id)
+        self.lock.release()
+
+        logging.debug("Added a vehicle successfully")
+        return "Added a vehicle successfully"
+
     def run(self):
         """
         This should be run on a separate thread
@@ -149,7 +174,6 @@ class Sumo(threading.Thread):
         except:
 
             logging.debug("Exception in start simulation method")
-
 
     def stop(self):
         """

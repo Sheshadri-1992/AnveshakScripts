@@ -64,7 +64,8 @@ class ProducerConsumer:
         """
 
         logging.debug("Ambulance co-ordinates received " + str(pointa) + " , " + str(pointb))
-        return "Success"
+        message = self.sumo_obj.add_new_vehicle(50000, [])  # the second argument is a list of short edges
+        return message
 
     def stop_sumo(self):
         """
