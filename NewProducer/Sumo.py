@@ -132,8 +132,6 @@ class Sumo(threading.Thread):
         print("The lanes which are controlled by traffic light ", traffic_lights_list[0], " are ", list_lanes)
         logging.debug("The phase is "+str(phase))
 
-
-
     def return_traffic_density(self, arg_edge_list):
         """
         makes traci call to each edge passed
@@ -141,6 +139,8 @@ class Sumo(threading.Thread):
         :return: a dictionary with key as vehicleid,
         """
         edge_dict = {}
+
+        self.get_traffic_lights()
 
         if arg_edge_list is None:
             logging.debug("Empty list sent")

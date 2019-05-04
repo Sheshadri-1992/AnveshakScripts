@@ -221,8 +221,6 @@ class ConsumerThread(threading.Thread):
             color_medium = self.get_edge_color(medium_dict)
             color_large = self.get_edge_color(large_dict)
 
-            logging.debug("The vehicle payload is ")
-
             mqtt_object.connect_to_broker()
             mqtt_object.send_vertex_message(json.dumps(vehicle_stat_dict), self.vehicle_topic)
             # mqtt_object.send_edge_message(json.dumps(color_small))
