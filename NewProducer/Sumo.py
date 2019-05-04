@@ -112,6 +112,28 @@ class Sumo(threading.Thread):
 
         return ambulance_dict
 
+    def get_traffic_lights(self):
+        """
+
+        :return:
+        """
+
+        # obtain all traffic lights' ids
+        self.lock.acquire()
+        traffic_lights_list = traci.trafficlight.getIDList()
+        traffic_lights_count = traci.trafficlight.getIDCount()
+        self.lock.release()
+
+        # obtain the lanes which are controlled by a particular traffic ID
+        self.lock.acquire()
+        list_lanes = traci.trafficlight.getControlledLanes(traffic_lights_list[0])
+        phase = traci.getPhase(traffic_lights_list[0])
+        self.lock.release()
+        print("The lanes which are controlled by traffic light ", traffic_lights_list[0], " are ", list_lanes)
+        logging.debug("The phase is "+str(phase))
+
+
+
     def return_traffic_density(self, arg_edge_list):
         """
         makes traci call to each edge passed

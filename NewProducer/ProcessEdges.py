@@ -51,7 +51,7 @@ class ProducerConsumer:
         :return:
         """
         self.consumer_thread.start_producers()
-        if self.flag == True:
+        if self.flag:
             self.flag = False
             self.consumer_thread.start()
 
