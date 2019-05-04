@@ -116,7 +116,7 @@ class ConsumerThread(threading.Thread):
 
             if edge_id in self.edge_lane_dict:
                 lane_list = self.edge_lane_dict[edge_id]
-                candidate_list = candidate_list + lane_list
+                candidate_list = candidate_list + lane_list  # this is where things are aggregated
 
         logging.debug("Number of edges in candidate list " + str(len(candidate_list)))
         return candidate_list
@@ -128,7 +128,7 @@ class ConsumerThread(threading.Thread):
         :return:
         """
         new_dict = {}
-        if (road_dict == None):
+        if road_dict is None:
             return None
 
         for lane in road_dict:
@@ -136,9 +136,9 @@ class ConsumerThread(threading.Thread):
             edge_id = self.lane_edge_dict[lane]
 
             if edge_id not in new_dict:
-                new_dict[edge_id] = road_dict[lane]
+                new_dict[edge_id] = int(road_dict[lane])
             else:
-                new_dict[edge_id] = new_dict[edge_id] + road_dict[lane]
+                new_dict[edge_id] = int(new_dict[edge_id]) + int(road_dict[lane])
 
         return new_dict
 
@@ -170,34 +170,30 @@ class ConsumerThread(threading.Thread):
             logging.debug("Entered the consumer..")
 
             batch_count = 0
-            small_candidate_edges = []
             medium_candidate_edges = []
             large_candidate_edges = []
             curr_time = datetime.now()
 
-            # Run simulation step here
-
-            # while not self.small_thread.small_queue.empty():
-            #
-            #     item = self.small_thread.get_element_from_queue()
-            #     print(type(item))
-            #     if (batch_count < MAX_BATCH) and (item.timestamp >= curr_time):
-            #         small_candidate_edges.append(item.get_edge_id())
-            #         batch_count = batch_count + 1
-
+            # Medium queue edges
             while not self.medium_thread.medium_queue.empty():
 
                 item = self.medium_thread.get_element_from_queue()
+
                 if batch_count < MAX_BATCH and (item.timestamp >= curr_time):
                     medium_candidate_edges.append(item.get_edge_id())
                     batch_count = batch_count + 1
+                else:
+                    logging.debug("dropping the message medium producer")
 
+            # Large queue edges
             while not self.large_thread.large_queue.empty():
 
                 item = self.large_thread.get_element_from_queue()
                 if batch_count < MAX_BATCH and (item.timestamp >= curr_time):
                     large_candidate_edges.append(item.get_edge_id())
                     batch_count = batch_count + 1
+                else:
+                    logging.debug("dropping the message large producer")
 
             logging.debug("The medium candidate edges are " + str(len(medium_candidate_edges)))
             logging.debug("The large candidate edges are" + str(len(large_candidate_edges)))
@@ -223,7 +219,6 @@ class ConsumerThread(threading.Thread):
 
             mqtt_object.connect_to_broker()
             mqtt_object.send_vertex_message(json.dumps(vehicle_stat_dict), self.vehicle_topic)
-            # mqtt_object.send_edge_message(json.dumps(color_small))
 
             if self.medium_topic in self.register_dict:
                 mqtt_object.send_edge_message(json.dumps(color_medium), self.medium_topic)
@@ -232,3 +227,6 @@ class ConsumerThread(threading.Thread):
                 mqtt_object.send_edge_message(json.dumps(color_large), self.large_topic)
 
             mqtt_object.disconnect_broker()
+
+            logging.debug("Consumer sleeping")
+            time.sleep(1)

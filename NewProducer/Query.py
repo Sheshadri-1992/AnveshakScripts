@@ -21,7 +21,7 @@ class QueryStruct:
         self.querytype = QueryType(enumtype)
         self.edgeid = args
         self.prevtime = datetime.now()
-	self.timestamp = datetime.now()
+        self.timestamp = datetime.now()
 
         if self.querytype == QueryType.largeview:
             self.timestamp = datetime.now() + timedelta(seconds=10)

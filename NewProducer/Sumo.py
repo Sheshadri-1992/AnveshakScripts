@@ -106,9 +106,9 @@ class Sumo(threading.Thread):
 
             logging.debug("The dictionary is " + str(ambulance_dict))
 
-        except:
+        except Exception as e:
 
-            logging.debug("Exception in vehicle stats method")
+            logging.debug("Exception in vehicle stats method " + str(e))
 
         return ambulance_dict
 
@@ -165,9 +165,9 @@ class Sumo(threading.Thread):
                 num_vehicles = traci.edge.getLastStepVehicleNumber(edge)
                 self.lock.release()
                 edge_dict[edge] = num_vehicles
-        except:
+        except Exception as e:
 
-            logging.debug("Exception in return traffic density method")
+            logging.debug("Exception in return traffic density method "+str(e))
 
         return edge_dict
 

@@ -4,7 +4,6 @@ import logging
 import threading
 import time
 import Queue
-import numpy as np
 from MqttPublish import MqttPublish
 from Query import QueryStruct
 
@@ -31,25 +30,18 @@ class LargeProducer(threading.Thread):
 
     def run(self):
 
-        # print("I am  here in large producer ")
         length = len(self.large_edge_list)
         index = 0
         while True:
-            if not self.large_queue.full():
+            while index < length:
+                edge_id = self.large_edge_list[index % length]
+                item = QueryStruct(1, edge_id)
+                self.large_queue.put(item)
+                index = index + 1
 
-                while index < length:
-                    edge_id = self.large_edge_list[index % length]
-                    item = QueryStruct(1, edge_id)
-                    self.large_queue.put(item)
-                    index = index + 1
-
-                logging.debug("index id is " + str(index))
-                index = 0
-                time.sleep(10)
-
-            else:
-                logging.debug("queue is full ")
-                time.sleep(10)
+            logging.debug("index id is " + str(index))
+            index = 0
+            time.sleep(10)
 
     def get_element_from_queue(self):
         """
@@ -87,22 +79,17 @@ class MediumProducer(threading.Thread):
 
         index = 0
         length = len(self.medium_edge_list)
-        # print("I am  here in medium producer ")
+
         while True:
-            if not self.medium_queue.full():
 
-                while index < length:
-                    edge_id = self.medium_edge_list[index % length]
-                    item = QueryStruct(2, edge_id)
-                    self.medium_queue.put(item)
-                    index = index + 1
+            while index < length:
+                edge_id = self.medium_edge_list[index % length]
+                item = QueryStruct(2, edge_id)
+                self.medium_queue.put(item)
+                index = index + 1
 
-                index = 0
-                time.sleep(5)
-
-            else:
-                logging.debug("queue is full ")
-                time.sleep(5)
+            index = 0
+            time.sleep(5)
 
     def get_element_from_queue(self):
         """
