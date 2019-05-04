@@ -24,8 +24,8 @@ class Sumo(threading.Thread):
 
         super(Sumo, self).__init__()
         logging.debug("Initialised sumo path")
-        # self.sumo_binary = "/home/dreamlab/sumo/bin/sumo"
-        self.sumo_binary = "/usr/bin/sumo/"  # local sumo path
+        self.sumo_binary = "/usr/local/bin/sumo"
+        # self.sumo_binary = "/usr/bin/sumo/"  # local sumo path
         self.sumo_cmd = [self.sumo_binary, "-c", "testconfig.sumocfg"]
         self.lock = threading.Lock()
         self.edge_list = []
