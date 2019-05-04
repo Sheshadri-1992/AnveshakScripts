@@ -124,13 +124,25 @@ class Sumo(threading.Thread):
         traffic_lights_count = traci.trafficlight.getIDCount()
         self.lock.release()
 
+        # for tl in traffic_lights_list:
+        tl = "343594553"
         # obtain the lanes which are controlled by a particular traffic ID
         self.lock.acquire()
-        list_lanes = traci.trafficlight.getControlledLanes(traffic_lights_list[0])
-        phase = traci.getPhase(traffic_lights_list[0])
+        list_lanes = traci.trafficlight.getControlledLanes(tl)
+        color = traci.trafficlight.getRedYellowGreenState(tl)
+        phase = traci.trafficlight.getPhase(tl)
+        phase_duration = traci.trafficlight.getPhaseDuration(tl)
+        phase_name = traci.trafficlight.getPhaseName(tl)
+        next_switch = traci.trafficlight.getNextSwitch(tl)
         self.lock.release()
-        print("The lanes which are controlled by traffic light ", traffic_lights_list[0], " are ", list_lanes)
-        logging.debug("The phase is "+str(phase))
+
+        if len(list_lanes) > 3:
+            print("The lanes which are controlled by traffic light ", tl, " are ", list_lanes)
+            logging.debug("The light color is " + str(color) + " the next switch is " + str(next_switch))
+            logging.debug("The phase is " + str(phase) + " the phase name is " + str(
+                phase_name) + " the phase duration is " + str(phase_duration))
+
+        print("The counts are ", traffic_lights_count, " the actual count ", len(traffic_lights_list))
 
     def return_traffic_density(self, arg_edge_list):
         """
