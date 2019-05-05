@@ -100,6 +100,8 @@ class MqttPublish:
         """
         self.client_edge.disconnect()
         self.client_vertex.disconnect()
+        self.client_path_topic.disconnect()
+        self.client_path_traffic_topic.disconnect()
 
     def send_vertex_message(self, vertex_json, topic):
         """
@@ -147,7 +149,8 @@ class MqttPublish:
         :param topic: path_traffic topic
         :return: nothing
         """
-        logging.debug("Sending path traffic topic json")
+        logging.debug("Sending path traffic topic json ")
+        logging.debug("The path traffic ")
         ret = self.client_path_traffic_topic.publish(topic, path_traffic_json, qos=0)
         ret.wait_for_publish()
         logging.debug("The ret is "+str(ret))

@@ -36,7 +36,7 @@ class Sumo(threading.Thread):
         self.sumo_binary = "/usr/local/bin/sumo"
         self.sumo_cmd = [self.sumo_binary, "-c", "testconfig.sumocfg"]
         self.lock = threading.Lock()
-        self.edge_list = [] # not used, remove after review
+        self.edge_list = []  # not used, remove after review
         self.ambulance_id = ""
         self.custom_edge_list = []
         self.custom_locations = {}
@@ -242,6 +242,29 @@ class Sumo(threading.Thread):
         :return: This method returns the custom locations
         """
         return self.custom_locations
+
+    def get_vehicle_speed(self, vehicle_id):
+        """
+
+        :param vehicle_id: the id of the ambulance
+        :return: the speed of the vehicle (speed in m/s)
+        """
+        self.lock.acquire()
+        speed = traci.getSpeed(vehicle_id)
+        self.lock.release()
+
+        return speed
+
+    def set_vehicle_speed(self, vehicle_id, speed):
+        """
+
+        :param vehicle_id: the id of the ambulance
+        :param speed: the speed that is set to the vehicle (speed in m/s)
+        :return: nothing
+        """
+        self.lock.acquire()
+        traci.setSpeed(vehicle_id, speed)
+        self.lock.release()
 
     def run(self):
         """

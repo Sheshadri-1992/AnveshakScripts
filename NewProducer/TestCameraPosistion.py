@@ -31,7 +31,7 @@ def calculate_within_radius(vehicle_pos_x, vehicle_pos_y):
     for i in range(0, 4000):
         camera_lat_long.append(np.array((lat_list[i], long_list[i])))
 
-    diameter = 0.0015  # Not sure what this value should be. This will have to be experimentally inferred.
+    diameter = 0.00015  # Not sure what this value should be. This will have to be experimentally inferred.
     # Calculate Euclidean Distance
 
     num_cameras = 0
