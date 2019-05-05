@@ -243,8 +243,6 @@ class Sumo(threading.Thread):
         """
         return self.custom_locations
 
-    def
-
     def run(self):
         """
         This should be run on a separate thread
