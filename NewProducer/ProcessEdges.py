@@ -58,20 +58,24 @@ class ProducerConsumer:
     def set_ambulance_co_ordinates(self, ambulance_dict):
         """
 
-        :param ambulance: The start point of ambulance
-        :param hospital: The destination of ambulance
-        :param sessionid: Used to remember a connection
-        :param latency: max latency
-        :param topic: the topic where vehicle stats have to be sent
+        :param ambulance_dict: The json received which contains src, dest, lat, batch_size, topic
         :return:nothing
         """
 
         logging.debug("The ambulance dict is "+str(ambulance_dict))
+        ambulance = ambulance_dict['ambulance']
+        hospital = ambulance_dict['hospital']
+        sessionid = ambulance_dict['session']
+        topic = ambulance_dict['topic']
+        latency = ambulance_dict['latency']
+        batch_size = ambulance_dict['batch_size']
 
-        # logging.debug(
-        #     "Ambulance co-ordinates received " + str(ambulance) + " , " + str(hospital) + " , " + str(
-        #         sessionid) + " , latency " + str(latency) + " , batchsize " + str(batchsize)+" , topic "+str(topic))
+        logging.debug(
+            "Ambulance co-ordinates received " + str(ambulance) + " , " + str(hospital) + " , " + str(
+                sessionid) + " , latency " + str(latency) + " , batchsize " + str(batch_size) + " , topic " + str(
+                topic))
 
+        self.consumer_thread.ambulance_topic_and_produce("newid", topic, ambulance, hospital)
         # message = self.sumo_obj.add_new_vehicle(50000, [])  # the second argument is a list of short edges
 
         return "New vehicle will be added"

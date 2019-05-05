@@ -41,13 +41,12 @@ class ConsumerThread(threading.Thread):
 
         self.large_thread = LargeProducer(self.edge_lane_dict, name='large-producer')
         self.medium_thread = MediumProducer(self.edge_lane_dict, name="medium-producer")
-        # self.small_thread = SmallProducer(name="small-producer")
 
         # default registration topic
         self.large_topic = "large"
         self.medium_topic = "medium"
         self.small_topic = "small"
-        self.vehicle_topic = "ambulance"
+        self.ambulance_topic = "ambulance"
 
         # registration dictionary
         self.register_dict = {}
@@ -62,7 +61,7 @@ class ConsumerThread(threading.Thread):
         logging.debug("Started producing...")
         self.large_thread.start()
         self.medium_thread.start()
-        # self.small_thread.start()
+
 
     def update_sumo_object(self, sumo_obj):
         """
@@ -76,24 +75,43 @@ class ConsumerThread(threading.Thread):
 
         logging.debug("The graph id is " + str(graphid) + " the topic is " + topic)
 
-        if (int(graphid) == 0):
+        if int(graphid) == 0:
 
             self.large_topic = topic
             self.register_dict[self.large_topic] = True
             self.large_thread.start()
 
-        elif (int(graphid) == 1):
+        elif int(graphid) == 1:
 
             self.medium_topic = topic
             self.register_dict[self.medium_topic] = True
             self.medium_thread.start()
 
-        elif (int(graphid) == 2):
+        elif int(graphid) == 2:
 
             self.register_dict[topic] = True
             self.small_topic = topic
-        else:
-            self.vehicle_topic = topic
+
+    def ambulance_topic_and_produce(self, ambulance_id, topic, source, dest):
+        """
+
+        :param ambulance_id: The id of the vehicle to be inserted
+        :param topic: The topic to which we need to publish ambulance updates
+        :param source: The location of ambulance
+        :param dest: The location of hospital
+        :return: nothing
+        """
+
+        logging.debug("The parameters received are "+str(ambulance_id)+str(topic)+str(source)+ str(dest))
+
+        # here the proper shortest route will be given to me
+        self.sumo_obj.add_new_vehicle(str(50000), "newrouteid",[]) #ambulance id and list of edges
+        self.ambulance_topic = topic
+        self.sumo_obj.set_ambulance_id(str(50000))
+        self.register_dict[self.ambulance_topic] = True
+
+        # a call to compute shortest path, I will get ambulance id and a list of edges as route
+        # it takes source and destination node id
 
     def update_edge_list(self, edge_list):
         """
@@ -105,7 +123,7 @@ class ConsumerThread(threading.Thread):
 
     def prepare_candidate_edges(self, candidate_edge_list):
         """
-
+        Method to prepare candidate edges which will be sent to sumo for traci calls
         :param candidate_edge_list: the edges will be just plain osm id, we need to convert into sumo id and
                then make traci calls
         :return: return traci complaint edge id
@@ -123,9 +141,9 @@ class ConsumerThread(threading.Thread):
 
     def aggregate_edge_id_traffic(self, road_dict):
         """
-
-        :param road_dict:
-        :return:
+        Method to aggregate traffic density from lane id to edge id
+        :param road_dict: contains lane id , these needs to be remapped to their respective edge id
+        :return: An edge id dictionary where key is edge id and value is number of vehicles
         """
         new_dict = {}
         if road_dict is None:
@@ -210,23 +228,28 @@ class ConsumerThread(threading.Thread):
             medium_dict = self.aggregate_edge_id_traffic(medium_dict)
             large_dict = self.aggregate_edge_id_traffic(large_dict)
 
-            self.sumo_obj.set_ambulance_id("dummy_ambulance_id")
-            vehicle_stat_dict = self.sumo_obj.get_vehicle_stats()
+            # self.sumo_obj.set_ambulance_id("dummy_ambulance_id")
 
             # color_small = self.get_edge_color(small_dict)
             color_medium = self.get_edge_color(medium_dict)
             color_large = self.get_edge_color(large_dict)
 
             mqtt_object.connect_to_broker()
-            mqtt_object.send_vertex_message(json.dumps(vehicle_stat_dict), self.vehicle_topic)
 
             if self.medium_topic in self.register_dict:
+                logging.debug("Medium topic set..sending message")
                 mqtt_object.send_edge_message(json.dumps(color_medium), self.medium_topic)
 
             if self.large_topic in self.register_dict:
+                logging.debug("Large topic set..sending message")
                 mqtt_object.send_edge_message(json.dumps(color_large), self.large_topic)
+
+            if self.ambulance_topic != "" and self.ambulance_topic in self.register_dict:
+                vehicle_stat_dict = self.sumo_obj.get_vehicle_stats()
+                logging.debug("Ambulance topic set..sending message")
+                mqtt_object.send_vertex_message(json.dumps(vehicle_stat_dict), self.ambulance_topic)
 
             mqtt_object.disconnect_broker()
 
-            logging.debug("Consumer sleeping")
+            logging.debug("Consumer sleeping...")
             time.sleep(1)

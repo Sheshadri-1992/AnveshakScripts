@@ -9,6 +9,7 @@ import os, sys
 import traci
 import time
 import logging
+import TestCameraPosistion
 
 logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-9s) %(message)s', )
 
@@ -56,24 +57,21 @@ class Sumo(threading.Thread):
 
     def set_ambulance_id(self, vehicle_id):
         """
-        Returns the ambulance Id, this may not be needed
+        Sets the ambulance Id, this may not be needed
         :return:
         """
         logging.debug("Got the ambulance id " + vehicle_id)
         self.ambulance_id = vehicle_id
 
-        self.lock.acquire()
-        vehicle_id_list = traci.vehicle.getIDList()
-        self.lock.release()
-        logging.debug("The number of vehicles are " + str(len(vehicle_id_list)))
-
-        ambulance_id = ""
-        if vehicle_id_list != None:
-            ambulance_id = vehicle_id_list[0]
-            self.ambulance_id = ambulance_id
-            logging.debug("Set the ambulance id " + str(self.ambulance_id))
-
-        return ambulance_id
+        # self.lock.acquire()
+        # vehicle_id_list = traci.vehicle.getIDList()
+        # self.lock.release()
+        # logging.debug("The number of vehicles are " + str(len(vehicle_id_list)))
+        #
+        # if vehicle_id_list is not None:
+        #     ambulance_id = vehicle_id_list[0]  # this I will have to remove
+        #     self.ambulance_id = ambulance_id
+        #     logging.debug("Set the ambulance id " + str(self.ambulance_id))
 
     def get_vehicle_stats(self):
         """
@@ -103,6 +101,8 @@ class Sumo(threading.Thread):
             ambulance_dict["vehicleid"] = str(self.ambulance_id)
             ambulance_dict["speed"] = speed
             ambulance_dict["position"] = geo_co_ord
+
+            TestCameraPosistion.calculate_within_radius(geo_co_ord[1], geo_co_ord[0]) # lat, long in reverse order
 
             logging.debug("The dictionary is " + str(ambulance_dict))
 
@@ -136,11 +136,15 @@ class Sumo(threading.Thread):
         next_switch = traci.trafficlight.getNextSwitch(tl)
         self.lock.release()
 
-        if len(list_lanes) > 3:
-            print("The lanes which are controlled by traffic light ", tl, " are ", list_lanes)
-            logging.debug("The light color is " + str(color) + " the next switch is " + str(next_switch))
-            logging.debug("The phase is " + str(phase) + " the phase name is " + str(
-                phase_name) + " the phase duration is " + str(phase_duration))
+        print("The lanes which are controlled by traffic light ", tl, " are ", list_lanes)
+        logging.debug("The light color is " + str(color) + " the next switch is " + str(next_switch))
+        logging.debug("The phase is " + str(phase) + " the phase name is " + str(
+            phase_name) + " the phase duration is " + str(phase_duration))
+
+        print("Before setting traffic light ", color)
+        traci.trafficlight.setRedYellowGreenState(tl, 'GgGg')
+        color = traci.trafficlight.getRedYellowGreenState(tl)
+        print("After setting traffic light ", color)
 
         print("The counts are ", traffic_lights_count, " the actual count ", len(traffic_lights_list))
 
@@ -167,30 +171,24 @@ class Sumo(threading.Thread):
                 edge_dict[edge] = num_vehicles
         except Exception as e:
 
-            logging.debug("Exception in return traffic density method "+str(e))
+            logging.debug("Exception in return traffic density method " + str(e))
 
         return edge_dict
 
-    def add_new_vehicle(self, vehicle_id, edge_id_list):
+    def add_new_vehicle(self, vehicle_id, new_route_id ,custom_edge_list):
         """
         This method needs to add a vehicle and a set of routes it will follow
         The vehicle is an ambulance, the new route is the set of sumo edges
         :param vehicle_id: id of the ambulance
-        :param edge_id: the road to which vehicle
+        :param new_route_id for adding new route
+        :param custom_edge_list: the custom edge list for the new route
         :return:
         """
 
         self.lock.acquire()
-        all_routes = traci.route.getIDList()
-        self.lock.release()
-
-        logging.debug("There are " + str(len(all_routes)) + " number of routes")
-        random_route_id = all_routes[0]
-        logging.debug("The random route that we are going to assign is " + str(random_route_id))
-
-        # adding a vehicle in the new route
-        self.lock.acquire()
-        traci.vehicle.add(vehicle_id, random_route_id)
+        traci.route.add(new_route_id, custom_edge_list)
+        traci.vehicle.add(vehicle_id, new_route_id)
+        traci.vehicle.moveTo(vehicle_id, custom_edge_list[0]+"_0") # lane 0 of first edge
         self.lock.release()
 
         logging.debug("Added a vehicle successfully")
