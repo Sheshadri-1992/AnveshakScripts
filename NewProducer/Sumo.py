@@ -102,7 +102,7 @@ class Sumo(threading.Thread):
             ambulance_dict["speed"] = speed
             ambulance_dict["position"] = geo_co_ord
 
-            TestCameraPosistion.calculate_within_radius(geo_co_ord[1], geo_co_ord[0]) # lat, long in reverse order
+            TestCameraPosistion.calculate_within_radius(geo_co_ord[1], geo_co_ord[0])  # lat, long in reverse order
 
             logging.debug("The dictionary is " + str(ambulance_dict))
 
@@ -175,7 +175,7 @@ class Sumo(threading.Thread):
 
         return edge_dict
 
-    def add_new_vehicle(self, vehicle_id, new_route_id ,custom_edge_list):
+    def add_new_vehicle(self, vehicle_id, new_route_id, custom_edge_list):
         """
         This method needs to add a vehicle and a set of routes it will follow
         The vehicle is an ambulance, the new route is the set of sumo edges
@@ -184,11 +184,12 @@ class Sumo(threading.Thread):
         :param custom_edge_list: the custom edge list for the new route
         :return:
         """
+        logging.debug("The first lane " + str(custom_edge_list[0] + "_0"))
 
         self.lock.acquire()
         traci.route.add(new_route_id, custom_edge_list)
         traci.vehicle.add(vehicle_id, new_route_id)
-        traci.vehicle.moveTo(vehicle_id, custom_edge_list[0]+"_0") # lane 0 of first edge
+        traci.vehicle.moveTo(vehicle_id, custom_edge_list[0] + "_0")  # lane 0 of first edge
         self.lock.release()
 
         logging.debug("Added a vehicle successfully")

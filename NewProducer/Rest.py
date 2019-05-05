@@ -113,8 +113,6 @@ def start_ambulance():
     """
     my_json =request.get_json()
     my_dict = json.loads(my_json)
-
-
     logging.debug("In the start ambulance method ")
     # src = request.args.get('src', default=0.0, type=float)
     # dest = request.args.get('dest', default=0.0, type=float)
