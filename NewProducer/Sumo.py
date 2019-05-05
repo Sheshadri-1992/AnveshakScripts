@@ -96,7 +96,7 @@ class Sumo(threading.Thread):
             geo_co_ord = traci.simulation.convertGeo(pos_x, pos_y, fromGeo=False)
             self.lock.release()
 
-	    rev_co_ord = (geo_co_ord[1], geo_co_ord[0])
+            rev_co_ord = (geo_co_ord[1], geo_co_ord[0])
 
             ambulance_dict["vehicleid"] = str(self.ambulance_id)
             ambulance_dict["speed"] = speed
@@ -185,7 +185,7 @@ class Sumo(threading.Thread):
         :return:
         """
 
-	custom_edge_list = ["45250008#7", "-45250008#7", "-45250008#6", "-45250008#5", "-45250008#4", "-45250008#3",
+        custom_edge_list = ["45250008#7", "-45250008#7", "-45250008#6", "-45250008#5", "-45250008#4", "-45250008#3",
                             "-45250008#2", "-45250008#1", "-45250008#0", "45250014#0", "45250533#0", "45250533#1",
                             "45250533#2", "45250533#3", "-46951252#1", "-46951252#0", "-35901381#10", "-35901381#9",
                             "-35901381#8", "-35901381#7", "-35901381#6", "-35901381#5", "-35901381#4", "-35901381#3",

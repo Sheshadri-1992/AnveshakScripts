@@ -56,6 +56,14 @@ class LargeProducer(threading.Thread):
 
         return None
 
+    def get_large_edge_list_length(self):
+        """
+        Should return the edge list maintained by this
+        :return: return the edge list
+        """
+
+        return len(self.large_edge_list)
+
 
 class MediumProducer(threading.Thread):
 
@@ -90,6 +98,14 @@ class MediumProducer(threading.Thread):
 
             index = 0
             time.sleep(5)
+
+    def get_medium_edge_list_length(self):
+        """
+        Should return the edge list maintained by this
+        :return: return the edge list
+        """
+
+        return len(self.medium_edge_list)
 
     def get_element_from_queue(self):
         """

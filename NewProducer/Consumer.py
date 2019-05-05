@@ -12,7 +12,7 @@ from Query import QueryStruct
 
 from Sumo import Sumo
 
-MAX_BATCH = 3400
+MAX_BATCH = 1500
 
 # logging template
 logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-9s) %(message)s', )
@@ -50,18 +50,10 @@ class ConsumerThread(threading.Thread):
 
         # registration dictionary
         self.register_dict = {}
+        self.medium_edges_dict = {}
+        self.large_edges_dict = {}
 
         logging.debug("Started all the producers...")
-
-    def start_producers(self):
-        """
-        start producing items from all queues
-        :return:
-        """
-        logging.debug("Started producing...")
-        self.large_thread.start()
-        self.medium_thread.start()
-
 
     def update_sumo_object(self, sumo_obj):
         """
@@ -102,10 +94,10 @@ class ConsumerThread(threading.Thread):
         :return: nothing
         """
 
-        logging.debug("The parameters received are "+str(ambulance_id)+str(topic)+str(source)+ str(dest))
+        logging.debug("The parameters received are " + str(ambulance_id) + str(topic) + str(source) + str(dest))
 
         # here the proper shortest route will be given to me
-        self.sumo_obj.add_new_vehicle(str(50000), "25000",[]) #ambulance id and list of edges
+        self.sumo_obj.add_new_vehicle(str(50000), "25000", [])  # ambulance id and list of edges
         self.ambulance_topic = topic
         self.sumo_obj.set_ambulance_id(str(50000))
         self.register_dict[self.ambulance_topic] = True
@@ -160,8 +152,13 @@ class ConsumerThread(threading.Thread):
 
         return new_dict
 
-    @staticmethod
-    def get_edge_color(edge_traffic_dict):
+    def get_edge_color(self, edge_traffic_dict, producer_type):
+        """
+        This method optimizes the number of edge ids to sned
+        :param edge_traffic_dict: the aggregated traffic density for each edges
+        :param producer_type: 0- large, 1- medium , 2- small
+        :return: the dictionary which contains edge id and color code for traffic density
+        """
 
         edgeid_color_dict = {}
 
@@ -177,7 +174,44 @@ class ConsumerThread(threading.Thread):
             else:
                 edgeid_color_dict[edge] = 2
 
-        return edgeid_color_dict
+        local_dict = {}
+        if producer_type == 0:
+            local_dict = self.large_edges_dict
+        elif producer_type == 1:
+            local_dict = self.medium_edges_dict
+
+        final_return_dict = {}
+
+        for edge in edgeid_color_dict:
+
+            if edge not in local_dict:
+                local_dict[edge] = edgeid_color_dict[edge]  # this will give the color
+                final_return_dict[edge] = edgeid_color_dict[edge]
+
+            elif edge in local_dict:
+
+                prev_color = local_dict[edge]
+                curr_color = edgeid_color_dict[edge]
+
+                if prev_color != curr_color:  # this is to check whether color has changed or not
+                    final_return_dict[edge] = edgeid_color_dict[edge]
+
+        if producer_type == 0:
+
+            self.large_edges_dict = local_dict
+            large_edges_count = self.large_thread.get_large_edge_list_length()
+            if len(self.large_edges_dict.keys()) == large_edges_count:
+                logging.debug(
+                    "Colors to all the large edges have been sent at least once " + str(large_edges_count))
+
+        elif producer_type == 1:
+
+            self.medium_edges_dict = local_dict
+            medium_edges_count = self.medium_thread.get_medium_edge_list_length()
+            if len(self.medium_edges_dict.keys()) == medium_edges_count:
+                logging.debug("Colors to all the medium edges have be sent at least once " + str(medium_edges_count))
+
+        return final_return_dict
 
     def run(self):
         mqtt_object = MqttPublish()
@@ -195,9 +229,8 @@ class ConsumerThread(threading.Thread):
             # Medium queue edges
             while not self.medium_thread.medium_queue.empty():
 
-                item = self.medium_thread.get_element_from_queue()
-
-                if batch_count < MAX_BATCH and (item.timestamp >= curr_time):
+                if batch_count < MAX_BATCH:  # and (item.timestamp >= curr_time):
+                    item = self.medium_thread.get_element_from_queue()
                     medium_candidate_edges.append(item.get_edge_id())
                     batch_count = batch_count + 1
                 else:
@@ -206,19 +239,19 @@ class ConsumerThread(threading.Thread):
             # Large queue edges
             while not self.large_thread.large_queue.empty():
 
-                item = self.large_thread.get_element_from_queue()
-                if batch_count < MAX_BATCH and (item.timestamp >= curr_time):
+                if batch_count < MAX_BATCH:  # and (item.timestamp >= curr_time):
+                    item = self.large_thread.get_element_from_queue()
                     large_candidate_edges.append(item.get_edge_id())
                     batch_count = batch_count + 1
                 else:
                     logging.debug("dropping the message large producer")
 
-            logging.debug("The medium candidate edges are " + str(len(medium_candidate_edges)))
-            logging.debug("The large candidate edges are" + str(len(large_candidate_edges)))
-
             # The original candidate id do not contain lane id
             medium_candidate_edges = self.prepare_candidate_edges(medium_candidate_edges)
             large_candidate_edges = self.prepare_candidate_edges(large_candidate_edges)
+
+            logging.debug("The medium candidate edges are " + str(len(medium_candidate_edges)))
+            logging.debug("The large candidate edges are" + str(len(large_candidate_edges)))
 
             # small_dict = self.sumo_obj.return_traffic_density(small_candidate_edges)
             medium_dict = self.sumo_obj.return_traffic_density(medium_candidate_edges)
@@ -231,13 +264,13 @@ class ConsumerThread(threading.Thread):
             # self.sumo_obj.set_ambulance_id("dummy_ambulance_id")
 
             # color_small = self.get_edge_color(small_dict)
-            color_medium = self.get_edge_color(medium_dict)
-            color_large = self.get_edge_color(large_dict)
+            color_medium = self.get_edge_color(medium_dict, 1)  # 1 is medium
+            color_large = self.get_edge_color(large_dict, 0)  # 0 is small
 
             mqtt_object.connect_to_broker()
 
             if self.medium_topic in self.register_dict:
-                logging.debug("Medium topic set..sending message "+str(len(color_medium.keys())))
+                logging.debug("Medium topic set..sending message " + str(len(color_medium.keys())))
                 mqtt_object.send_edge_message(json.dumps(color_medium), self.medium_topic)
 
             if self.large_topic in self.register_dict:
