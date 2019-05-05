@@ -10,6 +10,16 @@ import traci
 import time
 import logging
 import TestCameraPosistion
+import pickle
+import xmltodict
+import random
+import sumolib
+from collections import OrderedDict
+import networkx as nx
+import osmnx as ox
+import types
+from networkx.readwrite import json_graph
+import gen_shortest_path
 
 logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-9s) %(message)s', )
 
@@ -38,6 +48,12 @@ class Sumo(threading.Thread):
             sys.path.append(tools)
         else:
             sys.exit("please declare environment variable 'SUMO_HOME'")
+
+        with open("./InputFiles/sumo_mid_graph.json", 'rb') as f:
+            data = f.read()
+            data = json.loads(data)
+
+        self.graph = json_graph.node_link_graph(data)  # this is the graph
 
         logging.debug("All settings successfully initialized")
 
@@ -175,6 +191,14 @@ class Sumo(threading.Thread):
 
         return edge_dict
 
+    def get_shortest_path(self, src, dest):
+        """
+
+        :param src: The source id
+        :param dest: The destination id
+        :return: A set of edges which constitute shortest path
+        """
+
     def add_new_vehicle(self, vehicle_id, new_route_id, custom_edge_list):
         """
         This method needs to add a vehicle and a set of routes it will follow
@@ -195,6 +219,9 @@ class Sumo(threading.Thread):
                             "470223615#2", "470223615#3", "236578402", "-452366265#19", "-452366265#18",
                             "-452366265#17", "-452366265#16", "-236531497#1", "-236531497#0", "46918817", "-42013627#7",
                             "-42013627#6", "-42013627#5", "46918821"]
+
+        custom_edge_list = gen_shortest_path.compute_shortest_path("origin", "dest", self.graph)
+
         logging.debug("The first lane " + str(custom_edge_list[0] + "_0"))
 
         self.lock.acquire()
