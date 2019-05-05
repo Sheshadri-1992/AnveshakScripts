@@ -2,13 +2,18 @@ import numpy as np
 import random as rand
 import time
 import json
+import logging
 
+logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-9s) %(message)s', )
 camera_lat_long = []
 
 with open("./InputFiles/cameras.json") as json_file:
     cameras = json.load(json_file)
 
 def calculate_within_radius(vehicle_pos_x, vehicle_pos_y):
+
+
+    logging.debug("received positions are "+str(vehicle_pos_x)+" , "+str(vehicle_pos_y))
 
     camera_id_list = []
     node_id_list = []
@@ -33,12 +38,12 @@ def calculate_within_radius(vehicle_pos_x, vehicle_pos_y):
 
     start_time = time.time()
     for camera_pos in camera_lat_long:
-        print("camera position ", camera_pos, vehicle_pos)
+        # print("camera position ", camera_pos, vehicle_pos)
         dist = np.linalg.norm(vehicle_pos - camera_pos)
-        print dist
+        # print dist
         if dist < diameter:
             pass  # print(dist)
 
     print('Total time', time.time()-start_time)
 
-calculate_within_radius(0.0,0.0)
+# calculate_within_radius(0.0,0.0)

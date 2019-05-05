@@ -12,7 +12,7 @@ from Query import QueryStruct
 
 from Sumo import Sumo
 
-MAX_BATCH = 3700
+MAX_BATCH = 3400
 
 # logging template
 logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-9s) %(message)s', )
@@ -44,7 +44,7 @@ class ConsumerThread(threading.Thread):
 
         # default registration topic
         self.large_topic = "large"
-        self.medium_topic = "medium"
+        self.medium_topic = "medium-live-traffic"
         self.small_topic = "small"
         self.ambulance_topic = "ambulance"
 
@@ -105,7 +105,7 @@ class ConsumerThread(threading.Thread):
         logging.debug("The parameters received are "+str(ambulance_id)+str(topic)+str(source)+ str(dest))
 
         # here the proper shortest route will be given to me
-        self.sumo_obj.add_new_vehicle(str(50000), "newrouteid",[]) #ambulance id and list of edges
+        self.sumo_obj.add_new_vehicle(str(50000), "25000",[]) #ambulance id and list of edges
         self.ambulance_topic = topic
         self.sumo_obj.set_ambulance_id(str(50000))
         self.register_dict[self.ambulance_topic] = True
@@ -237,7 +237,7 @@ class ConsumerThread(threading.Thread):
             mqtt_object.connect_to_broker()
 
             if self.medium_topic in self.register_dict:
-                logging.debug("Medium topic set..sending message")
+                logging.debug("Medium topic set..sending message "+str(len(color_medium.keys())))
                 mqtt_object.send_edge_message(json.dumps(color_medium), self.medium_topic)
 
             if self.large_topic in self.register_dict:

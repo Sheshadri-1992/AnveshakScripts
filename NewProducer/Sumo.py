@@ -15,7 +15,6 @@ logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-9s) %(message)s'
 
 
 class Sumo(threading.Thread):
-    # sumo_binary = "/home/dreamlab/sumo/bin/sumo"
     sumo_cmd = None
     lock = None
     edge_list = None
@@ -26,7 +25,6 @@ class Sumo(threading.Thread):
         super(Sumo, self).__init__()
         logging.debug("Initialised sumo path")
         self.sumo_binary = "/usr/local/bin/sumo"
-        # self.sumo_binary = "/usr/bin/sumo/"  # local sumo path
         self.sumo_cmd = [self.sumo_binary, "-c", "testconfig.sumocfg"]
         self.lock = threading.Lock()
         self.edge_list = []
@@ -98,9 +96,11 @@ class Sumo(threading.Thread):
             geo_co_ord = traci.simulation.convertGeo(pos_x, pos_y, fromGeo=False)
             self.lock.release()
 
+	    rev_co_ord = (geo_co_ord[1], geo_co_ord[0])
+
             ambulance_dict["vehicleid"] = str(self.ambulance_id)
             ambulance_dict["speed"] = speed
-            ambulance_dict["position"] = geo_co_ord
+            ambulance_dict["position"] = rev_co_ord
 
             TestCameraPosistion.calculate_within_radius(geo_co_ord[1], geo_co_ord[0])  # lat, long in reverse order
 
@@ -156,7 +156,7 @@ class Sumo(threading.Thread):
         """
         edge_dict = {}
 
-        self.get_traffic_lights()
+        # self.get_traffic_lights()
 
         if arg_edge_list is None:
             logging.debug("Empty list sent")
@@ -184,12 +184,23 @@ class Sumo(threading.Thread):
         :param custom_edge_list: the custom edge list for the new route
         :return:
         """
+
+	custom_edge_list = ["45250008#7", "-45250008#7", "-45250008#6", "-45250008#5", "-45250008#4", "-45250008#3",
+                            "-45250008#2", "-45250008#1", "-45250008#0", "45250014#0", "45250533#0", "45250533#1",
+                            "45250533#2", "45250533#3", "-46951252#1", "-46951252#0", "-35901381#10", "-35901381#9",
+                            "-35901381#8", "-35901381#7", "-35901381#6", "-35901381#5", "-35901381#4", "-35901381#3",
+                            "-35901381#2", "-35901381#1", "40151526#2", "-215412812", "-345411282#1", "-345411282#0",
+                            "-404335353", "383028788#12", "383028788#13", "379878516#0", "379878516#1", "383029332",
+                            "392213813", "383031432#0", "383031432#1", "-470223620", "470223615#0", "470223615#1",
+                            "470223615#2", "470223615#3", "236578402", "-452366265#19", "-452366265#18",
+                            "-452366265#17", "-452366265#16", "-236531497#1", "-236531497#0", "46918817", "-42013627#7",
+                            "-42013627#6", "-42013627#5", "46918821"]
         logging.debug("The first lane " + str(custom_edge_list[0] + "_0"))
 
         self.lock.acquire()
         traci.route.add(new_route_id, custom_edge_list)
         traci.vehicle.add(vehicle_id, new_route_id)
-        traci.vehicle.moveTo(vehicle_id, custom_edge_list[0] + "_0")  # lane 0 of first edge
+        traci.vehicle.moveTo(vehicle_id, custom_edge_list[0] + "_0", pos=1)  # lane 0 of first edge
         self.lock.release()
 
         logging.debug("Added a vehicle successfully")
