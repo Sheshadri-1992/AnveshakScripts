@@ -278,8 +278,8 @@ class ConsumerThread(threading.Thread):
                 mqtt_object.send_edge_message(json.dumps(color_large), self.large_topic)
 
             if self.ambulance_topic != "" and self.ambulance_topic in self.register_dict:
-                vehicle_stat_dict = self.sumo_obj.get_vehicle_stats()
                 logging.debug("Ambulance topic set..sending message")
+                vehicle_stat_dict = self.sumo_obj.get_vehicle_stats()
                 mqtt_object.send_vertex_message(json.dumps(vehicle_stat_dict), self.ambulance_topic)
 
             mqtt_object.disconnect_broker()
