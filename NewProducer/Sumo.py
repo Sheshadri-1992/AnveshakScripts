@@ -250,7 +250,7 @@ class Sumo(threading.Thread):
         :return: the speed of the vehicle (speed in m/s)
         """
         self.lock.acquire()
-        speed = traci.getSpeed(vehicle_id)
+        speed = traci.vehicle.getSpeed(vehicle_id)
         self.lock.release()
 
         return speed
@@ -263,7 +263,7 @@ class Sumo(threading.Thread):
         :return: nothing
         """
         self.lock.acquire()
-        traci.setSpeed(vehicle_id, speed)
+        traci.vehicle.setSpeed(vehicle_id, speed)
         self.lock.release()
 
     def run(self):
