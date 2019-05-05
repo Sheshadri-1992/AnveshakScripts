@@ -36,8 +36,10 @@ class Sumo(threading.Thread):
         self.sumo_binary = "/usr/local/bin/sumo"
         self.sumo_cmd = [self.sumo_binary, "-c", "testconfig.sumocfg"]
         self.lock = threading.Lock()
-        self.edge_list = []
+        self.edge_list = [] # not used, remove after review
         self.ambulance_id = ""
+        self.custom_edge_list = []
+        self.custom_locations = {}
 
         # start the simulation here
         traci.start(self.sumo_cmd)
@@ -219,7 +221,9 @@ class Sumo(threading.Thread):
                             "-452366265#17", "-452366265#16", "-236531497#1", "-236531497#0", "46918817", "-42013627#7",
                             "-42013627#6", "-42013627#5", "46918821"]
 
-        custom_edge_list = gen_shortest_path.compute_shortest_path(source, dest, self.graph)
+        custom_edge_list, locations = gen_shortest_path.compute_shortest_path(source, dest, self.graph)
+        self.custom_edge_list = custom_edge_list
+        self.custom_locations = locations
 
         logging.debug("The first lane " + str(custom_edge_list[0] + "_0"))
 
@@ -231,6 +235,15 @@ class Sumo(threading.Thread):
 
         logging.debug("Added a vehicle successfully")
         return "Added a vehicle successfully"
+
+    def get_custom_locations(self):
+        """
+        This method returns the custom locations, which contain lat lon pair for each edges
+        :return: This method returns the custom locations
+        """
+        return self.custom_locations
+
+    def
 
     def run(self):
         """

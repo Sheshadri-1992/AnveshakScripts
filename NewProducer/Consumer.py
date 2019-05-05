@@ -47,6 +47,8 @@ class ConsumerThread(threading.Thread):
         self.medium_topic = "medium-live-traffic"
         self.small_topic = "small"
         self.ambulance_topic = "ambulance"
+        self.path_topic = ""  # this has to sent first
+        self.path_traffic_topic = ""  # this has to be be sent next
 
         # registration dictionary
         self.register_dict = {}
@@ -84,23 +86,34 @@ class ConsumerThread(threading.Thread):
             self.register_dict[topic] = True
             self.small_topic = topic
 
-    def ambulance_topic_and_produce(self, ambulance_id, topic, source, dest):
+    def ambulance_topic_and_produce(self, ambulance_id, position_topic, path_topic, path_traffic_topic, source, dest):
         """
 
         :param ambulance_id: The id of the vehicle to be inserted
-        :param topic: The topic to which we need to publish ambulance updates
+        :param position_topic: The topic to which we need to publish ambulance updates
+        :param path_topic: This is where the lat long of custom edges should be published
+        :param path_traffic_topic: This is where the raw traffic updates have to be updated, lane level no aggregation
         :param source: The location of ambulance
         :param dest: The location of hospital
         :return: nothing
         """
 
-        logging.debug("The parameters received are " + str(ambulance_id) + str(topic) + str(source) + str(dest))
+        logging.debug(
+            "The parameters received are " + str(ambulance_id) + str(position_topic) + str(source) + str(dest))
 
-        # here the proper shortest route will be given to me
+        # A new vehicle is added
         self.sumo_obj.add_new_vehicle(str(50000), "25000", [], source, dest)  # ambulance id and list of edges
-        self.ambulance_topic = topic
-        self.sumo_obj.set_ambulance_id(str(50000))
+        self.ambulance_topic = position_topic
         self.register_dict[self.ambulance_topic] = True
+        self.sumo_obj.set_ambulance_id(str(50000))
+
+        # this is for the focus path
+        self.path_topic = path_topic
+        self.register_dict[self.path_topic] = True
+
+        # this is for the raw traffic color updates
+        self.path_traffic_topic = path_traffic_topic
+        self.register_dict[self.path_traffic_topic] = True
 
         # a call to compute shortest path, I will get ambulance id and a list of edges as route
         # it takes source and destination node id
@@ -160,7 +173,7 @@ class ConsumerThread(threading.Thread):
         :return: the dictionary which contains edge id and color code for traffic density
         """
 
-	new_insertions = 0
+        new_insertions = 0
         edgeid_color_dict = {}
 
         for edge in edge_traffic_dict:
@@ -188,7 +201,7 @@ class ConsumerThread(threading.Thread):
             if edge not in local_dict:
                 local_dict[edge] = edgeid_color_dict[edge]  # this will give the color
                 final_return_dict[edge] = edgeid_color_dict[edge]
-		new_insertions = new_insertions + 1
+                new_insertions = new_insertions + 1
 
             elif edge in local_dict:
 
@@ -213,15 +226,37 @@ class ConsumerThread(threading.Thread):
             if len(self.medium_edges_dict.keys()) == medium_edges_count:
                 logging.debug("Colors to all the medium edges have be sent at least once " + str(medium_edges_count))
 
-	logging.debug("new insertions are "+str(new_insertions))
+        logging.debug("new insertions are " + str(new_insertions))
 
         return final_return_dict
+
+    def get_edge_color_simple(self, edge_traffic_dict):
+        """
+
+        :param edge_traffic_dict: The key is edge id , value is traffic density
+        :return: A dictionary where edgeid is key and value is color
+        """
+        edgeid_color_dict = {}
+
+        for edge in edge_traffic_dict:
+
+            num_vehicles = edge_traffic_dict[edge]
+
+            # color bucket logic
+            if num_vehicles < 5:
+                edgeid_color_dict[edge] = 0
+            elif 5 < num_vehicles <= 10:
+                edgeid_color_dict[edge] = 1
+            else:
+                edgeid_color_dict[edge] = 2
+
+        return edgeid_color_dict
 
     def run(self):
         mqtt_object = MqttPublish()
         mqtt_object.print_variables()
 
-	running_counter = 0
+        running_counter = 0
 
         while True:
 
@@ -234,14 +269,13 @@ class ConsumerThread(threading.Thread):
 
             # Medium queue edges
             while batch_count < MAX_BATCH:  # and (item.timestamp >= curr_time):
-		    if not self.medium_thread.medium_queue.empty():
-			    item = self.medium_thread.get_element_from_queue()
-			    medium_candidate_edges.append(item.get_edge_id())
-			    batch_count = batch_count + 1
-	
+                if not self.medium_thread.medium_queue.empty():
+                    item = self.medium_thread.get_element_from_queue()
+                    medium_candidate_edges.append(item.get_edge_id())
+                    batch_count = batch_count + 1
 
-	    logging.debug("message medium producer "+str(batch_count)+" ,running counter "+str(running_counter))
-		    
+            logging.debug("message medium producer " + str(batch_count) + " ,running counter " + str(running_counter))
+
             # Large queue edges
             while not self.large_thread.large_queue.empty():
 
@@ -276,10 +310,11 @@ class ConsumerThread(threading.Thread):
             mqtt_object.connect_to_broker()
 
             if self.medium_topic in self.register_dict:
-                logging.debug("Medium topic set..sending message, the label is "+str(running_counter) +" " + str(len(color_medium.keys())))
-		# key = "id:" +
-		color_medium['id'] = str(running_counter)
-		#final_message[str(running_counter)] = color_medium
+                logging.debug("Medium topic set..sending message, the label is " + str(running_counter) + " " + str(
+                    len(color_medium.keys())))
+                # key = "id:" +
+                color_medium['id'] = str(running_counter)
+                # final_message[str(running_counter)] = color_medium
                 mqtt_object.send_edge_message(json.dumps(color_medium), self.medium_topic)
 
             if self.large_topic in self.register_dict:
@@ -291,8 +326,21 @@ class ConsumerThread(threading.Thread):
                 vehicle_stat_dict = self.sumo_obj.get_vehicle_stats()
                 mqtt_object.send_vertex_message(json.dumps(vehicle_stat_dict), self.ambulance_topic)
 
+            if self.path_topic != "" and self.path_topic in self.register_dict:
+                logging.debug("path topic set..sending message")
+                locations_dict = self.sumo_obj.get_custom_locations()
+                mqtt_object.send_path_topic_message(json.dumps(locations_dict), self.path_topic)
+
+            if self.path_traffic_topic != "" and self.path_traffic_topic in self.register_dict:
+                logging.debug("path traffic topic set.. sending message")
+                locations_dict = self.sumo_obj.get_custom_locations()
+                candidate_edges = list(locations_dict.keys())
+                lane_traffic_dict = self.sumo_obj.return_traffic_density(candidate_edges)
+                lane_traffic_dict = self.get_edge_color_simple(lane_traffic_dict)
+                mqtt_object.send_path_traffic_topic_message(json.dumps(lane_traffic_dict), self.path_traffic_topic)
+
             mqtt_object.disconnect_broker()
 
             logging.debug("Consumer sleeping...")
-	    running_counter = running_counter + 1
+            running_counter = running_counter + 1
             time.sleep(1)

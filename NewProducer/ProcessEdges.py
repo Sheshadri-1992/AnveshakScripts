@@ -68,16 +68,21 @@ class ProducerConsumer:
             ambulance = ambulance_dict['ambulance']
             hospital = ambulance_dict['hospital']
             sessionid = ambulance_dict['session']
-            topic = ambulance_dict['topic']
+            position_topic = ambulance_dict['position_topic']
+            path_topic = ambulance_dict['path_topic']
+            path_traffic_topic = ambulance_dict['path_traffic_topic']
             latency = ambulance_dict['latency']
             batch_size = ambulance_dict['batch_size']
 
             logging.debug(
                 "Ambulance co-ordinates received " + str(ambulance) + " , " + str(hospital) + " , " + str(
-                    sessionid) + " , latency " + str(latency) + " , batchsize " + str(batch_size) + " , topic " + str(
-                    topic))
+                    sessionid) + " , latency " + str(latency) + " , batchsize " + str(
+                    batch_size) + " ,position topic " + str(
+                    position_topic) + " , path topic " + str(path_topic) + " , path traffic topic " + str(
+                    path_traffic_topic))
 
-            self.consumer_thread.ambulance_topic_and_produce("newid", topic, ambulance, hospital)
+            self.consumer_thread.ambulance_topic_and_produce("newid", position_topic, path_topic, path_traffic_topic,
+                                                             ambulance, hospital)
             # message = self.sumo_obj.add_new_vehicle(50000, [])  # the second argument is a list of short edges
 
         except Exception as e:

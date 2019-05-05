@@ -15,6 +15,8 @@ class MqttPublish:
     edge_topic = ""
     client_edge = None
     client_vertex = None
+    client_path_topic = None
+    client_path_traffic_topic = None
 
     def __init__(self):
         logging.debug("the constructor method is called")
@@ -23,6 +25,7 @@ class MqttPublish:
         self.tPort = 10001
         self.vehicle_topic = "vechiclestats"
         self.edge_topic = "trafficstats"
+
 
     def print_variables(self):
         """
@@ -34,6 +37,21 @@ class MqttPublish:
             "The broker address " + str(
                 self.broker_address) + "  transport " + self.tTransport + "  the port is  " + str(
                 self.tPort))
+
+    def on_publish_path_traffic_topic(self):
+        """
+
+        :return:
+        """
+        logging.debug("Path traffic topic got published")
+
+    def on_publish_path_topic(self):
+        """
+
+        :return:
+        """
+        logging.debug("Path topic got published")
+
 
     def on_publish_edge(self):
         """
@@ -65,6 +83,16 @@ class MqttPublish:
         self.client_vertex.on_publish = self.on_publish_vertex
         self.client_vertex.connect(self.broker_address, port=self.tPort, keepalive=60, bind_address="")
 
+        self.client_path_topic = mqtt.Client("P13", transport=self.tTransport)
+        self.client_path_topic.username_pw_set(username="dreamlabanveshak", password="dream119")
+        self.client_path_topic.on_publish = self.on_publish_path_topic
+        self.client_path_topic.connect(self.broker_address, port=self.tPort, keepalive=60, bind_address="")
+
+        self.client_path_traffic_topic = mqtt.Client("P14", transport=self.tTransport)
+        self.client_path_traffic_topic.username_pw_set(username="dreamlabanveshak", password="dream119")
+        self.client_path_traffic_topic.on_publish = self.on_publish_path_traffic_topic
+        self.client_path_traffic_topic.connect(self.broker_address, port=self.tPort, keepalive=60, bind_address="")
+
     def disconnect_broker(self):
         """
         disconnect the broker
@@ -92,10 +120,34 @@ class MqttPublish:
         :param topic: the topic for edge which is sent by consumer
         :return: nothing to return
         """
-	
-	my_dict = json.loads(edge_json)
+
+        my_dict = json.loads(edge_json)
         logging.debug("Sending edge id " + str(len(edge_json)) + " topic is " + str(topic))
         ret = self.client_edge.publish(topic, edge_json, qos=0)
         ret.wait_for_publish()
-	logging.debug("The label sent is "+str(my_dict.keys()))
+        logging.debug("The label sent is " + str(my_dict.keys()))
         logging.debug("The ret is " + str(ret))
+
+    def send_path_topic_message(self, path_json, topic):
+        """
+
+        :param path_json: edgeid and lat long
+        :param topic: path_topic
+        :return: nothing
+        """
+        logging.debug("Sending path topic json")
+        ret = self.client_path_topic.publish(topic, path_json, qos=0)
+        ret.wait_for_publish()
+        logging.debug("The ret is "+str(ret))
+
+    def send_path_traffic_topic_message(self, path_traffic_json, topic):
+        """
+
+        :param path_traffic_json:  edge id and color
+        :param topic: path_traffic topic
+        :return: nothing
+        """
+        logging.debug("Sending path traffic topic json")
+        ret = self.client_path_traffic_topic.publish(topic, path_traffic_json, qos=0)
+        ret.wait_for_publish()
+        logging.debug("The ret is "+str(ret))
