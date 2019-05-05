@@ -97,7 +97,7 @@ class ConsumerThread(threading.Thread):
         logging.debug("The parameters received are " + str(ambulance_id) + str(topic) + str(source) + str(dest))
 
         # here the proper shortest route will be given to me
-        self.sumo_obj.add_new_vehicle(str(50000), "25000", [])  # ambulance id and list of edges
+        self.sumo_obj.add_new_vehicle(str(50000), "25000", [], source, dest)  # ambulance id and list of edges
         self.ambulance_topic = topic
         self.sumo_obj.set_ambulance_id(str(50000))
         self.register_dict[self.ambulance_topic] = True
@@ -160,6 +160,7 @@ class ConsumerThread(threading.Thread):
         :return: the dictionary which contains edge id and color code for traffic density
         """
 
+	new_insertions = 0
         edgeid_color_dict = {}
 
         for edge in edge_traffic_dict:
@@ -187,6 +188,7 @@ class ConsumerThread(threading.Thread):
             if edge not in local_dict:
                 local_dict[edge] = edgeid_color_dict[edge]  # this will give the color
                 final_return_dict[edge] = edgeid_color_dict[edge]
+		new_insertions = new_insertions + 1
 
             elif edge in local_dict:
 
@@ -211,11 +213,15 @@ class ConsumerThread(threading.Thread):
             if len(self.medium_edges_dict.keys()) == medium_edges_count:
                 logging.debug("Colors to all the medium edges have be sent at least once " + str(medium_edges_count))
 
+	logging.debug("new insertions are "+str(new_insertions))
+
         return final_return_dict
 
     def run(self):
         mqtt_object = MqttPublish()
         mqtt_object.print_variables()
+
+	running_counter = 0
 
         while True:
 
@@ -227,15 +233,15 @@ class ConsumerThread(threading.Thread):
             curr_time = datetime.now()
 
             # Medium queue edges
-            while not self.medium_thread.medium_queue.empty():
+            while batch_count < MAX_BATCH:  # and (item.timestamp >= curr_time):
+		    if not self.medium_thread.medium_queue.empty():
+			    item = self.medium_thread.get_element_from_queue()
+			    medium_candidate_edges.append(item.get_edge_id())
+			    batch_count = batch_count + 1
+	
 
-                if batch_count < MAX_BATCH:  # and (item.timestamp >= curr_time):
-                    item = self.medium_thread.get_element_from_queue()
-                    medium_candidate_edges.append(item.get_edge_id())
-                    batch_count = batch_count + 1
-                else:
-                    logging.debug("dropping the message medium producer")
-
+	    logging.debug("message medium producer "+str(batch_count)+" ,running counter "+str(running_counter))
+		    
             # Large queue edges
             while not self.large_thread.large_queue.empty():
 
@@ -270,7 +276,10 @@ class ConsumerThread(threading.Thread):
             mqtt_object.connect_to_broker()
 
             if self.medium_topic in self.register_dict:
-                logging.debug("Medium topic set..sending message " + str(len(color_medium.keys())))
+                logging.debug("Medium topic set..sending message, the label is "+str(running_counter) +" " + str(len(color_medium.keys())))
+		# key = "id:" +
+		color_medium['id'] = str(running_counter)
+		#final_message[str(running_counter)] = color_medium
                 mqtt_object.send_edge_message(json.dumps(color_medium), self.medium_topic)
 
             if self.large_topic in self.register_dict:
@@ -285,4 +294,5 @@ class ConsumerThread(threading.Thread):
             mqtt_object.disconnect_broker()
 
             logging.debug("Consumer sleeping...")
+	    running_counter = running_counter + 1
             time.sleep(1)

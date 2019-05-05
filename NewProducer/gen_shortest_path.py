@@ -1,6 +1,5 @@
 from collections import OrderedDict
 import networkx as nx
-import osmnx as ox
 import types
 from networkx.readwrite import json_graph
 import json
@@ -18,8 +17,10 @@ def compute_shortest_path(origin, dest, graph):
     :param graph:
     :return:
     """
-    origin = '249072983'
-    dest = '448116544'
+    # origin = '249072983'
+    # dest = '448116544'
+
+    print("The origin is ",origin," destination is ",dest)
     path = nx.shortest_path(graph, origin, dest, weight='weight')
 
     # get edges
@@ -27,7 +28,7 @@ def compute_shortest_path(origin, dest, graph):
     edges = [-1]
 
     for i in range(len(path) - 1):
-        e = g[path[i]][path[i + 1]]
+        e = graph[path[i]][path[i + 1]]
         if type(e) is list:
             for j in e:
                 if edges[-1] != j.keys()[0]:

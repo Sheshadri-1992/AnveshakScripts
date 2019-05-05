@@ -16,7 +16,6 @@ import random
 import sumolib
 from collections import OrderedDict
 import networkx as nx
-import osmnx as ox
 import types
 from networkx.readwrite import json_graph
 import gen_shortest_path
@@ -199,7 +198,7 @@ class Sumo(threading.Thread):
         :return: A set of edges which constitute shortest path
         """
 
-    def add_new_vehicle(self, vehicle_id, new_route_id, custom_edge_list):
+    def add_new_vehicle(self, vehicle_id, new_route_id, custom_edge_list, source, dest):
         """
         This method needs to add a vehicle and a set of routes it will follow
         The vehicle is an ambulance, the new route is the set of sumo edges
@@ -220,7 +219,7 @@ class Sumo(threading.Thread):
                             "-452366265#17", "-452366265#16", "-236531497#1", "-236531497#0", "46918817", "-42013627#7",
                             "-42013627#6", "-42013627#5", "46918821"]
 
-        custom_edge_list = gen_shortest_path.compute_shortest_path("origin", "dest", self.graph)
+        custom_edge_list = gen_shortest_path.compute_shortest_path(source, dest, self.graph)
 
         logging.debug("The first lane " + str(custom_edge_list[0] + "_0"))
 

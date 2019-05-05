@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 import logging
-
+import json
 import paho.mqtt.client as mqtt
 
 logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-9s) %(message)s', )
@@ -92,8 +92,10 @@ class MqttPublish:
         :param topic: the topic for edge which is sent by consumer
         :return: nothing to return
         """
-
-        logging.debug("Sending edge id " + str(len(edge_json)) + " topic is " + topic)
+	
+	my_dict = json.loads(edge_json)
+        logging.debug("Sending edge id " + str(len(edge_json)) + " topic is " + str(topic))
         ret = self.client_edge.publish(topic, edge_json, qos=0)
         ret.wait_for_publish()
+	logging.debug("The label sent is "+str(my_dict.keys()))
         logging.debug("The ret is " + str(ret))
