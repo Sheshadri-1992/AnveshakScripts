@@ -199,6 +199,7 @@ class Sumo(threading.Thread):
         :param dest: The destination id
         :return: A set of edges which constitute shortest path
         """
+        return None
 
     def add_new_vehicle(self, vehicle_id, new_route_id, custom_edge_list, source, dest):
         """
@@ -264,6 +265,8 @@ class Sumo(threading.Thread):
         """
         self.lock.acquire()
         traci.vehicle.setSpeed(vehicle_id, speed)
+        traci.vehicle.setSpeedMode(vehicle_id, 0)
+        traci.vehicle.setLaneChangeMode(vehicle_id, 2218)
         self.lock.release()
 
     def run(self):
@@ -295,5 +298,5 @@ class Sumo(threading.Thread):
         :return:
         """
         logging.debug("Request to stop simulation")
-        traci.close()
+        traci.close(False) # important
         return "Sumo stopped"

@@ -107,7 +107,7 @@ class ConsumerThread(threading.Thread):
         self.register_dict[self.ambulance_topic] = True
         self.sumo_obj.set_ambulance_id(str(50000))
         speed = self.sumo_obj.get_vehicle_speed(str(50000))
-        self.sumo_obj.set_vehicle_speed(str(50000), 28.0)
+        self.sumo_obj.set_vehicle_speed(str(50000), 28.0)  # Setting the vehicle speed here
         logging.debug("Previous speed was " + str(speed) + " the current speed set is 28m/s")
 
         # this is for the focus path
