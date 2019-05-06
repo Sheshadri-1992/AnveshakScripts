@@ -456,6 +456,7 @@ class Sumo(threading.Thread):
                         else:
                             new_state = new_state + 'R'
 
+                    logging.debug("Setting state "+str(new_state))
                     traci.trafficlight.setRedYellowGreenState(green_wave_id, new_state)
                 else:
                     edge_traffic_id_dict[edge_id] = -1
