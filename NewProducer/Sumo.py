@@ -195,7 +195,7 @@ class Sumo(threading.Thread):
 
     def init_green_wave(self):
         """
-
+        Starts by turning at least 4 signals green
         :return:
         """
         edge_list = self.edge_traffic_state.edge_list
@@ -207,7 +207,7 @@ class Sumo(threading.Thread):
         num_edges = len(edge_list)
 
         completed_edges = 0
-        for i in range(0, num_edges):
+        for i in range(0, num_edges):  # number of edges
 
             if i > 4:
                 break
@@ -235,14 +235,15 @@ class Sumo(threading.Thread):
 
                         j = j + 1
 
-                    if traffic_id_found:
+                    if traffic_light_found:
                         break
 
             if traffic_light_found:
                 green_id_list.append(traffic_id_found)
-                edge_traffic_dict[i] = traffic_id_found
+                edge_traffic_dict[edge_id] = traffic_id_found
+                break
             else:
-                edge_traffic_dict[i] = -1
+                edge_traffic_dict[edge_id] = -1
 
             completed_edges = completed_edges + 1
 
@@ -258,7 +259,7 @@ class Sumo(threading.Thread):
                     if j == edge_lane_index[i]:
                         new_state = new_state + 'G'
                     else:
-                        new_state = new_state + 'R'
+                        new_state = new_state + 'r'
 
                 traci.trafficlight.setRedYellowGreenState(green_id_list[i], new_state)
                 self.lock.release()
@@ -291,7 +292,7 @@ class Sumo(threading.Thread):
         self.custom_edge_list = custom_edge_list
         self.custom_locations = locations
 
-        self.edge_traffic_state.set_edge_list(self.custom_edge_list)
+        self.edge_traffic_state.set_edge_list(self.custom_edge_list)  # set the edge list
 
         logging.debug("The first lane " + str(custom_edge_list[0] + "_0"))
 
@@ -404,13 +405,13 @@ class Sumo(threading.Thread):
             traffic_phase_dict = self.edge_traffic_state.get_traffic_phase_dict()
 
             if traffic_id != -1:
+                logging.debug("Un-setting edge id")
                 phase = traffic_phase_dict[traffic_id]
                 traci.trafficlight.setPhase(traffic_id, phase)
 
             new_index = current_set_index + 1
             if new_index < len(self.custom_edge_list):
 
-                edge_traffic_dict = self.edge_traffic_state.get_edge_traffic_dict()
                 edge_id = self.custom_edge_list[new_index]
                 edge_lane_dict = self.edge_traffic_state.get_edge_lane_dict()
                 lanes = edge_lane_dict[edge_id]
@@ -444,7 +445,7 @@ class Sumo(threading.Thread):
                         break
 
                 if lane_found:
-                    edge_traffic_dict[edge_id] = green_wave_id
+                    edge_traffic_id_dict[edge_id] = green_wave_id
                     curr_state = traci.trafficlight.getRedYellowGreenState(green_wave_id)
                     state_length = len(curr_state)
 
@@ -457,7 +458,10 @@ class Sumo(threading.Thread):
 
                     traci.trafficlight.setRedYellowGreenState(green_wave_id, new_state)
                 else:
-                    edge_traffic_dict[edge_id] = -1
+                    edge_traffic_id_dict[edge_id] = -1
+
+            self.edge_traffic_state.set_edge_traffic_dict(edge_traffic_id_dict)
+            self.edge_traffic_state.set_index(new_index)
 
         self.lock.release()
 
@@ -482,6 +486,7 @@ class Sumo(threading.Thread):
                 traci.simulationStep()  # this is an important step
                 self.lock.release()
 
+                self.check_if_vehicle_position_changed()
                 logging.debug("simulation step " + str(step))
 
                 step = step + 1  # this is an important step
