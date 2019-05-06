@@ -19,6 +19,7 @@ import networkx as nx
 import types
 from networkx.readwrite import json_graph
 import gen_shortest_path
+from EdgeTrafficState import EdgeStateInfo
 
 logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-9s) %(message)s', )
 
@@ -37,9 +38,10 @@ class Sumo(threading.Thread):
         self.sumo_cmd = [self.sumo_binary, "-c", "testconfig.sumocfg"]
         self.lock = threading.Lock()
         self.edge_list = []  # not used, remove after review
-        self.ambulance_id = ""
+        self.ambulance_id = "-1"
         self.custom_edge_list = []
         self.custom_locations = {}
+        self.edge_traffic_state = EdgeStateInfo()
 
         # start the simulation here
         traci.start(self.sumo_cmd)
@@ -77,16 +79,6 @@ class Sumo(threading.Thread):
         """
         logging.debug("Got the ambulance id " + vehicle_id)
         self.ambulance_id = vehicle_id
-
-        # self.lock.acquire()
-        # vehicle_id_list = traci.vehicle.getIDList()
-        # self.lock.release()
-        # logging.debug("The number of vehicles are " + str(len(vehicle_id_list)))
-        #
-        # if vehicle_id_list is not None:
-        #     ambulance_id = vehicle_id_list[0]  # this I will have to remove
-        #     self.ambulance_id = ambulance_id
-        #     logging.debug("Set the ambulance id " + str(self.ambulance_id))
 
     def get_vehicle_stats(self):
         """
@@ -201,6 +193,79 @@ class Sumo(threading.Thread):
         """
         return None
 
+    def init_green_wave(self):
+        """
+
+        :return:
+        """
+        edge_list = self.edge_traffic_state.edge_list
+        edge_lane_dict = self.edge_traffic_state.get_edge_lane_dict()
+        traffic_id_lane_dict = self.edge_traffic_state.get_traffic_id_lane_dict()
+        green_id_list = []
+        edge_lane_index = []
+        edge_traffic_dict = {}
+        num_edges = len(edge_list)
+
+        completed_edges = 0
+        for i in range(0, num_edges):
+
+            if i > 4:
+                break
+
+            traffic_light_found = False
+            traffic_id_found = ""
+
+            edge_id = edge_list[i]
+            edge_lanes = edge_lane_dict[edge_id]
+
+            for lane in edge_lanes:
+
+                for traffic_id in traffic_id_lane_dict:
+
+                    traffic_lanes = traffic_id_lane_dict[traffic_id]
+
+                    j = 0
+                    for traffic_lane in traffic_lanes:
+
+                        if lane == traffic_lane:
+                            traffic_light_found = True
+                            traffic_id_found = traffic_id
+                            edge_lane_index.append(j)
+                            break
+
+                        j = j + 1
+
+                    if traffic_id_found:
+                        break
+
+            if traffic_light_found:
+                green_id_list.append(traffic_id_found)
+                edge_traffic_dict[i] = traffic_id_found
+            else:
+                edge_traffic_dict[i] = -1
+
+            completed_edges = completed_edges + 1
+
+        if len(green_id_list) != 0:
+
+            for i in range(0, len(green_id_list)):
+                self.lock.acquire()
+                curr_state = traci.trafficlight.getRedYellowGreenState(green_id_list[i])
+                state_length = len(curr_state)
+
+                new_state = ""
+                for j in range(0, state_length):
+                    if j == edge_lane_index[i]:
+                        new_state = new_state + 'G'
+                    else:
+                        new_state = new_state + 'R'
+
+                traci.trafficlight.setRedYellowGreenState(green_id_list[i], new_state)
+                self.lock.release()
+
+        self.edge_traffic_state.set_edge_traffic_dict(edge_traffic_dict)
+        self.edge_traffic_state.set_index(completed_edges)
+
     def add_new_vehicle(self, vehicle_id, new_route_id, custom_edge_list, source, dest):
         """
         This method needs to add a vehicle and a set of routes it will follow
@@ -226,6 +291,8 @@ class Sumo(threading.Thread):
         self.custom_edge_list = custom_edge_list
         self.custom_locations = locations
 
+        self.edge_traffic_state.set_edge_list(self.custom_edge_list)
+
         logging.debug("The first lane " + str(custom_edge_list[0] + "_0"))
 
         self.lock.acquire()
@@ -234,7 +301,52 @@ class Sumo(threading.Thread):
         traci.vehicle.moveTo(vehicle_id, custom_edge_list[0] + "_0", pos=1)  # lane 0 of first edge
         self.lock.release()
 
+        # store all the traffic light ids
+        self.lock.acquire()
+        traffic_light_sequence = traci.vehicle.getNextTLS(vehicle_id)  # Possible breaking point
+        self.lock.release()
+
+        # all the upcoming traffic lights for the given vehicle
+        traffic_light_list = []
+        for item in traffic_light_sequence:
+            traffic_light_id = item[0]
+            traffic_light_list.append(traffic_light_id)
+
+        traffic_id_phase_dict = {}
+        for traffic_id in traffic_light_list:
+            self.lock.acquire()
+            traffic_phase = traci.trafficlight.getPhase(traffic_id)
+            traffic_id_phase_dict[traffic_id] = traffic_phase
+            self.lock.release()
+
+        traffic_id_lanes_dict = {}
+        for traffic_id in traffic_light_list:
+            self.lock.acquire()
+            lanes = traci.trafficlight.getControlledLanes(traffic_id)
+            traffic_id_lanes_dict[traffic_id] = lanes
+            self.lock.release()
+
+        edge_lane_dict = {}
+        for edge_id in custom_edge_list:
+            self.lock.acquire()
+            number = traci.edge.getLaneNumber(edge_id)
+            lane_list = []
+
+            for i in range(0, number):
+                lane_id = edge_id + "_" + str(i)
+                lane_list.append(lane_id)
+
+            edge_lane_dict[edge_id] = lane_list
+            self.lock.release()
+
+        self.edge_traffic_state.set_traffic_phase_dict(traffic_id_phase_dict)
+        self.edge_traffic_state.set_traffic_id_lane_dict(traffic_id_lanes_dict)
+        self.edge_traffic_state.set_traffic_id_lane_dict(edge_lane_dict)
+
         logging.debug("Added a vehicle successfully")
+
+        self.init_green_wave()
+
         return "Added a vehicle successfully"
 
     def get_custom_locations(self):
@@ -265,9 +377,97 @@ class Sumo(threading.Thread):
         """
         self.lock.acquire()
         traci.vehicle.setSpeed(vehicle_id, speed)
-        traci.vehicle.setSpeedMode(vehicle_id, 0)
-        traci.vehicle.setLaneChangeMode(vehicle_id, 2218)
+        traci.vehicle.setSpeedMode(vehicle_id, 0)  # 0 is rouge mode
+        traci.vehicle.setLaneChangeMode(vehicle_id, 2218)  # 2218 is rouge mode
         self.lock.release()
+
+    def check_if_vehicle_position_changed(self):
+        """
+
+        :return:
+        """
+        if self.ambulance_id == "-1":
+            return
+
+        self.lock.acquire()
+        edge_id = traci.vehicle.getRoadID(self.ambulance_id)
+        edge_index = self.custom_edge_list.index(edge_id)
+        current_set_index = self.edge_traffic_state.get_index()
+
+        if edge_index == (current_set_index - 4):
+            logging.debug("position hasn't changed yet")
+        else:
+            logging.debug("position has changed")
+            unset_index = edge_index - 1
+            edge_traffic_id_dict = self.edge_traffic_state.get_edge_traffic_dict()
+            traffic_id = edge_traffic_id_dict[self.custom_edge_list[unset_index]]
+            traffic_phase_dict = self.edge_traffic_state.get_traffic_phase_dict()
+
+            if traffic_id != -1:
+                phase = traffic_phase_dict[traffic_id]
+                traci.trafficlight.setPhase(traffic_id, phase)
+
+            new_index = current_set_index + 1
+            if new_index < len(self.custom_edge_list):
+
+                edge_traffic_dict = self.edge_traffic_state.get_edge_traffic_dict()
+                edge_id = self.custom_edge_list[new_index]
+                edge_lane_dict = self.edge_traffic_state.get_edge_lane_dict()
+                lanes = edge_lane_dict[edge_id]
+                traffic_id_lane_dict = self.edge_traffic_state.get_traffic_id_lane_dict()
+
+                lane_found = False
+                green_wave_id = -1
+                found_index = -1
+
+                for lane in lanes:
+
+                    for traffic_light_id in traffic_id_lane_dict:
+
+                        traffic_lanes = traffic_id_lane_dict[traffic_light_id]
+                        j = 0
+
+                        for traffic_lane in traffic_lanes:
+
+                            if lane == traffic_lane:
+                                lane_found = True
+                                found_index = j
+                                green_wave_id = traffic_light_id
+                                break
+
+                            j = j + 1
+
+                        if lane_found:
+                            break
+
+                    if lane_found:
+                        break
+
+                if lane_found:
+                    edge_traffic_dict[edge_id] = green_wave_id
+                    curr_state = traci.trafficlight.getRedYellowGreenState(green_wave_id)
+                    state_length = len(curr_state)
+
+                    new_state = ""
+                    for j in range(0, state_length):
+                        if j == found_index:
+                            new_state = new_state + 'G'
+                        else:
+                            new_state = new_state + 'R'
+
+                    traci.trafficlight.setRedYellowGreenState(green_wave_id, new_state)
+                else:
+                    edge_traffic_dict[edge_id] = -1
+
+        self.lock.release()
+
+    def setTrafficLightsToGreen(self, traffic_light_id):
+        """
+
+        :param traffic_light_id: The traffic light id to be set to green
+        :return: nothing
+        """
+        trafficState = traci.trafficlight.getRedYellowGreenState(traffic_light_id)
 
     def run(self):
         """
@@ -298,5 +498,5 @@ class Sumo(threading.Thread):
         :return:
         """
         logging.debug("Request to stop simulation")
-        traci.close(False) # important
+        traci.close(False)  # important
         return "Sumo stopped"

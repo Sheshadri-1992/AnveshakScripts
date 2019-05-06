@@ -28,6 +28,7 @@ class ConsumerThread(threading.Thread):
         self.edge_list = []
         self.sumo_obj = None
 
+        # mandatory file loads
         logging.debug("Loading the low_ways json ")
         with open("./InputFiles/osm_sumo.json") as json_file:
             osm_sumo = json.load(json_file)
@@ -39,6 +40,7 @@ class ConsumerThread(threading.Thread):
             sumo_osm = json.load(json_file)
         self.lane_edge_dict = sumo_osm
 
+        # threads
         self.large_thread = LargeProducer(self.edge_lane_dict, name='large-producer')
         self.medium_thread = MediumProducer(self.edge_lane_dict, name="medium-producer")
 
@@ -54,6 +56,9 @@ class ConsumerThread(threading.Thread):
         self.register_dict = {}
         self.medium_edges_dict = {}
         self.large_edges_dict = {}
+
+        # vehicle id for new additions
+        self.vehicle_id = 50000
 
         logging.debug("Started all the producers...")
 
@@ -101,14 +106,17 @@ class ConsumerThread(threading.Thread):
         logging.debug(
             "The parameters received are " + str(ambulance_id) + str(position_topic) + str(source) + str(dest))
 
-        # A new vehicle is added
-        self.sumo_obj.add_new_vehicle(str(50000), "25000", [], source, dest)  # ambulance id and list of edges
+        # add new vehicle
+        self.sumo_obj.add_new_vehicle(str(self.vehicle_id), "25000", [], source, dest)  # ambulance id and list of edges
+
+        # topic is set for the ambulance
         self.ambulance_topic = position_topic
         self.register_dict[self.ambulance_topic] = True
-        self.sumo_obj.set_ambulance_id(str(50000))
-        speed = self.sumo_obj.get_vehicle_speed(str(50000))
-        self.sumo_obj.set_vehicle_speed(str(50000), 28.0)  # Setting the vehicle speed here
-        logging.debug("Previous speed was " + str(speed) + " the current speed set is 28m/s")
+        self.sumo_obj.set_ambulance_id(str(self.vehicle_id))
+
+        # Set a high speed for ambulance
+        speed = self.sumo_obj.get_vehicle_speed(str(self.vehicle_id))
+        self.sumo_obj.set_vehicle_speed(str(self.vehicle_id), 28.0)  # Setting the vehicle speed here
 
         # this is for the focus path
         self.path_topic = path_topic
@@ -118,8 +126,8 @@ class ConsumerThread(threading.Thread):
         self.path_traffic_topic = path_traffic_topic
         self.register_dict[self.path_traffic_topic] = True
 
-        # a call to compute shortest path, I will get ambulance id and a list of edges as route
-        # it takes source and destination node id
+        # increment vehicle id
+        self.vehicle_id = self.vehicle_id + 1
 
     def update_edge_list(self, edge_list):
         """
@@ -330,9 +338,13 @@ class ConsumerThread(threading.Thread):
                 mqtt_object.send_vertex_message(json.dumps(vehicle_stat_dict), self.ambulance_topic)
 
             if self.path_topic != "" and self.path_topic in self.register_dict:
-                logging.debug("path topic set..sending message")
-                locations_dict = self.sumo_obj.get_custom_locations()
-                mqtt_object.send_path_topic_message(json.dumps(locations_dict), self.path_topic)
+                if self.register_dict[self.path_topic]:
+                    logging.debug("path topic set..sending message..only once")
+                    locations_dict = self.sumo_obj.get_custom_locations()
+                    mqtt_object.send_path_topic_message(json.dumps(locations_dict), self.path_topic)
+                    # this is important to send it only once
+                    # need to set it to True again when there is a custom edge list which gets updated
+                    self.register_dict[self.path_topic] = False
 
             if self.path_traffic_topic != "" and self.path_traffic_topic in self.register_dict:
                 logging.debug("path traffic topic set.. sending message")
