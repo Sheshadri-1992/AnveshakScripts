@@ -210,7 +210,7 @@ class Sumo(threading.Thread):
             completed_edges = 0
             for i in range(0, num_traffic_signals):
 
-                if i >= 4:
+                if i >= 1:  # turn only one camera green
                     break
 
                 traffic_signal_id = traffic_id_list[i]
@@ -363,6 +363,162 @@ class Sumo(threading.Thread):
         traci.vehicle.setLaneChangeMode(vehicle_id, 2218)  # 2218 is rouge mode
         self.lock.release()
 
+    def reset_traffic_lights(self, end_index):
+        """
+
+        :param end_index:
+        :return:
+        """
+        print("Start index 0, end index ", end_index)
+
+        if end_index == -1:
+            logging.debug("Nothing to reset")
+            return
+
+        candidate_edge_list = self.custom_edge_list[0:end_index]
+        if len(candidate_edge_list) == 0:
+            logging.debug("nothing to re-set")
+
+        traffic_id_index_dict = self.edge_traffic_state.get_traffic_id_index_dict()
+        traffic_phase_dict = self.edge_traffic_state.get_traffic_phase_dict()
+
+        for edge_id in candidate_edge_list:
+
+            lane_list = []
+            self.lock.acquire()
+            lane_count = traci.edge.getLaneNumber(edge_id)
+            self.lock.release()
+
+            for i in range(0, lane_count):
+                lane_id = edge_id + "_" + str(i)
+                lane_list.append(lane_id)
+
+            traffic_id_lane_dict = self.edge_traffic_state.get_traffic_id_lane_dict()
+            for traffic_signal_id in traffic_id_lane_dict:
+
+                traffic_lanes = traffic_id_lane_dict[traffic_signal_id]
+                found = False
+                for traffic_lane in traffic_lanes:
+
+                    for lane in lane_list:
+
+                        if lane == traffic_lane:
+                            found = True
+                            print("edge found")
+                            break
+
+                    if found:
+                        break
+
+                if found:
+                    self.lock.acquire()
+                    old_phase = traffic_phase_dict[traffic_signal_id]
+                    traci.trafficlight.setPhase(traffic_signal_id, old_phase)
+                    new_phase = traci.trafficlight.getPhase(traffic_signal_id)
+                    print("the old phase ", old_phase, " new phase is ", new_phase)
+                    self.lock.release()
+
+    def set_traffic_lights(self, start_index, end_index):
+        """
+
+        :param start_index: current edge id index
+        :param end_index: the edge id upto which traffic lights should be turned on
+        :return:
+        """
+
+        print("Start index ", start_index, " end index ", end_index)
+
+        if end_index >= len(self.custom_edge_list):
+            logging.debug("The end index is more than the edges")
+            end_index = len(self.custom_edge_list) - 1
+
+        candidate_edge_list = self.custom_edge_list[start_index:end_index]
+
+        if len(candidate_edge_list) == 0:
+            logging.debug("nothing to set")
+
+        traffic_id_index_dict = self.edge_traffic_state.get_traffic_id_index_dict()
+
+        for edge_id in candidate_edge_list:
+
+            lane_list = []
+            self.lock.acquire()
+            lane_count = traci.edge.getLaneNumber(edge_id)
+            self.lock.release()
+
+            for i in range(0, lane_count):
+                lane_id = edge_id + "_" + str(i)
+                lane_list.append(lane_id)
+
+            traffic_id_lane_dict = self.edge_traffic_state.get_traffic_id_lane_dict()
+            for traffic_signal_id in traffic_id_lane_dict:
+
+                traffic_lanes = traffic_id_lane_dict[traffic_signal_id]
+                found = False
+                for traffic_lane in traffic_lanes:
+
+                    for lane in lane_list:
+
+                        if lane == traffic_lane:
+                            found = True
+                            print("edge found")
+                            break
+
+                    if found:
+                        break
+
+                if found:
+                    self.lock.acquire()
+                    curr_state = traci.trafficlight.getRedYellowGreenState(traffic_signal_id)
+                    state_length = len(curr_state)
+                    lane_index = traffic_id_index_dict[traffic_signal_id]  # this is the dictionary
+                    print("lane index for ", traffic_signal_id, " is ", lane_index)
+
+                    new_state = ""
+                    for j in range(0, state_length):
+                        if j == int(lane_index):
+                            new_state = new_state + 'G'
+                        else:
+                            new_state = new_state + 'r'
+
+                    traci.trafficlight.setRedYellowGreenState(traffic_signal_id, new_state)
+                    new_state = traci.trafficlight.getRedYellowGreenState(traffic_signal_id)
+                    logging.debug("Prev state " + str(curr_state) + " set state " + str(new_state))
+                    self.lock.release()
+
+    def set_reset_traffic_lights(self):
+        """
+
+        :return:
+        """
+
+        try:
+            self.lock.acquire()
+            logging.debug("The vehicle id is " + self.ambulance_id)
+            edge_id = traci.vehicle.getRoadID(self.ambulance_id)
+            logging.debug("The edge id is " + str(edge_id))
+            self.lock.release()
+
+            edge_index = -1
+            count = 0
+            for custom_edge_id in self.custom_edge_list:
+
+                if custom_edge_id == edge_id:
+                    edge_index = count
+                    break
+                count = count + 1
+
+            if edge_index == -1:
+                print("Edge " + str(edge_id) + " not found in custom edge list ", self.custom_edge_list)
+                return
+
+            self.set_traffic_lights(edge_index, edge_index+4)
+            self.reset_traffic_lights(edge_index-1)
+
+        except Exception as e:
+
+            print("The exception is ", e)
+
     def check_if_vehicle_position_changed(self):
         """
 
@@ -483,7 +639,7 @@ class Sumo(threading.Thread):
                 time.sleep(1)
         except Exception as e:
 
-            logging.debug("Exception in start simulation method "+e)
+            logging.debug("Exception in start simulation method " + e)
 
     def stop(self):
         """
