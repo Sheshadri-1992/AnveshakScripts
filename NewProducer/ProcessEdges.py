@@ -83,7 +83,6 @@ class ProducerConsumer:
 
             self.consumer_thread.ambulance_topic_and_produce("newid", position_topic, path_topic, path_traffic_topic,
                                                              ambulance, hospital)
-            # message = self.sumo_obj.add_new_vehicle(50000, [])  # the second argument is a list of short edges
 
         except Exception as e:
             logging.debug("The exception message is " + str(e))

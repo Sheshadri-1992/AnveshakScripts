@@ -318,6 +318,7 @@ class Sumo(threading.Thread):
             edge_lane_dict[edge_id] = lane_list
             self.lock.release()
 
+        # structures which will be referred to later
         self.edge_traffic_state.set_traffic_id_list(traffic_light_list)
         self.edge_traffic_state.set_traffic_phase_dict(traffic_id_phase_dict)
         self.edge_traffic_state.set_traffic_id_lane_dict(traffic_id_lanes_dict)
@@ -503,7 +504,9 @@ class Sumo(threading.Thread):
             self.lock.acquire()
             logging.debug("The vehicle id is " + self.ambulance_id)
             edge_id = traci.vehicle.getRoadID(self.ambulance_id)
+            traffic_id_seq = traci.vehicle.getNextTLS(self.ambulance_id)
             logging.debug("The edge/road id is " + str(edge_id))
+            print("The traffic light sequence is ",traffic_id_seq)
             self.lock.release()
 
             edge_index = -1
@@ -516,7 +519,7 @@ class Sumo(threading.Thread):
                 count = count + 1
 
             if edge_index == -1:
-                print("Edge " + str(edge_id) + " not found in custom edge list ", self.custom_edge_list)
+                print("Edge " + str(edge_id) + " not found in custom edge list ")
                 return
 
             self.set_traffic_lights(edge_index, edge_index + 4)
@@ -616,14 +619,6 @@ class Sumo(threading.Thread):
         except Exception as e:
 
             print("Exception at change position ", e)
-
-    def setTrafficLightsToGreen(self, traffic_light_id):
-        """
-
-        :param traffic_light_id: The traffic light id to be set to green
-        :return: nothing
-        """
-        trafficState = traci.trafficlight.getRedYellowGreenState(traffic_light_id)
 
     def run(self):
         """

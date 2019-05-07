@@ -64,6 +64,8 @@ class ConsumerThread(threading.Thread):
 
         # vehicle id for new additions
         self.vehicle_id = 50000
+        # route id for new routes
+        self.route_id = 60000
 
         logging.debug("Started all the producers...")
 
@@ -112,7 +114,8 @@ class ConsumerThread(threading.Thread):
             "The parameters received are " + str(ambulance_id) + str(position_topic) + str(source) + str(dest))
 
         # add new vehicle
-        self.sumo_obj.add_new_vehicle(str(self.vehicle_id), "25000", [], source, dest)  # ambulance id and list of edges
+        self.sumo_obj.add_new_vehicle(str(self.vehicle_id), str(self.route_id), [], source,
+                                      dest)  # ambulance id and list of edges
 
         # topic is set for the ambulance
         self.ambulance_topic = position_topic
@@ -133,6 +136,7 @@ class ConsumerThread(threading.Thread):
 
         # increment vehicle id
         self.vehicle_id = self.vehicle_id + 1
+        self.route_id = self.route_id + 1
 
     def update_edge_list(self, edge_list):
         """
@@ -197,9 +201,9 @@ class ConsumerThread(threading.Thread):
             num_vehicles = edge_traffic_dict[edge]
             total_distance = self.edge_dist_dict[edge]
 
-            vehicles_per_meter = float(num_vehicles*1.0) / float(total_distance*1.0)
-            cat_1 = vehicles_per_meter/3.0
-            cat_2 = (2.0*vehicles_per_meter)/3.0
+            vehicles_per_meter = float(num_vehicles * 1.0) / float(total_distance * 1.0)
+            cat_1 = vehicles_per_meter / 3.0
+            cat_2 = (2.0 * vehicles_per_meter) / 3.0
 
             # color bucket logic
             if vehicles_per_meter <= cat_1:
