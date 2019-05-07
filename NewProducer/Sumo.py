@@ -80,6 +80,13 @@ class Sumo(threading.Thread):
         logging.debug("Got the ambulance id " + vehicle_id)
         self.ambulance_id = vehicle_id
 
+    def get_ambulance_id(self):
+        """
+
+        :return: the ambulance id
+        """
+        return self.ambulance_id
+
     def get_vehicle_stats(self):
         """
         Make a traci call and return the ambulance speed and position
@@ -121,41 +128,18 @@ class Sumo(threading.Thread):
 
         return ambulance_dict
 
-    def get_traffic_lights(self):
+    def get_traffic_lights_for_vehicle(self, vehicle_id):
         """
-
-        :return:
+        Returns all the traffic signals in the route
+        :return: Returns all the traffic signals in the route
         """
+        all_traffic_routes = traci.vehicle.getNextTLS(vehicle_id)
+        traffic_id_list = []
 
-        # obtain all traffic lights' ids
-        self.lock.acquire()
-        traffic_lights_list = traci.trafficlight.getIDList()
-        traffic_lights_count = traci.trafficlight.getIDCount()
-        self.lock.release()
+        for item in all_traffic_routes:
+            traffic_id_list.append(str(item[0]))
 
-        # for tl in traffic_lights_list:
-        tl = "343594553"
-        # obtain the lanes which are controlled by a particular traffic ID
-        self.lock.acquire()
-        list_lanes = traci.trafficlight.getControlledLanes(tl)
-        color = traci.trafficlight.getRedYellowGreenState(tl)
-        phase = traci.trafficlight.getPhase(tl)
-        phase_duration = traci.trafficlight.getPhaseDuration(tl)
-        phase_name = traci.trafficlight.getPhaseName(tl)
-        next_switch = traci.trafficlight.getNextSwitch(tl)
-        self.lock.release()
-
-        print("The lanes which are controlled by traffic light ", tl, " are ", list_lanes)
-        logging.debug("The light color is " + str(color) + " the next switch is " + str(next_switch))
-        logging.debug("The phase is " + str(phase) + " the phase name is " + str(
-            phase_name) + " the phase duration is " + str(phase_duration))
-
-        print("Before setting traffic light ", color)
-        traci.trafficlight.setRedYellowGreenState(tl, 'GgGg')
-        color = traci.trafficlight.getRedYellowGreenState(tl)
-        print("After setting traffic light ", color)
-
-        print("The counts are ", traffic_lights_count, " the actual count ", len(traffic_lights_list))
+        return traffic_id_list
 
     def return_traffic_density(self, arg_edge_list):
         """
@@ -506,7 +490,7 @@ class Sumo(threading.Thread):
             edge_id = traci.vehicle.getRoadID(self.ambulance_id)
             traffic_id_seq = traci.vehicle.getNextTLS(self.ambulance_id)
             logging.debug("The edge/road id is " + str(edge_id))
-            print("The traffic light sequence is ",traffic_id_seq)
+            print("The traffic light sequence is ", traffic_id_seq)
             self.lock.release()
 
             edge_index = -1

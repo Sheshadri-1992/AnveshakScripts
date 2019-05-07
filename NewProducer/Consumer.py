@@ -5,12 +5,9 @@ import logging
 import threading
 import time
 from datetime import datetime
-from random import randint
 from MqttPublish import MqttPublish
 from Producer import LargeProducer, MediumProducer, SmallProducer
 from Query import QueryStruct
-
-from Sumo import Sumo
 
 MAX_BATCH = 1500
 
@@ -44,6 +41,10 @@ class ConsumerThread(threading.Thread):
         logging.debug("Loading the Edge distance json ")
         with open("./InputFiles/sumo_distance.json") as json_file:
             self.edge_dist_dict = json.load(json_file)
+
+        logging.debug("Loading the Node lat long json")
+        with open("./InputFiles/nodes_lat_lon_coord.json") as json_file:
+            self.edge_lat_long_dict = json.load(json_file)
 
         # threads
         self.large_thread = LargeProducer(self.edge_lane_dict, name='large-producer')
@@ -308,6 +309,37 @@ class ConsumerThread(threading.Thread):
         except Exception as e:
             print("The exception is ", e)
 
+    def get_traffic_id_lat_long_list(self, traffic_signal_list):
+        """
+
+        :param traffic_signal_list: the list of traffic light id
+        :return: a list of tuple where each tuple is a lat long entry
+        """
+
+        traffic_id_lat_long_list = []
+
+        for traffic_signal_id in traffic_signal_list:
+            lat_long = self.edge_lat_long_dict[traffic_signal_id]  # new one
+            lat = lat_long[0]
+            lon = lat_long[1]
+            pos_item = (lat, lon)
+            traffic_id_lat_long_list.append(pos_item)
+
+        return traffic_id_lat_long_list
+
+    def get_total_edge_weight(self, edge_list):
+        """
+
+        :param edge_list: the edges whose wait has to be aggregated
+        :return:sum total of distances of all the edges
+        """
+        total = 0
+        for edge in edge_list:
+            total = total + float(self.edge_dist_dict[edge])
+
+        logging.debug("The total weight is " + str(total))
+        return total
+
     def set_resources(self):
         """
         Resets the reset flag
@@ -394,7 +426,15 @@ class ConsumerThread(threading.Thread):
             if self.path_topic != "" and self.path_topic in self.register_dict:
                 if self.register_dict[self.path_topic]:
                     logging.debug("path topic set..sending message..only once")
-                    locations_dict = self.sumo_obj.get_custom_locations()
+                    locations_list = self.sumo_obj.get_custom_locations()
+                    traffic_id_list = self.sumo_obj.get_traffic_lights_for_vehicle(self.sumo_obj.get_ambulance_id())
+                    traffic_id_lat_long_list = self.get_traffic_id_lat_long_list(traffic_id_list)
+
+                    locations_dict = {}
+                    locations_dict['traffic_signals'] = traffic_id_lat_long_list
+                    locations_dict['distance'] = self.get_total_edge_weight(locations_list)
+                    locations_dict['path'] = locations_list
+
                     mqtt_object.send_path_topic_message(json.dumps(locations_dict), self.path_topic)
                     # this is important to send it only once
                     # need to set it to True again when there is a custom edge list which gets updated
