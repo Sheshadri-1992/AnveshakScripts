@@ -145,15 +145,14 @@ def start_ambulance():
 
 
 @app.route('reset', methods=['GET'])
-def stop_sumo():
+def reset():
     """
-    This method will stop the sumo simulation
-    :return:
+    Reset
     """
-    logging.debug("In the stop simulation method")
-
     my_state = current_app.config['state']
-    result = my_state.stop_sumo()
-    return json.dumps({'message': result})
+    ret = my_state.reset_simulation()
+    # my_state.load_json()
+
+    return json.dumps({'message': ret})
 
 # 308453207 3451683332

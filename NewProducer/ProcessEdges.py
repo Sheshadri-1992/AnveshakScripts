@@ -89,12 +89,12 @@ class ProducerConsumer:
 
         return "New vehicle will be added"
 
-    def stop_sumo(self):
+    def reset_simulation(self):
         """
         close the simulation
         :return:
         """
-
+        logging.debug("Stopping simulation")
         self.consumer_thread.stop_producers()
         self.consumer_thread.join()
         logging.debug("Consumer thread is stopped")
