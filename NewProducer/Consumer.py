@@ -263,10 +263,16 @@ class ConsumerThread(threading.Thread):
 
             num_vehicles = edge_traffic_dict[edge]
 
+            total_distance = self.edge_dist_dict[edge]
+
+            vehicles_per_meter = float(num_vehicles * 1.0) / float(total_distance * 1.0)
+            cat_1 = vehicles_per_meter / 3.0
+            cat_2 = (2.0 * vehicles_per_meter) / 3.0
+
             # color bucket logic
-            if num_vehicles < 5:
+            if vehicles_per_meter <= cat_1:
                 edgeid_color_dict[edge] = 0
-            elif 5 < num_vehicles <= 10:
+            elif cat_1 < vehicles_per_meter <= cat_2:
                 edgeid_color_dict[edge] = 1
             else:
                 edgeid_color_dict[edge] = 2

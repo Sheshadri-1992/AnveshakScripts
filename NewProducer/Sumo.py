@@ -35,7 +35,7 @@ class Sumo(threading.Thread):
         super(Sumo, self).__init__()
         logging.debug("Initialised sumo path")
         self.sumo_binary = "/usr/local/bin/sumo"
-        self.sumo_cmd = [self.sumo_binary,"--collision.action", "none","-c", "testconfig.sumocfg"]
+        self.sumo_cmd = [self.sumo_binary, "--collision.action", "none", "-c", "testconfig.sumocfg"]
         self.lock = threading.Lock()
         self.edge_list = []  # not used, remove after review
         self.ambulance_id = "-1"
@@ -199,11 +199,11 @@ class Sumo(threading.Thread):
         :return:
 
         """
-	print("In green wave ")
+        print("In green wave ")
         traffic_id_list = self.edge_traffic_state.get_traffic_id_list()
         traffic_id_index_dict = self.edge_traffic_state.get_traffic_id_index_dict()
         num_traffic_signals = len(traffic_id_list)
-	logging.debug("The number of traffic signals are "+str(num_traffic_signals))
+        logging.debug("The number of traffic signals are " + str(num_traffic_signals))
 
         try:
 
@@ -235,12 +235,12 @@ class Sumo(threading.Thread):
                 completed_edges = completed_edges + 1
 
             completed_edges = completed_edges - 1
-	    print("Processed ",completed_edges," setting ",completed_edges)
+            print("Processed ", completed_edges, " setting ", completed_edges)
             self.edge_traffic_state.set_index(completed_edges)
 
         except Exception as e:
 
-            print("Excpetion in initi green wave "+e)
+            print("Excpetion in initi green wave " + e)
 
     def add_new_vehicle(self, vehicle_id, new_route_id, custom_edge_list, source, dest):
         """
@@ -269,7 +269,7 @@ class Sumo(threading.Thread):
 
         self.edge_traffic_state.set_edge_list(self.custom_edge_list)  # set the edge list
 
-	print("The custom edge locations are ",custom_edge_list)
+        print("The custom edge locations are ", custom_edge_list)
         logging.debug("The first lane " + str(custom_edge_list[0] + "_0"))
 
         self.lock.acquire()
@@ -327,8 +327,8 @@ class Sumo(threading.Thread):
         logging.debug("Added a vehicle successfully")
 
         self.init_green_wave()
-	print("Traffic lanes are ",self.edge_traffic_state.get_traffic_id_list())
-	print("Lanes controlled by traffic lights ",self.edge_traffic_state.get_traffic_id_lane_dict())
+        print("Traffic lanes are ", self.edge_traffic_state.get_traffic_id_list())
+        print("Lanes controlled by traffic lights ", self.edge_traffic_state.get_traffic_id_lane_dict())
 
         return "Added a vehicle successfully"
 
@@ -375,10 +375,10 @@ class Sumo(threading.Thread):
         try:
 
             self.lock.acquire()
-            logging.debug("The vehicle id is "+self.ambulance_id)
+            logging.debug("The vehicle id is " + self.ambulance_id)
             edge_id = traci.vehicle.getRoadID(self.ambulance_id)
             lane_count = traci.edge.getLaneNumber(edge_id)
-	    logging.debug("The edge id is "+str(edge_id))
+            logging.debug("The edge id is " + str(edge_id))
             self.lock.release()
 
             lane_list = []
@@ -389,67 +389,67 @@ class Sumo(threading.Thread):
             current_set_index = self.edge_traffic_state.get_index()
             check_index = current_set_index - 2
 
-	    if check_index > 0:
+            if check_index > 0:
 
-		    logging.debug("Current index "+str(current_set_index)+" checking index "+str(check_index))
+                logging.debug("Current index " + str(current_set_index) + " checking index " + str(check_index))
 
-		    traffic_id_list = self.edge_traffic_state.get_traffic_id_list()
-		    traffic_signal_id = traffic_id_list[check_index]
+                traffic_id_list = self.edge_traffic_state.get_traffic_id_list()
+                traffic_signal_id = traffic_id_list[check_index]
 
-		    traffic_lane_dict = self.edge_traffic_state.get_traffic_id_lane_dict()
-		    traffic_lane_list = traffic_lane_dict[traffic_signal_id]
+                traffic_lane_dict = self.edge_traffic_state.get_traffic_id_lane_dict()
+                traffic_lane_list = traffic_lane_dict[traffic_signal_id]
 
-		    traffic_index_dict = self.edge_traffic_state.get_traffic_id_index_dict()
+                traffic_index_dict = self.edge_traffic_state.get_traffic_id_index_dict()
 
-		    change_needed = False
-		    for traffic_lane in traffic_lane_list:
+                change_needed = False
+                for traffic_lane in traffic_lane_list:
 
-			for lane in lane_list:
+                    for lane in lane_list:
 
-			    print("The lane is ",lane," the traffic lane is ",traffic_lane)
+                        print("The lane is ", lane, " the traffic lane is ", traffic_lane)
 
-			    if lane == traffic_lane:
-				logging.debug("Matching so old id Need to be reset..")
-				change_needed = True
-				break
+                        if lane == traffic_lane:
+                            logging.debug("Matching so old id Need to be reset..")
+                            change_needed = True
+                            break
 
-			if change_needed:
-			    break
+                    if change_needed:
+                        break
 
-		    traffic_phase_dict = self.edge_traffic_state.get_traffic_phase_dict()
-		    old_traffic_id = traffic_id_list[check_index-1]
-		    old_phase = traffic_phase_dict[old_traffic_id]
+                traffic_phase_dict = self.edge_traffic_state.get_traffic_phase_dict()
+                old_traffic_id = traffic_id_list[check_index - 1]
+                old_phase = traffic_phase_dict[old_traffic_id]
 
-		    if change_needed:
-			self.lock.acquire()
-			traci.trafficlight.setPhase(old_traffic_id, old_phase)
-			print("Phase is set")
-			self.lock.release()
+                if change_needed:
+                    self.lock.acquire()
+                    traci.trafficlight.setPhase(old_traffic_id, old_phase)
+                    print("Phase is set")
+                    self.lock.release()
 
-			new_index = self.edge_traffic_state.get_index() + 1
-			print("New index is ",new_index)
-			if new_index < len(traffic_id_list):
-			    new_traffic_signal_id = traffic_id_list[new_index]
-			    lane_index = traffic_index_dict[new_traffic_signal_id]
+                    new_index = self.edge_traffic_state.get_index() + 1
+                    print("New index is ", new_index)
+                    if new_index < len(traffic_id_list):
+                        new_traffic_signal_id = traffic_id_list[new_index]
+                        lane_index = traffic_index_dict[new_traffic_signal_id]
 
-			    self.lock.acquire()
-			    curr_state = traci.trafficlight.getRedYellowGreenState(new_traffic_signal_id)
-			    state_length = len(curr_state)
+                        self.lock.acquire()
+                        curr_state = traci.trafficlight.getRedYellowGreenState(new_traffic_signal_id)
+                        state_length = len(curr_state)
 
-			    new_state = ""
-			    for j in range(0, state_length):
-				if j == int(lane_index):
-				    new_state = new_state + 'G'
-				else:
-				    new_state = new_state + 'r'
+                        new_state = ""
+                        for j in range(0, state_length):
+                            if j == int(lane_index):
+                                new_state = new_state + 'G'
+                            else:
+                                new_state = new_state + 'r'
 
-			    traci.trafficlight.setRedYellowGreenState(traffic_signal_id, new_state)
-			    new_state = traci.trafficlight.getRedYellowGreenState(new_traffic_signal_id)
-			    logging.debug("Prev state " + str(curr_state) + " set state " + str(new_state))
+                        traci.trafficlight.setRedYellowGreenState(traffic_signal_id, new_state)
+                        new_state = traci.trafficlight.getRedYellowGreenState(new_traffic_signal_id)
+                        logging.debug("Prev state " + str(curr_state) + " set state " + str(new_state))
 
-			    self.edge_traffic_state.set_index(new_index)
+                        self.edge_traffic_state.set_index(new_index)
 
-			    self.lock.release()
+                        self.lock.release()
 
         except Exception as e:
 
@@ -483,9 +483,9 @@ class Sumo(threading.Thread):
 
                 # if step > 20000:
                 time.sleep(1)
-        except:
+        except Exception as e:
 
-            logging.debug("Exception in start simulation method")
+            logging.debug("Exception in start simulation method "+e)
 
     def stop(self):
         """
