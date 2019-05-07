@@ -202,20 +202,26 @@ class ConsumerThread(threading.Thread):
 
         for edge in edge_traffic_dict:
 
-            num_vehicles = edge_traffic_dict[edge]
-            total_distance = self.edge_dist_dict[edge]
+            try:
 
-            vehicles_per_meter = float(num_vehicles * 1.0) / float(total_distance * 1.0)
-            cat_1 = vehicles_per_meter / 3.0
-            cat_2 = (2.0 * vehicles_per_meter) / 3.0
+                num_vehicles = edge_traffic_dict[edge]
+                total_distance = self.edge_dist_dict[edge]
 
-            # color bucket logic
-            if vehicles_per_meter <= cat_1:
+                vehicles_per_meter = float(num_vehicles * 1.0) / float(total_distance * 1.0)
+                cat_1 = vehicles_per_meter / 3.0
+                cat_2 = (2.0 * vehicles_per_meter) / 3.0
+
+                # color bucket logic
+                if vehicles_per_meter <= cat_1:
+                    edgeid_color_dict[edge] = 0
+                elif cat_1 < vehicles_per_meter <= cat_2:
+                    edgeid_color_dict[edge] = 1
+                else:
+                    edgeid_color_dict[edge] = 2
+
+            except Exception as e:
+                print("Exception in get color ", e, " the edge is ",edge)
                 edgeid_color_dict[edge] = 0
-            elif cat_1 < vehicles_per_meter <= cat_2:
-                edgeid_color_dict[edge] = 1
-            else:
-                edgeid_color_dict[edge] = 2
 
         local_dict = {}
         if producer_type == 0:
@@ -269,21 +275,27 @@ class ConsumerThread(threading.Thread):
 
         for edge in edge_traffic_dict:
 
-            num_vehicles = edge_traffic_dict[edge]
+            try:
 
-            total_distance = self.edge_dist_dict[edge]
+                num_vehicles = edge_traffic_dict[edge]
 
-            vehicles_per_meter = float(num_vehicles * 1.0) / float(total_distance * 1.0)
-            cat_1 = vehicles_per_meter / 3.0
-            cat_2 = (2.0 * vehicles_per_meter) / 3.0
+                total_distance = self.edge_dist_dict[edge]
 
-            # color bucket logic
-            if vehicles_per_meter <= cat_1:
+                vehicles_per_meter = float(num_vehicles * 1.0) / float(total_distance * 1.0)
+                cat_1 = vehicles_per_meter / 3.0
+                cat_2 = (2.0 * vehicles_per_meter) / 3.0
+
+                # color bucket logic
+                if vehicles_per_meter <= cat_1:
+                    edgeid_color_dict[edge] = 0
+                elif cat_1 < vehicles_per_meter <= cat_2:
+                    edgeid_color_dict[edge] = 1
+                else:
+                    edgeid_color_dict[edge] = 2
+
+            except Exception as e:
+                print("Exception in get color ", e, " the edge is ",edge)
                 edgeid_color_dict[edge] = 0
-            elif cat_1 < vehicles_per_meter <= cat_2:
-                edgeid_color_dict[edge] = 1
-            else:
-                edgeid_color_dict[edge] = 2
 
         return edgeid_color_dict
 
