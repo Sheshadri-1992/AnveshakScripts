@@ -492,6 +492,9 @@ class Sumo(threading.Thread):
         :return:
         """
         logging.debug("In set reset traffic lights ")
+        if self.ambulance_id == "-1":
+            return
+        
         try:
             self.lock.acquire()
             logging.debug("The vehicle id is " + self.ambulance_id)
