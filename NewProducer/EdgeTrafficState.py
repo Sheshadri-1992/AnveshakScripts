@@ -8,13 +8,44 @@ class EdgeStateInfo:
 
     def __init__(self):
         self.edge_list = []
+        self.traffic_id_list = []
         self.traffic_phase_dict = {}  # store the previous edge phase
         self.traffic_id_lane_dict = {}  # traffic id to lanes
+        self.traffic_id_index_dict = {}
         self.edge_lane_dict = {} # edge to number of lanes
         self.edge_traffic_dict = {} # edge to traffic light id
         self.set_list = []  # This is to set the traffic lights to green
         self.reset_list = []  # This is to reset the traffic lights to green
         self.index = 0
+
+    def set_traffic_id_list(self, traffic_id_list):
+        """
+
+        :param traffic_id_list:
+        :return:
+        """
+        self.traffic_id_list = traffic_id_list
+
+    def get_traffic_id_list(self):
+        """
+
+        :return:
+        """
+        return self.traffic_id_list
+
+    def set_traffic_id_index_dict(self, traffic_id_index_dict):
+        """
+
+        :return:
+        """
+        self.traffic_id_index_dict = traffic_id_index_dict
+
+    def get_traffic_id_index_dict(self):
+        """
+
+        :return:
+        """
+        return self.traffic_id_index_dict
 
     def set_edge_traffic_dict(self, edge_traffic_dict):
         """

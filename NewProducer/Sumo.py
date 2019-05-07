@@ -197,75 +197,47 @@ class Sumo(threading.Thread):
         """
         Starts by turning at least 4 signals green
         :return:
+
         """
-        edge_list = self.edge_traffic_state.edge_list
-        edge_lane_dict = self.edge_traffic_state.get_edge_lane_dict()
-        traffic_id_lane_dict = self.edge_traffic_state.get_traffic_id_lane_dict()
-        green_id_list = []
-        edge_lane_index = []
-        edge_traffic_dict = {}
-        num_edges = len(edge_list)
+        traffic_id_list = self.edge_traffic_state.get_traffic_id_list()
+        traffic_id_index_dict = self.edge_traffic_state.get_traffic_id_index_dict()
+        num_traffic_signals = len(traffic_id_list)
 
-        completed_edges = 0
-        for i in range(0, num_edges):  # number of edges
+        try:
 
-            if i > 4:
-                break
+            completed_edges = 0
+            for i in range(0, num_traffic_signals):
 
-            traffic_light_found = False
-            traffic_id_found = ""
+                if i > 4:
+                    break
 
-            edge_id = edge_list[i]
-            edge_lanes = edge_lane_dict[edge_id]
+                traffic_signal_id = traffic_id_list[i]
+                lane_index = traffic_id_index_dict[traffic_signal_id]
 
-            for lane in edge_lanes:
-
-                for traffic_id in traffic_id_lane_dict:
-
-                    traffic_lanes = traffic_id_lane_dict[traffic_id]
-
-                    j = 0
-                    for traffic_lane in traffic_lanes:
-
-                        if lane == traffic_lane:
-                            traffic_light_found = True
-                            traffic_id_found = traffic_id
-                            edge_lane_index.append(j)
-                            break
-
-                        j = j + 1
-
-                    if traffic_light_found:
-                        break
-
-            if traffic_light_found:
-                green_id_list.append(traffic_id_found)
-                edge_traffic_dict[edge_id] = traffic_id_found
-                break
-            else:
-                edge_traffic_dict[edge_id] = -1
-
-            completed_edges = completed_edges + 1
-
-        if len(green_id_list) != 0:
-
-            for i in range(0, len(green_id_list)):
                 self.lock.acquire()
-                curr_state = traci.trafficlight.getRedYellowGreenState(green_id_list[i])
+                curr_state = traci.trafficlight.getRedYellowGreenState(traffic_signal_id)
                 state_length = len(curr_state)
 
                 new_state = ""
                 for j in range(0, state_length):
-                    if j == edge_lane_index[i]:
+                    if j == int(lane_index):
                         new_state = new_state + 'G'
                     else:
                         new_state = new_state + 'r'
 
-                traci.trafficlight.setRedYellowGreenState(green_id_list[i], new_state)
-                self.lock.release()
+                traci.trafficlight.setRedYellowGreenState(traffic_signal_id, new_state)
+                new_state = traci.trafficlight.getRedYellowGreenState(traffic_signal_id)
+                logging.debug("Prev state " + str(curr_state) + " set state " + str(new_state))
 
-        self.edge_traffic_state.set_edge_traffic_dict(edge_traffic_dict)
-        self.edge_traffic_state.set_index(completed_edges)
+                self.lock.release()
+                completed_edges = completed_edges + 1
+
+            completed_edges = completed_edges - 1
+            self.edge_traffic_state.set_index(completed_edges)
+
+        except Exception as e:
+
+            print("Excpetion in initi green wave "+e)
 
     def add_new_vehicle(self, vehicle_id, new_route_id, custom_edge_list, source, dest):
         """
@@ -308,9 +280,11 @@ class Sumo(threading.Thread):
         self.lock.release()
 
         # all the upcoming traffic lights for the given vehicle
+        traffic_id_index_dict = {}
         traffic_light_list = []
         for item in traffic_light_sequence:
             traffic_light_id = item[0]
+            traffic_id_index_dict[item[0]] = item[1]  # this is the lane index
             traffic_light_list.append(traffic_light_id)
 
         traffic_id_phase_dict = {}
@@ -340,9 +314,11 @@ class Sumo(threading.Thread):
             edge_lane_dict[edge_id] = lane_list
             self.lock.release()
 
+        self.edge_traffic_state.set_traffic_id_list(traffic_light_list)
         self.edge_traffic_state.set_traffic_phase_dict(traffic_id_phase_dict)
         self.edge_traffic_state.set_traffic_id_lane_dict(traffic_id_lanes_dict)
-        self.edge_traffic_state.set_traffic_id_lane_dict(edge_lane_dict)
+        self.edge_traffic_state.set_edge_lane_dict(edge_lane_dict)
+        self.edge_traffic_state.set_traffic_id_index_dict(traffic_id_index_dict)
 
         logging.debug("Added a vehicle successfully")
 
@@ -390,81 +366,79 @@ class Sumo(threading.Thread):
         if self.ambulance_id == "-1":
             return
 
-        self.lock.acquire()
-        edge_id = traci.vehicle.getRoadID(self.ambulance_id)
-        edge_index = self.custom_edge_list.index(edge_id)
-        current_set_index = self.edge_traffic_state.get_index()
+        try:
 
-        if edge_index == (current_set_index - 4):
-            logging.debug("position hasn't changed yet")
-        else:
-            logging.debug("position has changed")
-            unset_index = edge_index - 1
-            edge_traffic_id_dict = self.edge_traffic_state.get_edge_traffic_dict()
-            traffic_id = edge_traffic_id_dict[self.custom_edge_list[unset_index]]
-            traffic_phase_dict = self.edge_traffic_state.get_traffic_phase_dict()
+            self.lock.acquire()
+            logging.debug("The vehicle id is "+self.ambulance_id)
+            edge_id = traci.vehicle.getRoadID(self.ambulance_id)
+            lane_count = traci.edge.getLaneNumber(edge_id)
+            self.lock.release()
 
-            if traffic_id != -1:
-                logging.debug("Un-setting edge id")
-                phase = traffic_phase_dict[traffic_id]
-                traci.trafficlight.setPhase(traffic_id, phase)
+            lane_list = []
+            for i in range(0, lane_count):
+                lane_id = edge_id + "_" + str(i)
+                lane_list.append(lane_id)
 
-            new_index = current_set_index + 1
-            if new_index < len(self.custom_edge_list):
+            current_set_index = self.edge_traffic_state.get_index()
+            check_index = current_set_index - 3
+            logging.debug("Current index "+current_set_index+" checking index "+str(check_index))
 
-                edge_id = self.custom_edge_list[new_index]
-                edge_lane_dict = self.edge_traffic_state.get_edge_lane_dict()
-                lanes = edge_lane_dict[edge_id]
-                traffic_id_lane_dict = self.edge_traffic_state.get_traffic_id_lane_dict()
+            traffic_id_list = self.edge_traffic_state.get_traffic_id_list()
+            traffic_signal_id = traffic_id_list[check_index]
 
-                lane_found = False
-                green_wave_id = -1
-                found_index = -1
+            traffic_lane_dict = self.edge_traffic_state.get_traffic_id_lane_dict()
+            traffic_lane_list = traffic_lane_dict[traffic_signal_id]
 
-                for lane in lanes:
+            traffic_index_dict = self.edge_traffic_state.get_traffic_id_index_dict()
 
-                    for traffic_light_id in traffic_id_lane_dict:
+            change_needed = False
+            for traffic_lane in traffic_lane_list:
 
-                        traffic_lanes = traffic_id_lane_dict[traffic_light_id]
-                        j = 0
+                for lane in lane_list:
 
-                        for traffic_lane in traffic_lanes:
-
-                            if lane == traffic_lane:
-                                lane_found = True
-                                found_index = j
-                                green_wave_id = traffic_light_id
-                                break
-
-                            j = j + 1
-
-                        if lane_found:
-                            break
-
-                    if lane_found:
+                    if lane == traffic_lane:
+                        logging.debug("Need to be reset..")
+                        change_needed = True
                         break
 
-                if lane_found:
-                    edge_traffic_id_dict[edge_id] = green_wave_id
-                    curr_state = traci.trafficlight.getRedYellowGreenState(green_wave_id)
+                if change_needed:
+                    break
+
+            traffic_phase_dict = self.edge_traffic_state.get_traffic_phase_dict()
+            old_phase = traffic_phase_dict[traffic_signal_id]
+
+            if change_needed:
+                self.lock.acquire()
+                traci.trafficlight.setPhase(traffic_signal_id, old_phase)
+                self.lock.release()
+
+                new_index = self.edge_traffic_state.get_index() + 1
+                if new_index < len(traffic_id_list):
+                    new_traffic_signal_id = traffic_id_list[new_index]
+                    lane_index = traffic_index_dict[new_traffic_signal_id]
+
+                    self.lock.acquire()
+                    curr_state = traci.trafficlight.getRedYellowGreenState(new_traffic_signal_id)
                     state_length = len(curr_state)
 
                     new_state = ""
                     for j in range(0, state_length):
-                        if j == found_index:
+                        if j == int(lane_index):
                             new_state = new_state + 'G'
                         else:
-                            new_state = new_state + 'R'
+                            new_state = new_state + 'r'
 
-                    logging.debug("Setting state "+str(new_state))
-                    traci.trafficlight.setRedYellowGreenState(green_wave_id, new_state)
-                else:
-                    edge_traffic_id_dict[edge_id] = -1
+                    traci.trafficlight.setRedYellowGreenState(traffic_signal_id, new_state)
+                    new_state = traci.trafficlight.getRedYellowGreenState(new_traffic_signal_id)
+                    logging.debug("Prev state " + str(curr_state) + " set state " + str(new_state))
 
-            self.edge_traffic_state.set_edge_traffic_dict(edge_traffic_id_dict)
-            self.edge_traffic_state.set_index(new_index)
+                    self.edge_traffic_state.set_index(new_index)
 
-        self.lock.release()
+                    self.lock.release()
+
+        except Exception as e:
+
+            print("Exception at change position ", e)
 
     def setTrafficLightsToGreen(self, traffic_light_id):
         """
