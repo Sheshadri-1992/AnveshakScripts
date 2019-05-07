@@ -12,8 +12,8 @@ class EdgeStateInfo:
         self.traffic_phase_dict = {}  # store the previous edge phase
         self.traffic_id_lane_dict = {}  # traffic id to lanes
         self.traffic_id_index_dict = {}
-        self.edge_lane_dict = {} # edge to number of lanes
-        self.edge_traffic_dict = {} # edge to traffic light id
+        self.edge_lane_dict = {}  # edge to number of lanes
+        self.edge_traffic_dict = {}  # edge to traffic light id
         self.set_list = []  # This is to set the traffic lights to green
         self.reset_list = []  # This is to reset the traffic lights to green
         self.index = 0

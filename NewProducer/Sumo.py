@@ -326,7 +326,6 @@ class Sumo(threading.Thread):
 
         logging.debug("Added a vehicle successfully")
 
-        self.init_green_wave()
         print("Traffic lanes are ", self.edge_traffic_state.get_traffic_id_list())
         print("Lanes controlled by traffic lights ", self.edge_traffic_state.get_traffic_id_lane_dict())
 
@@ -476,7 +475,6 @@ class Sumo(threading.Thread):
                 traci.simulationStep()  # this is an important step
                 self.lock.release()
 
-                self.check_if_vehicle_position_changed()
                 logging.debug("simulation step " + str(step))
 
                 step = step + 1  # this is an important step
