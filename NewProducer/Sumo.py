@@ -369,15 +369,15 @@ class Sumo(threading.Thread):
         :param end_index:
         :return:
         """
-        print("Start index 0, end index ", end_index)
+        print("reset_traffic_lights Start index 0, end index ", end_index)
 
         if end_index == -1:
-            logging.debug("Nothing to reset")
+            logging.debug("reset_traffic_lights Nothing to reset")
             return
 
         candidate_edge_list = self.custom_edge_list[0:end_index]
         if len(candidate_edge_list) == 0:
-            logging.debug("nothing to re-set")
+            logging.debug("reset_traffic_lights nothing to re-set")
             return
 
         traffic_phase_dict = self.edge_traffic_state.get_traffic_phase_dict()
@@ -404,7 +404,7 @@ class Sumo(threading.Thread):
 
                         if lane == traffic_lane:
                             found = True
-                            print("edge found in traffic signal ", traffic_signal_id)
+                            print("reset_traffic_lights edge found", lane, " in traffic signal ", traffic_signal_id)
                             break
 
                     if found:
@@ -413,9 +413,10 @@ class Sumo(threading.Thread):
                 if found:
                     self.lock.acquire()
                     old_phase = traffic_phase_dict[traffic_signal_id]
-                    traci.trafficlight.setPhase(traffic_signal_id, old_phase)
+                    traci.trafficlight.setPhaseDuration(traffic_signal_id, 100.0)
                     new_phase = traci.trafficlight.getPhase(traffic_signal_id)
-                    print("the old phase ", old_phase, " new phase is ", new_phase)
+                    print("reset_traffic_lights", traffic_signal_id, " the old phase ", old_phase, " new phase is ",
+                          new_phase)
                     self.lock.release()
 
     def set_traffic_lights(self, start_index, end_index):
@@ -426,16 +427,16 @@ class Sumo(threading.Thread):
         :return:
         """
 
-        print("Start index ", start_index, " end index ", end_index)
+        print("set_traffic_lights Start index ", start_index, " end index ", end_index)
 
         if end_index >= len(self.custom_edge_list):
-            logging.debug("The end index is more than the edges")
+            logging.debug("set_traffic_lights The end index is more than the edges")
             end_index = len(self.custom_edge_list) - 1
 
         candidate_edge_list = self.custom_edge_list[start_index:end_index]
 
         if len(candidate_edge_list) == 0:
-            logging.debug("nothing to set")
+            logging.debug("set_traffic_lights nothing to set")
             return
 
         traffic_id_index_dict = self.edge_traffic_state.get_traffic_id_index_dict()
@@ -463,7 +464,7 @@ class Sumo(threading.Thread):
 
                         if lane == traffic_lane:
                             found = True
-                            print("edge found in traffic signal ", traffic_signal_id)
+                            print("set_traffic_lights edge found", lane, " in traffic signal ", traffic_signal_id)
                             break
 
                     if found:
@@ -474,7 +475,7 @@ class Sumo(threading.Thread):
                     curr_state = traci.trafficlight.getRedYellowGreenState(traffic_signal_id)
                     state_length = len(curr_state)
                     lane_index = traffic_id_index_dict[traffic_signal_id]  # this is the dictionary
-                    print("lane index for ", traffic_signal_id, " is ", lane_index)
+                    print("set_traffic_lights lane index for ", traffic_signal_id, " is ", lane_index)
 
                     new_state = ""
                     for j in range(0, state_length):
@@ -485,7 +486,8 @@ class Sumo(threading.Thread):
 
                     traci.trafficlight.setRedYellowGreenState(traffic_signal_id, new_state)
                     new_state = traci.trafficlight.getRedYellowGreenState(traffic_signal_id)
-                    logging.debug("Prev state " + str(curr_state) + " set state " + str(new_state))
+                    logging.debug("set_traffic_lights Prev state " + traffic_signal_id + " , " + str(
+                        curr_state) + " set state " + str(new_state))
                     self.lock.release()
 
     def set_reset_traffic_lights(self):
@@ -517,8 +519,8 @@ class Sumo(threading.Thread):
                 print("Edge " + str(edge_id) + " not found in custom edge list ", self.custom_edge_list)
                 return
 
-            self.set_traffic_lights(edge_index, edge_index+4)
-            self.reset_traffic_lights(edge_index-1)
+            self.set_traffic_lights(edge_index, edge_index + 4)
+            self.reset_traffic_lights(edge_index - 1)
 
         except Exception as e:
 
@@ -582,7 +584,7 @@ class Sumo(threading.Thread):
 
                 if change_needed:
                     self.lock.acquire()
-                    traci.trafficlight.setPhase(old_traffic_id, old_phase)
+                    traci.trafficlight.setPhaseDuration(old_traffic_id, 100.0)
                     print("Phase is set")
                     self.lock.release()
 
