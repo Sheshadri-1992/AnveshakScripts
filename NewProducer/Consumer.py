@@ -294,8 +294,8 @@ class ConsumerThread(threading.Thread):
 
         try:
 
-            self.medium_thread.stop_thread()
-            self.large_thread.stop_thread()
+            self.medium_thread.kill_thread()
+            self.large_thread.kill_thread()
 
             self.medium_thread.join()
             logging.debug("Medium thread has stopped")

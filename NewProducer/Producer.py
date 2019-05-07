@@ -50,7 +50,7 @@ class LargeProducer(threading.Thread):
             index = 0
             time.sleep(10)
 
-    def stop_thread(self):
+    def kill_thread(self):
         """
         Stop the thread, set the value to true
         :return: nothing
@@ -119,7 +119,7 @@ class MediumProducer(threading.Thread):
             index = 0
             time.sleep(5)
 
-    def stop_thread(self):
+    def kill_thread(self):
         """
         Stop the thread, set the value to true
         :return: nothing
@@ -191,7 +191,7 @@ class SmallProducer(threading.Thread):
                 logging.debug("queue is full ")
                 time.sleep(1)
 
-    def stop_thread(self):
+    def kill_thread(self):
         """
         Stop the thread, set the value to true
         :return: nothing
