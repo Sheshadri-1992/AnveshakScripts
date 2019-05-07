@@ -133,7 +133,11 @@ class Sumo(threading.Thread):
         Returns all the traffic signals in the route
         :return: Returns all the traffic signals in the route
         """
+
+        self.lock.acquire()
         all_traffic_routes = traci.vehicle.getNextTLS(vehicle_id)
+        self.lock.release()
+
         traffic_id_list = []
 
         for item in all_traffic_routes:
