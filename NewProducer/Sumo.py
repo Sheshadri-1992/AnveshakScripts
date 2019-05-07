@@ -325,7 +325,7 @@ class Sumo(threading.Thread):
         This method returns the custom locations, which contain lat lon pair for each edges
         :return: This method returns the custom locations
         """
-        return self.custom_locations
+        return self.custom_edge_list
 
     def get_vehicle_speed(self, vehicle_id):
         """
