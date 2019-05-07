@@ -335,7 +335,11 @@ class ConsumerThread(threading.Thread):
         """
         total = 0
         for edge in edge_list:
-            total = total + float(self.edge_dist_dict[edge])
+            try:
+                total = total + float(self.edge_dist_dict[edge])
+            except Exception as e:
+                total = total + 0
+                print("Excpetion is ", e)
 
         logging.debug("The total weight is " + str(total))
         return total
