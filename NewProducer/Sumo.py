@@ -491,7 +491,7 @@ class Sumo(threading.Thread):
 
         :return:
         """
-
+        logging.debug("In set reset traffic lights ")
         try:
             self.lock.acquire()
             logging.debug("The vehicle id is " + self.ambulance_id)
@@ -632,6 +632,8 @@ class Sumo(threading.Thread):
                 self.lock.release()
 
                 logging.debug("simulation step " + str(step))
+
+                self.set_reset_traffic_lights()
 
                 step = step + 1  # this is an important step
 
