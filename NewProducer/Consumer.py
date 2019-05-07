@@ -67,6 +67,9 @@ class ConsumerThread(threading.Thread):
         # route id for new routes
         self.route_id = 60000
 
+        # reset flag
+        self.stop_thread = False
+
         logging.debug("Started all the producers...")
 
     def update_sumo_object(self, sumo_obj):
@@ -283,15 +286,48 @@ class ConsumerThread(threading.Thread):
 
         return edgeid_color_dict
 
+    def stop_producers(self):
+        """
+        Clears out all state
+        :return:
+        """
+
+        try:
+
+            self.medium_thread.stop_thread()
+            self.large_thread.stop_thread()
+
+            self.medium_thread.join()
+            logging.debug("Medium thread has stopped")
+            self.large_thread.join()
+            logging.debug("Large Thread has been stopped")
+
+            self.stop_thread = True
+            logging.debug("All producer threads are stopped")
+
+        except Exception as e:
+            print("The exception is ", e)
+
+    def set_resources(self):
+        """
+        Resets the reset flag
+        :return:
+        """
+        self.stop_thread = False
+
     def run(self):
         mqtt_object = MqttPublish()
         mqtt_object.print_variables()
-
+        self.stop_thread = False
         running_counter = 0
 
         while True:
 
             logging.debug("Entered the consumer..")
+
+            if self.stop_thread:
+                logging.debug("The reset flag has been called ")
+                break
 
             batch_count = 0
             medium_candidate_edges = []

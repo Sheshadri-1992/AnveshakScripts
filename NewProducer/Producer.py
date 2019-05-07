@@ -20,6 +20,7 @@ class LargeProducer(threading.Thread):
         self.large_queue = Queue.Queue()
         self.large_edge_list = []
         self.global_edge_dict = edge_dict
+        self.stop_thread = False
 
         logging.debug("Loading the high_ways json ")
         with open("./InputFiles/high_ways_p.json") as json_file:
@@ -32,7 +33,13 @@ class LargeProducer(threading.Thread):
 
         length = len(self.large_edge_list)
         index = 0
+        self.stop_thread = False
         while True:
+
+            if self.stop_thread:
+                logging.debug("A call to stop the large thread has been received.. stopping..")
+                break
+
             while index < length:
                 edge_id = self.large_edge_list[index % length]
                 item = QueryStruct(1, edge_id)
@@ -42,6 +49,13 @@ class LargeProducer(threading.Thread):
             logging.debug("index id is " + str(index))
             index = 0
             time.sleep(10)
+
+    def stop_thread(self):
+        """
+        Stop the thread, set the value to true
+        :return: nothing
+        """
+        self.stop_thread = True
 
     def get_element_from_queue(self):
         """
@@ -75,6 +89,7 @@ class MediumProducer(threading.Thread):
         self.medium_queue = Queue.Queue()
         self.medium_edge_list = []
         self.global_edge_dict = edge_dict
+        self.stop_thread = False
 
         logging.debug("Loading the mid_ways json ")
         with open("./InputFiles/mid_ways_p.json") as json_file:
@@ -87,8 +102,13 @@ class MediumProducer(threading.Thread):
 
         index = 0
         length = len(self.medium_edge_list)
+        self.stop_thread = False
 
         while True:
+
+            if self.stop_thread:
+                logging.debug("A call to stop the medium thread has been received, stopping...")
+                break
 
             while index < length:
                 edge_id = self.medium_edge_list[index % length]
@@ -98,6 +118,13 @@ class MediumProducer(threading.Thread):
 
             index = 0
             time.sleep(5)
+
+    def stop_thread(self):
+        """
+        Stop the thread, set the value to true
+        :return: nothing
+        """
+        self.stop_thread = True
 
     def get_medium_edge_list_length(self):
         """
@@ -130,6 +157,7 @@ class SmallProducer(threading.Thread):
         self.name = name
         self.small_queue = Queue.Queue()
         self.small_edge_list = []
+        self.stop_thread = False
 
         logging.debug("Loading the low_ways json ")
         with open("./InputFiles/low_ways_p.json") as json_file:
@@ -143,7 +171,14 @@ class SmallProducer(threading.Thread):
         index = 0
         length = len(self.small_edge_list)
         # print("I am  here in small producer ")
+        self.stop_thread = False
+
         while True:
+
+            if self.stop_thread:
+                logging.debug("Stopping the small-thread")
+                break
+
             if not self.small_queue.full():
                 item = QueryStruct(3, self.small_edge_list[index % length])
                 self.small_queue.put(item)
@@ -155,6 +190,13 @@ class SmallProducer(threading.Thread):
             else:
                 logging.debug("queue is full ")
                 time.sleep(1)
+
+    def stop_thread(self):
+        """
+        Stop the thread, set the value to true
+        :return: nothing
+        """
+        self.stop_thread = True
 
     def get_element_from_queue(self):
         """

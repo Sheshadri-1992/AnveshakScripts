@@ -94,7 +94,13 @@ class ProducerConsumer:
         close the simulation
         :return:
         """
+
+        self.consumer_thread.stop_producers()
+        self.consumer_thread.join()
+        logging.debug("Consumer thread is stopped")
+
         result = self.sumo_obj.stop()
+        logging.debug("Stopped sumo execution " + str(result))
         return result
 
     def load_json(self):
