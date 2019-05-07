@@ -378,8 +378,8 @@ class Sumo(threading.Thread):
         candidate_edge_list = self.custom_edge_list[0:end_index]
         if len(candidate_edge_list) == 0:
             logging.debug("nothing to re-set")
+            return
 
-        traffic_id_index_dict = self.edge_traffic_state.get_traffic_id_index_dict()
         traffic_phase_dict = self.edge_traffic_state.get_traffic_phase_dict()
 
         for edge_id in candidate_edge_list:
@@ -404,7 +404,7 @@ class Sumo(threading.Thread):
 
                         if lane == traffic_lane:
                             found = True
-                            print("edge found")
+                            print("edge found in traffic signal ", traffic_signal_id)
                             break
 
                     if found:
@@ -436,6 +436,7 @@ class Sumo(threading.Thread):
 
         if len(candidate_edge_list) == 0:
             logging.debug("nothing to set")
+            return
 
         traffic_id_index_dict = self.edge_traffic_state.get_traffic_id_index_dict()
 
@@ -446,6 +447,7 @@ class Sumo(threading.Thread):
             lane_count = traci.edge.getLaneNumber(edge_id)
             self.lock.release()
 
+            # prepare lane list
             for i in range(0, lane_count):
                 lane_id = edge_id + "_" + str(i)
                 lane_list.append(lane_id)
@@ -461,7 +463,7 @@ class Sumo(threading.Thread):
 
                         if lane == traffic_lane:
                             found = True
-                            print("edge found")
+                            print("edge found in traffic signal ", traffic_signal_id)
                             break
 
                     if found:
@@ -494,12 +496,12 @@ class Sumo(threading.Thread):
         logging.debug("In set reset traffic lights ")
         if self.ambulance_id == "-1":
             return
-        
+
         try:
             self.lock.acquire()
             logging.debug("The vehicle id is " + self.ambulance_id)
             edge_id = traci.vehicle.getRoadID(self.ambulance_id)
-            logging.debug("The edge id is " + str(edge_id))
+            logging.debug("The edge/road id is " + str(edge_id))
             self.lock.release()
 
             edge_index = -1
