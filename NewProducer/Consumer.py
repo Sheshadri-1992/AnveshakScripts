@@ -27,6 +27,7 @@ class ConsumerThread(threading.Thread):
         self.name = name
         self.edge_list = []
         self.sumo_obj = None
+        self.edge_dist_dict = {}
 
         # mandatory file loads
         logging.debug("Loading the low_ways json ")
@@ -39,6 +40,10 @@ class ConsumerThread(threading.Thread):
         with open("./InputFiles/sumo_osm.json") as json_file:
             sumo_osm = json.load(json_file)
         self.lane_edge_dict = sumo_osm
+
+        logging.debug("Loading the Edge distance json ")
+        with open("./InputFiles/sumo_distance.json") as json_file:
+            self.edge_dist_dict = json.load(json_file)
 
         # threads
         self.large_thread = LargeProducer(self.edge_lane_dict, name='large-producer')
@@ -190,11 +195,16 @@ class ConsumerThread(threading.Thread):
         for edge in edge_traffic_dict:
 
             num_vehicles = edge_traffic_dict[edge]
+            total_distance = self.edge_dist_dict[edge]
+
+            vehicles_per_meter = float(num_vehicles*1.0) / float(total_distance*1.0)
+            cat_1 = vehicles_per_meter/3.0
+            cat_2 = (2.0*vehicles_per_meter)/3.0
 
             # color bucket logic
-            if num_vehicles < 5:
+            if vehicles_per_meter <= cat_1:
                 edgeid_color_dict[edge] = 0
-            elif 5 < num_vehicles <= 10:
+            elif cat_1 < vehicles_per_meter <= cat_2:
                 edgeid_color_dict[edge] = 1
             else:
                 edgeid_color_dict[edge] = 2
