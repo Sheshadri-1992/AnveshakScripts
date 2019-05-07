@@ -344,14 +344,12 @@ class ConsumerThread(threading.Thread):
             logging.debug("message medium producer " + str(batch_count) + " ,running counter " + str(running_counter))
 
             # Large queue edges
-            while not self.large_thread.large_queue.empty():
+            while batch_count < MAX_BATCH:
 
-                if batch_count < MAX_BATCH:  # and (item.timestamp >= curr_time):
+                if not self.large_thread.large_queue.empty():  # and (item.timestamp >= curr_time):
                     item = self.large_thread.get_element_from_queue()
                     large_candidate_edges.append(item.get_edge_id())
                     batch_count = batch_count + 1
-                else:
-                    logging.debug("dropping the message large producer")
 
             # The original candidate id do not contain lane id
             medium_candidate_edges = self.prepare_candidate_edges(medium_candidate_edges)
