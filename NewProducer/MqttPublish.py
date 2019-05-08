@@ -17,6 +17,7 @@ class MqttPublish:
     client_vertex = None
     client_path_topic = None
     client_path_traffic_topic = None
+    client_traffic_color_topic = None
 
     def __init__(self):
         logging.debug("the constructor method is called")
@@ -37,6 +38,13 @@ class MqttPublish:
             "The broker address " + str(
                 self.broker_address) + "  transport " + self.tTransport + "  the port is  " + str(
                 self.tPort))
+
+    def on_publish_traffic_color_topic(self):
+        """
+
+        :return:
+        """
+        logging.debug("Traffic color topic got published")
 
     def on_publish_path_traffic_topic(self):
         """
@@ -93,6 +101,11 @@ class MqttPublish:
         self.client_path_traffic_topic.on_publish = self.on_publish_path_traffic_topic
         self.client_path_traffic_topic.connect(self.broker_address, port=self.tPort, keepalive=60, bind_address="")
 
+        self.client_traffic_color_topic = mqtt.Client("P21", transport=self.tTransport)
+        self.client_traffic_color_topic.username_pw_set(username="dreamlabanveshak", password="dream119")
+        self.client_traffic_color_topic.on_publish = self.on_publish_path_traffic_topic
+        self.client_traffic_color_topic.connect(self.broker_address, port=self.tPort, keepalive=60, bind_address="")
+
     def disconnect_broker(self):
         """
         disconnect the broker
@@ -102,6 +115,7 @@ class MqttPublish:
         self.client_vertex.disconnect()
         self.client_path_topic.disconnect()
         self.client_path_traffic_topic.disconnect()
+        self.client_traffic_color_topic.disconnect()
 
     def send_vertex_message(self, vertex_json, topic):
         """
@@ -154,3 +168,15 @@ class MqttPublish:
         ret = self.client_path_traffic_topic.publish(topic, path_traffic_json, qos=0)
         ret.wait_for_publish()
         logging.debug("The ret is "+str(ret))
+
+    def send_traffic_color_topic_message(self, traffic_color_json, topic):
+        """
+
+        :param traffic_color_json:  contains traffic id and color
+        :param topic: traffic color topic
+        :return: nothing
+        """
+        logging.debug("Sending traffic color topic json")
+        ret = self.client_traffic_color_topic.publish(topic, traffic_color_json, qos=0)
+        ret.wait_for_publish()
+        logging.debug("The ret is " + str(ret))

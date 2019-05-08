@@ -8,6 +8,8 @@ from datetime import datetime
 from MqttPublish import MqttPublish
 from Producer import LargeProducer, MediumProducer, SmallProducer
 from Query import QueryStruct
+import pickle
+from networkx.readwrite import json_graph
 
 MAX_BATCH = 1500
 
@@ -25,6 +27,7 @@ class ConsumerThread(threading.Thread):
         self.edge_list = []
         self.sumo_obj = None
         self.edge_dist_dict = {}
+        self.edge_node_map = {}
 
         # mandatory file loads
         logging.debug("Loading the low_ways json ")
@@ -57,6 +60,7 @@ class ConsumerThread(threading.Thread):
         self.ambulance_topic = "ambulance"
         self.path_topic = ""  # this has to sent first
         self.path_traffic_topic = ""  # this has to be be sent next
+        self.traffic_color_topic = ""
 
         # registration dictionary
         self.register_dict = {}
@@ -65,8 +69,13 @@ class ConsumerThread(threading.Thread):
 
         # vehicle id for new additions
         self.vehicle_id = 50000
+
         # route id for new routes
         self.route_id = 60000
+
+        # source and destination for ambulance
+        self.amb_source = "-1"
+        self.amb_dest = "-1"
 
         # reset flag
         self.stop_thread = False
@@ -121,6 +130,10 @@ class ConsumerThread(threading.Thread):
         self.sumo_obj.add_new_vehicle(str(self.vehicle_id), str(self.route_id), [], source,
                                       dest)  # ambulance id and list of edges
 
+        # set source and destination for ambulance
+        self.amb_source = source  # VERY IMPORTANT
+        self.amb_dest = dest  # VERY IMPORTANT
+
         # topic is set for the ambulance
         self.ambulance_topic = position_topic
         self.register_dict[self.ambulance_topic] = True
@@ -137,6 +150,10 @@ class ConsumerThread(threading.Thread):
         # this is for the raw traffic color updates
         self.path_traffic_topic = path_traffic_topic
         self.register_dict[self.path_traffic_topic] = True
+
+        # this topic is for the traffic color updates
+        self.traffic_color_topic = "traffic_color"
+        self.register_dict[self.traffic_color_topic] = True
 
         # increment vehicle id
         self.vehicle_id = self.vehicle_id + 1
@@ -220,7 +237,7 @@ class ConsumerThread(threading.Thread):
                     edgeid_color_dict[edge] = 2
 
             except Exception as e:
-                print("Exception in get color ", e, " the edge is ",edge)
+                print("Exception in get color ", e, " the edge is ", edge)
                 edgeid_color_dict[edge] = 0
 
         local_dict = {}
@@ -294,7 +311,7 @@ class ConsumerThread(threading.Thread):
                     edgeid_color_dict[edge] = 2
 
             except Exception as e:
-                print("Exception in get color ", e, " the edge is ",edge)
+                # print("Exception in get color ", e, " the edge is ",edge)
                 edgeid_color_dict[edge] = 0
 
         return edgeid_color_dict
@@ -444,11 +461,15 @@ class ConsumerThread(threading.Thread):
                     logging.debug("path topic set..sending message..only once")
                     locations_dict = self.sumo_obj.get_custom_locations()
                     locations_list = list(locations_dict.keys())
-                    traffic_id_list = self.sumo_obj.get_traffic_lights_for_vehicle(self.sumo_obj.get_ambulance_id())
+                    traffic_id_list = self.sumo_obj.get_traffic_lights_between_src_dest()
                     traffic_id_lat_long_list = self.get_traffic_id_lat_long_list(traffic_id_list)
 
+                    traffic_id_lat_long_dict = {}
+                    for i in range(0, len(traffic_id_list)):
+                        traffic_id_lat_long_dict[traffic_id_list[i]] = traffic_id_lat_long_list[i]
+
                     payload_dict = {}
-                    payload_dict['traffic_signals'] = traffic_id_lat_long_list
+                    payload_dict['traffic_signals'] = traffic_id_lat_long_dict
                     payload_dict['distance'] = self.get_total_edge_weight(locations_list)
                     payload_dict['path'] = locations_dict
 
@@ -464,6 +485,9 @@ class ConsumerThread(threading.Thread):
                 lane_traffic_dict = self.sumo_obj.return_traffic_density(candidate_edges)
                 lane_traffic_dict = self.get_edge_color_simple(lane_traffic_dict)
                 mqtt_object.send_path_traffic_topic_message(json.dumps(lane_traffic_dict), self.path_traffic_topic)
+
+            if self.traffic_color_topic != "" and self.traffic_color_topic in self.register_dict:
+                traffic_color_dict = self.sumo_obj.prepare_traffic_color_payload()
 
             mqtt_object.disconnect_broker()
 

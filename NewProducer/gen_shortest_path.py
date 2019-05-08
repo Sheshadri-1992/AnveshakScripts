@@ -21,11 +21,12 @@ def compute_shortest_path(origin, dest, graph):
     # dest = '448116544'
 
     print("The origin is ", origin, " destination is ", dest)
-    path = nx.shortest_path(graph, origin, dest, weight='weight')
+    path = nx.shortest_path(graph, origin, dest, weight='weight')  # LIST OF NODES
 
     # get edges
 
     edges = [-1]
+    edge_node_map = {}
 
     locations = {}
 
@@ -34,15 +35,36 @@ def compute_shortest_path(origin, dest, graph):
         if type(e) is list:
             for j in e:
                 id = j.keys()[0]
+                edge_node_map[id] = (path[i], path[i + 1])  # newly added
                 if edges[-1] != id:
                     edges.append(id)
                     locations[id] = j[id]['lanes'][0]['shape']
         else:
             id = e.keys()[0]
+            edge_node_map[id] = (path[i], path[i + 1]) # newly added
             if edges[-1] != id:
                 edges.append(id)
                 locations[id] = e[id]['lanes'][0]['shape']
 
     edges = edges[1:]
 
-    return edges, locations
+    return edges, locations, edge_node_map
+
+
+def get_shortest_path_traffic(graph, traffic_lights, source, destination, foresight):
+    """
+
+    :return:
+    """
+    path = nx.shortest_path(graph, source, destination, weight='weight')
+    lights = []
+    if set(path) & traffic_lights:
+        s = set(path) & traffic_lights
+        for node in path:
+            if node in s:
+                lights.append(node)
+
+    if foresight == -1:
+        return lights
+
+    return set(lights[:foresight])

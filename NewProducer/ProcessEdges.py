@@ -45,16 +45,6 @@ class ProducerConsumer:
             logging.debug("Calling thread only once")
             self.consumer_thread.start()
 
-    def start_producing_content(self):
-        """
-
-        :return:
-        """
-        self.consumer_thread.start_producers()
-        if self.flag:
-            self.flag = False
-            self.consumer_thread.start()
-
     def set_ambulance_co_ordinates(self, ambulance_dict):
         """
 

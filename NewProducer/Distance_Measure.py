@@ -3,12 +3,49 @@ import random as rand
 import time
 import json
 import logging
+from scipy.spatial import distance
 
 logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-9s) %(message)s', )
 camera_lat_long = []
 
 with open("./InputFiles/cameras.json") as json_file:
     cameras = json.load(json_file)
+
+
+def calculate_diameter():
+    camera_id_list = []
+    node_id_list = []
+    lat_list = []
+    long_list = []
+
+    for item in cameras:
+        camera_id_list.append(item[0])
+        node_id_list.append(item[1])
+        lat_list.append(float(item[2]))
+        long_list.append(float(item[3]))
+
+    for i in range(0, len(lat_list)):
+        camera_lat_long.append(np.array((lat_list[i], long_list[i])))
+
+    index = 1
+    dist_list = []
+    for i in range(0, len(lat_list)):
+        for j in range(i + 1, len(lat_list)):
+            cam_1_pos = lat_list[i]
+            cam_2_pos = lat_list[j]
+            dist = np.linalg.norm(cam_1_pos - cam_2_pos)
+            dist_list.append(dist)
+            print("index ", index)
+            index = index + 1
+
+    total = 0
+    for ele in dist_list:
+        total = total + ele
+
+    print("Total is ", total)
+    print("Index is ", index)
+    total = total / index
+    print("The average is ", total)
 
 
 def calculate_within_radius(vehicle_pos_x, vehicle_pos_y):
@@ -31,7 +68,7 @@ def calculate_within_radius(vehicle_pos_x, vehicle_pos_y):
     for i in range(0, 4000):
         camera_lat_long.append(np.array((lat_list[i], long_list[i])))
 
-    diameter = 0.025  # Not sure what this value should be. This will have to be experimentally inferred.
+    diameter = 0.00015  # Not sure what this value should be. This will have to be experimentally inferred.
     # Calculate Euclidean Distance
 
     num_cameras = 0
@@ -44,6 +81,9 @@ def calculate_within_radius(vehicle_pos_x, vehicle_pos_y):
             num_cameras = num_cameras + 1
             print("the vehicle is coming close ", num_cameras)  # print(dist)
 
-    print('Total time', time.time() - start_time," num cameras ",num_cameras)
+    print('Total time', time.time() - start_time, " num cameras ", num_cameras)
+
 
 # calculate_within_radius(0.0,0.0)
+
+calculate_diameter()
