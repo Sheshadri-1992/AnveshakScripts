@@ -442,16 +442,17 @@ class ConsumerThread(threading.Thread):
             if self.path_topic != "" and self.path_topic in self.register_dict:
                 if self.register_dict[self.path_topic]:
                     logging.debug("path topic set..sending message..only once")
-                    locations_list = self.sumo_obj.get_custom_locations()
+                    locations_dict = self.sumo_obj.get_custom_locations()
+                    locations_list = list(locations_dict.keys())
                     traffic_id_list = self.sumo_obj.get_traffic_lights_for_vehicle(self.sumo_obj.get_ambulance_id())
                     traffic_id_lat_long_list = self.get_traffic_id_lat_long_list(traffic_id_list)
 
-                    locations_dict = {}
-                    locations_dict['traffic_signals'] = traffic_id_lat_long_list
-                    locations_dict['distance'] = self.get_total_edge_weight(locations_list)
-                    locations_dict['path'] = locations_list
+                    payload_dict = {}
+                    payload_dict['traffic_signals'] = traffic_id_lat_long_list
+                    payload_dict['distance'] = self.get_total_edge_weight(locations_list)
+                    payload_dict['path'] = locations_dict
 
-                    mqtt_object.send_path_topic_message(json.dumps(locations_dict), self.path_topic)
+                    mqtt_object.send_path_topic_message(json.dumps(payload_dict), self.path_topic)
                     # this is important to send it only once
                     # need to set it to True again when there is a custom edge list which gets updated
                     self.register_dict[self.path_topic] = False
