@@ -17,8 +17,8 @@ def compute_shortest_path(origin, dest, graph):
     :param graph: The network graph
     :return: the shortest path (set of edges) and locations dict which has lat long for the shortest path
     """
-    # origin = '249072983'
-    # dest = '448116544'
+    origin = '3756191723'
+    dest = '3370075981'
 
     print("The origin is ", origin, " destination is ", dest)
     path = nx.shortest_path(graph, origin, dest, weight='weight')  # LIST OF NODES

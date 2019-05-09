@@ -42,7 +42,6 @@ class Sumo(threading.Thread):
         self.amb_src = ""
         self.amb_dest = ""
         self.edge_node_map = {}
-        self.camera_list = []
         self.custom_edge_list = []
         self.custom_locations = {}
         self.edge_traffic_state = EdgeStateInfo()
@@ -62,12 +61,14 @@ class Sumo(threading.Thread):
 
         self.graph = json_graph.node_link_graph(data)  # this is the graph
 
-        with open('./InputFiles/traffic_light_set.pkl', 'rb') as traffic_file:
-            self.traffic_lights_set = pickle.load(traffic_file)
+        with open('./InputFiles/traffic_lights_anveshak.json', 'rb') as traffic_file:
+	    json_string = traffic_file.read()
+            self.traffic_lights_set = json.loads(json_string)
 
-        with open("./InputFiles/cameras_anveshak.json", 'rb') as camera_file:
-            self.camera_list = camera_file.read().split(",")
-
+	with open("./InputFiles/cameras_anveshak.json", 'rb') as camera_file:
+            json_string = camera_file.read()
+	    self.camera_list = json.loads(json_string)
+	
         with open("./InputFiles/nodes_coord.json", 'rb') as json_file:
             node_to_xy_json = json.load(json_file)
             self.node_to_xy_json = node_to_xy_json
@@ -150,7 +151,7 @@ class Sumo(threading.Thread):
         """
 
         :param src: The starting point of ambulance route
-        :param dest: The end point of th:e ambulance route
+        :param dest: The end point of the ambulance route
         :return:
         """
         logging.debug("The new traffic lights method got called")
@@ -211,63 +212,6 @@ class Sumo(threading.Thread):
         """
         return None
 
-    def get_next_camera(self):
-        """
-        returns the id of the next camera id, in which a vehicle will feature or skip
-        but never takes a wrong decision
-        :return: return camera id
-        """
-        if self.ambulance_id == "-1":
-            logging.debug("Ambulance id not yet set")
-            return
-
-        custom_node_id_list = []
-        first_edge = self.custom_edge_list[0]
-        node_tuple = self.edge_node_map[first_edge]
-        custom_node_id_list.append(node_tuple[0])
-        custom_node_id_list.append(node_tuple[1])
-
-        for edge_id in self.custom_edge_list[1:]:
-            node_tuple = self.edge_node_map[edge_id]
-            custom_node_id_list.append(node_tuple[1])
-
-        custom_node_id_set = set(custom_node_id_list)
-
-        camera_set = set(self.camera_list)
-        cameras_in_path = camera_set.intersection(custom_node_id_set)
-
-        print("Custom node id set ",custom_node_id_set)
-        print("Cameras path ",cameras_in_path)
-
-        self.lock.acquire()
-        curr_edge_id = traci.vehicle.getRoadID(self.ambulance_id)
-        self.lock.release()
-
-        print("The current edge the vehicle is in ", curr_edge_id)
-        node_1 = self.edge_node_map.get(curr_edge_id)[1]  # the ending node
-
-        # convert set to list
-        custom_node_id_list = list(custom_node_id_set)
-        cameras_in_path_list = list(cameras_in_path)
-
-        node1_index = custom_node_id_list.index(node_1)
-        end_index = node_1 + 3
-
-        if end_index > (len(custom_node_id_list) - 1):
-            end_index = (len(custom_node_id_list) - 1)
-
-        candidate_list = custom_node_id_list[node1_index:end_index]
-        print("start index ",node1_index," end index ", end_index)
-        print("Candidate list ",candidate_list)
-
-        for node_id in candidate_list:
-            for camera in cameras_in_path_list:
-
-                node_id_lat_long = self.node_to_lat_long_json[node_id]
-                camera_lat_long_pair = self.node_to_lat_long_json[camera]
-                distance = TestCameraPosistion.distance_in_meters(node_id_lat_long, camera_lat_long_pair)
-                if distance < (2 * 28):
-                    logging.debug("Sending message to camera", camera)
 
 
     def send_message_to_everyone(self):
@@ -276,6 +220,7 @@ class Sumo(threading.Thread):
         :return:
         """
         logging.debug("Got the message")
+
 
     def init_green_wave(self):
         """
@@ -417,7 +362,6 @@ class Sumo(threading.Thread):
 
         print("Traffic lanes are ", self.edge_traffic_state.get_traffic_id_list())
         print("Lanes controlled by traffic lights ", self.edge_traffic_state.get_traffic_id_lane_dict())
-        self.get_next_camera()
 
         return "Added a vehicle successfully"
 
@@ -442,7 +386,7 @@ class Sumo(threading.Thread):
         """
 
         custom_edge_list = self.custom_edge_list  # this will give me the edge list
-        custom_traffic_lights = self.get_traffic_lights_between_src_dest()
+        custom_traffic_lights = self.get_traffic_lights_for_vehicle(self.ambulance_id)
         traffic_id_color_dict = {}
 
         for traffic_signal_id in custom_traffic_lights:
@@ -493,6 +437,84 @@ class Sumo(threading.Thread):
         traci.vehicle.setSpeedMode(vehicle_id, 0)  # 0 is rouge mode
         traci.vehicle.setLaneChangeMode(vehicle_id, 2218)  # 2218 is rouge mode
         self.lock.release()
+
+    def get_next_camera(self):
+        """
+        returns the id of the next camera id, in which a vehicle will feature or skip
+        but never takes a wrong decision
+        :return: return camera id
+        """
+        if self.ambulance_id == "-1":
+            logging.debug("Ambulance id not yet set")
+            return
+
+	self.lock.acquire()
+        curr_edge_id = traci.vehicle.getRoadID(self.ambulance_id)
+        self.lock.release()
+
+	if curr_edge_id[0]==":" :
+		print("Returning Internal Edge ",curr_edge_id)
+		return
+
+        custom_node_id_list = []
+        first_edge = self.custom_edge_list[0]
+        node_tuple = self.edge_node_map[first_edge]
+        custom_node_id_list.append(str(node_tuple[0]))
+        custom_node_id_list.append(str(node_tuple[1]))
+
+        for edge_id in self.custom_edge_list[1:]:
+            node_tuple = self.edge_node_map[edge_id]
+            custom_node_id_list.append(str(node_tuple[1]))
+
+        custom_node_id_set = set(custom_node_id_list)
+
+	print("The camera list is ",self.camera_list)
+        camera_set = set(self.camera_list)
+        cameras_in_path = camera_set.intersection(custom_node_id_set)
+
+        print("Custom node id set ",custom_node_id_set)
+        print("Cameras path ",cameras_in_path)
+
+        print("The current edge the vehicle is in ", curr_edge_id)
+        node_1 = self.edge_node_map.get(curr_edge_id)[1]  # the ending node
+	print("The node 1 is ",node_1)
+
+        # convert set to list
+        cameras_in_path_list = list(cameras_in_path)
+
+	print("The custom node id list is ",custom_node_id_list)
+	print("camera in path list is ",cameras_in_path)
+
+        node1_index = 0
+	for ele in custom_node_id_list:
+		if(node_1 == ele):
+			print("Element is found ",ele)
+			break		
+
+		node1_index = node1_index + 1 
+        end_index = node1_index + 3
+
+	print("start index is ",node1_index," end_index ",end_index)
+
+        if end_index > (len(custom_node_id_list) - 1):
+            end_index = (len(custom_node_id_list) - 1)
+
+        candidate_list = custom_node_id_list[node1_index:end_index]
+        print("start index ",node1_index," end index ", end_index)
+        print("Candidate list ",candidate_list)
+
+	current_node_id = self.edge_node_map[curr_edge_id]
+	
+        # for node_id in candidate_list:
+        for camera in cameras_in_path_list:
+		
+		node_id_lat_long = self.node_to_lat_long_json[current_node_id[1]]
+		camera_lat_long_pair = self.node_to_lat_long_json[camera]
+		distance = TestCameraPosistion.distance_in_meters(node_id_lat_long, camera_lat_long_pair)
+		if distance < (2 * 28):
+		    print("Sending message to traffic signal ", str(camera)," the distance is ",distance)
+		    break
+
 
     def reset_traffic_lights(self, end_index):
         """
@@ -632,16 +654,15 @@ class Sumo(threading.Thread):
 
                 logging.debug("simulation step " + str(step))
 
-                self.get_next_camera()
-
                 # self.set_reset_traffic_lights()
+		self.get_next_camera()
 
                 step = step + 1  # this is an important step
 
                 time.sleep(1)
         except Exception as e:
 
-            logging.debug("Exception in start simulation method " + e)
+            logging.debug("Exception in start simulation method " + str(e))
 
     def stop(self):
         """

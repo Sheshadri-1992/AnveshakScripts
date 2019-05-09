@@ -1,6 +1,5 @@
 import numpy as np
 import random as rand
-import pickle
 import time
 import json
 import logging
@@ -30,40 +29,23 @@ def calculate_diameter():
 
     index = 1
     dist_list = []
-    min = 9999
-    max = 0
     for i in range(0, len(lat_list)):
         for j in range(i + 1, len(lat_list)):
-            cam_1_pos = camera_lat_long[i]
-            cam_2_pos = camera_lat_long[j]
+            cam_1_pos = lat_list[i]
+            cam_2_pos = lat_list[j]
             dist = np.linalg.norm(cam_1_pos - cam_2_pos)
-
-            if dist <= min:
-                min = dist
-
-            if dist > max:
-                max = dist
-
             dist_list.append(dist)
             print("index ", index)
             index = index + 1
-
-    bin_inc = (max - min) / 10
 
     total = 0
     for ele in dist_list:
         total = total + ele
 
-    file_dist = open("dist_file.pkl",'wb')
-    pickle.dumps(dist_list, file_dist)
-    file_dist.close()
-
-
     print("Total is ", total)
     print("Index is ", index)
     total = total / index
     print("The average is ", total)
-    print("The min is ", min, " the max is ", max)
 
 
 def calculate_within_radius(vehicle_pos_x, vehicle_pos_y):

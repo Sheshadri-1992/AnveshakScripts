@@ -237,7 +237,7 @@ class ConsumerThread(threading.Thread):
                     edgeid_color_dict[edge] = 2
 
             except Exception as e:
-                print("Exception in get color ", e, " the edge is ", edge)
+                #print("Exception in get color ", e, " the edge is ", edge)
                 edgeid_color_dict[edge] = 0
 
         local_dict = {}
@@ -461,7 +461,7 @@ class ConsumerThread(threading.Thread):
                     logging.debug("path topic set..sending message..only once")
                     locations_dict = self.sumo_obj.get_custom_locations()
                     locations_list = list(locations_dict.keys())
-                    traffic_id_list = self.sumo_obj.get_traffic_lights_between_src_dest()
+                    traffic_id_list = self.sumo_obj.get_traffic_lights_for_vehicle(self.sumo_obj.get_ambulance_id())
                     traffic_id_lat_long_list = self.get_traffic_id_lat_long_list(traffic_id_list)
 
                     traffic_id_lat_long_dict = {}
