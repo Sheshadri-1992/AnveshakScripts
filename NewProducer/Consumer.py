@@ -311,7 +311,7 @@ class ConsumerThread(threading.Thread):
                     edgeid_color_dict[edge] = 2
 
             except Exception as e:
-                # print("Exception in get color ", e, " the edge is ",edge)
+                print("Exception in get color ", e, " the edge is ",edge)
                 edgeid_color_dict[edge] = 0
 
         return edgeid_color_dict
@@ -505,4 +505,6 @@ class ConsumerThread(threading.Thread):
             logging.debug("Consumer sleeping...")
             index = index + 1
             running_counter = running_counter + 1
+
+            self.sumo_obj.update_simulation_step()
             time.sleep(1)

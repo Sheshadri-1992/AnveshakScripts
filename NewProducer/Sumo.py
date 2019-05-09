@@ -45,6 +45,7 @@ class Sumo(threading.Thread):
         self.edge_node_map = {}
         self.custom_edge_list = []
         self.custom_locations = {}
+        self.sim_step = 0
         self.edge_traffic_state = EdgeStateInfo()
 
         # start the simulation here
@@ -304,6 +305,7 @@ class Sumo(threading.Thread):
         print("The custom edge locations are ", custom_edge_list)
         logging.debug("The first lane " + str(custom_edge_list[0] + "_0"))
 
+        # adds a vehicle and sets its route and moves it to the desired part
         self.lock.acquire()
         traci.route.add(new_route_id, custom_edge_list)
         traci.vehicle.add(vehicle_id, new_route_id)
@@ -757,30 +759,44 @@ class Sumo(threading.Thread):
 
             print("The exception is ", e)
 
-    def run(self):
+    def update_simulation_step(self):
         """
-        This should be run on a separate thread
-        :return:
+        Is called from Consumer, updates the simulation step
+        :return: nothing
         """
-        logging.debug("Starting the simulation..")
-        try:
-            step = 0
-            while True:
-                self.lock.acquire()
-                traci.simulationStep()  # this is an important step
-                self.lock.release()
 
-                logging.debug("simulation step " + str(step))
+        self.lock.acquire()
+        traci.simulationStep()  # this is an important step
+        self.lock.release()
 
-                # self.set_reset_traffic_lights()
-                self.get_next_camera()
+        logging.debug("simulation step " + str(self.sim_step))
+        self.get_next_camera()
+        self.sim_step = self.sim_step + 1
 
-                step = step + 1  # this is an important step
-
-                time.sleep(1)
-        except Exception as e:
-
-            logging.debug("Exception in start simulation method " + str(e))
+    # def run(self):
+    #     """
+    #     This should be run on a separate thread
+    #     :return:
+    #     """
+    #     logging.debug("Starting the simulation..")
+    #     try:
+    #         step = 0
+    #         while True:
+    #             self.lock.acquire()
+    #             traci.simulationStep()  # this is an important step
+    #             self.lock.release()
+    #
+    #             logging.debug("simulation step " + str(step))
+    #
+    #             # self.set_reset_traffic_lights()
+    #             self.get_next_camera()
+    #
+    #             step = step + 1  # this is an important step
+    #
+    #             time.sleep(1)
+    #     except Exception as e:
+    #
+    #         logging.debug("Exception in start simulation method " + str(e))
 
     def stop(self):
         """

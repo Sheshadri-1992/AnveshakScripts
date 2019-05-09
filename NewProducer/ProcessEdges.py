@@ -33,7 +33,8 @@ class ProducerConsumer:
         :return:
         """
         # start simulation
-        self.sumo_obj.start()
+        # self.sumo_obj.start()
+        logging.debug("simulation already started")
         return "success"
 
     def register_topic(self, lat, lon, topic, graphid):
