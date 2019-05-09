@@ -489,6 +489,7 @@ class ConsumerThread(threading.Thread):
             if self.traffic_color_topic != "" and self.traffic_color_topic in self.register_dict:
                 traffic_color_dict = self.sumo_obj.prepare_traffic_color_payload()
                 print("Getting the traffic color payload ", traffic_color_dict)
+                mqtt_object.send_traffic_color_topic_message(json.dumps(traffic_color_dict), self.traffic_color_topic)
 
             mqtt_object.disconnect_broker()
 

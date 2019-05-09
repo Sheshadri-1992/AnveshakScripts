@@ -176,7 +176,7 @@ class MqttPublish:
         :param topic: traffic color topic
         :return: nothing
         """
-        logging.debug("Sending traffic color topic json")
+        print("Sending traffic color topic json ",traffic_color_json)
         ret = self.client_traffic_color_topic.publish(topic, traffic_color_json, qos=0)
         ret.wait_for_publish()
         logging.debug("The ret is " + str(ret))

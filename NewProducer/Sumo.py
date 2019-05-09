@@ -408,6 +408,7 @@ class Sumo(threading.Thread):
 
                     lane_to_edge_id = lane[:-2]
                     if lane_to_edge_id == edge:
+
                         self.lock.acquire()
                         color_state = traci.trafficlight.getRedYellowGreenState(traffic_signal_id)
                         all_edge_lanes = traci.edge.getLaneNumber(edge)
@@ -617,6 +618,7 @@ class Sumo(threading.Thread):
 
                 node_id_index = custom_node_id_list.index(current_node_id[0])
                 camera_index = custom_node_id_list.index(camera)
+                print("NODE INDEX ", node_id_index, " CAMERA INDEX ", camera_index)
 
                 if node_id_index <= camera_index:
                     print("Sending message to traffic signal ", str(camera), " the distance is ", distance)
