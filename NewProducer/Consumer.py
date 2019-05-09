@@ -400,7 +400,7 @@ class ConsumerThread(threading.Thread):
             curr_time = datetime.now()
 
             # Medium queue edges
-            while batch_count < MAX_BATCH:  # and (item.timestamp >= curr_time):
+            while batch_count < MAX_BATCH and (item.timestamp >= curr_time):
                 if not self.medium_thread.medium_queue.empty():
                     item = self.medium_thread.get_element_from_queue()
                     medium_candidate_edges.append(item.get_edge_id())

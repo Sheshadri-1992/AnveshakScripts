@@ -27,7 +27,7 @@ class QueryStruct:
             self.timestamp = datetime.now() + timedelta(seconds=10)
 
         elif self.querytype == QueryType.mediumview:
-            self.timestamp = datetime.now() + timedelta(seconds=15)
+            self.timestamp = datetime.now() + timedelta(seconds=5)
 
         else:
             self.timestamp = datetime.now() + timedelta(seconds=1)
