@@ -458,6 +458,8 @@ class Sumo(threading.Thread):
         """
         # self.lock.acquire()
         traci.vehicle.setSpeed(vehicle_id, speed)
+        traci.vehicle.setMaxSpeed(vehicle_id, 27.0)
+        traci.vehicle.setMaxSpeedLat(vehicle_id, 27.0)
         # traci.vehicle.setSpeedMode(vehicle_id, 0)  # 0 is rouge mode
         # traci.vehicle.setLaneChangeMode(vehicle_id, 2218)  # 2218 is rouge mode
         # self.lock.acquire()
