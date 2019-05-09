@@ -311,8 +311,8 @@ class Sumo(threading.Thread):
 
         # store all the traffic light ids
         self.lock.acquire()
-        # traffic_light_sequence = traci.vehicle.getNextTLS(vehicle_id)  # THIS API HAS TO BE REPLACED
-        traffic_light_sequence = self.get_traffic_lights_between_src_dest()
+        traffic_light_sequence = traci.vehicle.getNextTLS(vehicle_id)  # THIS API HAS TO BE REPLACED
+        # traffic_light_sequence = self.get_traffic_lights_between_src_dest()
         self.lock.release()
 
         # all the upcoming traffic lights for the given vehicle
@@ -390,8 +390,8 @@ class Sumo(threading.Thread):
         """
 
         custom_edge_list = self.custom_edge_list  # this will give me the edge list
-        # custom_traffic_lights = self.get_traffic_lights_for_vehicle(self.ambulance_id) # THIS API HAS TO BE REPLACED
-        custom_traffic_lights = self.get_traffic_lights_between_src_dest()
+        custom_traffic_lights = self.get_traffic_lights_for_vehicle(self.ambulance_id) # THIS API HAS TO BE REPLACED
+        # custom_traffic_lights = self.get_traffic_lights_between_src_dest()
         traffic_id_color_dict = {}
 
         for traffic_signal_id in custom_traffic_lights:
@@ -578,14 +578,14 @@ class Sumo(threading.Thread):
 
         cameras_in_path_list = []
         for custom_node_id in custom_node_id_list:
-            if custom_node_id in custom_node_id_set:
+            if custom_node_id in cameras_in_path:
                 cameras_in_path_list.append(custom_node_id)
 
         # convert set to list
         # cameras_in_path_list = list(cameras_in_path)
 
         print("The custom node id list is ", custom_node_id_list)
-        print("camera in path list is ", cameras_in_path)
+        print("************************* Camera in path list is ", cameras_in_path_list)
 
         node1_index = 0
         for ele in custom_node_id_list:
