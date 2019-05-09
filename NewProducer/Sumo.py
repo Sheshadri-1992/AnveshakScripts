@@ -17,6 +17,7 @@ import sumolib
 from collections import OrderedDict
 import networkx as nx
 import types
+import datetime
 from networkx.readwrite import json_graph
 import gen_shortest_path
 from EdgeTrafficState import EdgeStateInfo
@@ -408,7 +409,6 @@ class Sumo(threading.Thread):
 
                     lane_to_edge_id = lane[:-2]
                     if lane_to_edge_id == edge:
-
                         self.lock.acquire()
                         color_state = traci.trafficlight.getRedYellowGreenState(traffic_signal_id)
                         all_edge_lanes = traci.edge.getLaneNumber(edge)
@@ -456,8 +456,8 @@ class Sumo(threading.Thread):
         """
         self.lock.acquire()
         traci.vehicle.setSpeed(vehicle_id, speed)
-        traci.vehicle.setSpeedMode(vehicle_id, 0)  # 0 is rouge mode
-        traci.vehicle.setLaneChangeMode(vehicle_id, 2218)  # 2218 is rouge mode
+        # traci.vehicle.setSpeedMode(vehicle_id, 0)  # 0 is rouge mode
+        # traci.vehicle.setLaneChangeMode(vehicle_id, 2218)  # 2218 is rouge mode
         self.lock.release()
 
     def perform_reset_traffic_lights(self, reset_id_list):
@@ -566,12 +566,12 @@ class Sumo(threading.Thread):
 
         custom_node_id_set = set(custom_node_id_list)
 
-        print("The camera list is ", self.camera_list)
+        # print("The camera list is ", self.camera_list)
         camera_set = set(self.camera_list)
         cameras_in_path = camera_set.intersection(custom_node_id_set)
 
         # print("Custom node id set ", custom_node_id_set)
-        print("************ Cameras path ", cameras_in_path)
+        # print("************ Cameras path ", cameras_in_path)
 
         print("The current edge the vehicle is in ", curr_edge_id)
         node_1 = self.edge_node_map.get(curr_edge_id)[1]  # the ending node
@@ -585,8 +585,8 @@ class Sumo(threading.Thread):
         # convert set to list
         # cameras_in_path_list = list(cameras_in_path)
 
-        print("The custom node id list is ", custom_node_id_list)
-        print("************************* Camera in path list is ", cameras_in_path_list)
+        # print("The custom node id list is ", custom_node_id_list)
+        # print("************************* Camera in path list is ", cameras_in_path_list)
 
         node1_index = 0
         for ele in custom_node_id_list:
@@ -614,6 +614,13 @@ class Sumo(threading.Thread):
             node_id_lat_long = self.node_to_lat_long_json[current_node_id[1]]
             camera_lat_long_pair = self.node_to_lat_long_json[camera]
             distance = TestCameraPosistion.distance_in_meters(node_id_lat_long, camera_lat_long_pair)
+            self.lock.acquire()
+            speed = traci.vehicle.getSpeed(self.ambulance_id)
+            position = traci.vehicle.getPosition(self.ambulance_id)
+            self.lock.release()
+            time_stamp = datetime.datetime.now()
+            print("************ speed = ", str(speed), " position = ", str(position), "********* time = ",
+                  str(time_stamp))
             if distance < (2 * 28):
 
                 node_id_index = custom_node_id_list.index(current_node_id[0])
