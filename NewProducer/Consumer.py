@@ -455,6 +455,10 @@ class ConsumerThread(threading.Thread):
                         medium_candidate_edges.append(item.get_edge_id())
                         batch_count = batch_count + 1
 
+                    if batch_count >= MAX_BATCH:
+                        logging.debug("Hit the 1500 barrier")
+                        break
+
                 medium_candidate_edges = self.prepare_candidate_edges(medium_candidate_edges)
                 logging.debug("message medium producer " + str(batch_count) + " ,running counter " + str(running_counter))
                 logging.debug("The medium candidate edges are " + str(len(medium_candidate_edges)))
@@ -476,12 +480,15 @@ class ConsumerThread(threading.Thread):
             # Wakeup every 10 seconds
             if index%10 == 0:
                 # Large queue edges
-                while batch_count < MAX_BATCH:
+                while not self.large_thread.large_queue.empty():
+                    item = self.large_thread.get_element_from_queue()
 
-                    if not self.large_thread.large_queue.empty():  # and (item.timestamp >= curr_time):
-                        item = self.large_thread.get_element_from_queue()
+                    if batch_count < MAX_BATCH and (item.timestamp >= curr_time):
                         large_candidate_edges.append(item.get_edge_id())
                         batch_count = batch_count + 1
+
+                    if batch_count >= MAX_BATCH:
+                        break
 
                 # The original candidate id do not contain lane id
                 large_candidate_edges = self.prepare_candidate_edges(large_candidate_edges)
@@ -499,4 +506,3 @@ class ConsumerThread(threading.Thread):
             index = index + 1
             running_counter = running_counter + 1
             time.sleep(1)
-            
