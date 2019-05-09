@@ -42,6 +42,7 @@ class Sumo(threading.Thread):
         self.amb_src = ""
         self.amb_dest = ""
         self.edge_node_map = {}
+        self.camera_list = []
         self.custom_edge_list = []
         self.custom_locations = {}
         self.edge_traffic_state = EdgeStateInfo()
@@ -63,6 +64,17 @@ class Sumo(threading.Thread):
 
         with open('./InputFiles/traffic_light_set.pkl', 'rb') as traffic_file:
             self.traffic_lights_set = pickle.load(traffic_file)
+
+        with open("./InputFiles/cameras_anveshak.json", 'rb') as camera_file:
+            self.camera_list = camera_file.read().split(",")
+
+        with open("./InputFiles/nodes_coord.json", 'rb') as json_file:
+            node_to_xy_json = json.load(json_file)
+            self.node_to_xy_json = node_to_xy_json
+
+        with open("./InputFiles/nodes_lat_lon_coord.json", 'rb') as json_file:
+            node_to_lat_long_json = json.load(json_file)
+            self.node_to_lat_long_json = node_to_lat_long_json
 
         logging.debug("All settings successfully initialized")
 
@@ -138,7 +150,7 @@ class Sumo(threading.Thread):
         """
 
         :param src: The starting point of ambulance route
-        :param dest: The end point of the ambulance route
+        :param dest: The end point of th:e ambulance route
         :return:
         """
         logging.debug("The new traffic lights method got called")
@@ -198,6 +210,72 @@ class Sumo(threading.Thread):
         :return: A set of edges which constitute shortest path
         """
         return None
+
+    def get_next_camera(self):
+        """
+        returns the id of the next camera id, in which a vehicle will feature or skip
+        but never takes a wrong decision
+        :return: return camera id
+        """
+        if self.ambulance_id == "-1":
+            logging.debug("Ambulance id not yet set")
+            return
+
+        custom_node_id_list = []
+        first_edge = self.custom_edge_list[0]
+        node_tuple = self.edge_node_map[first_edge]
+        custom_node_id_list.append(node_tuple[0])
+        custom_node_id_list.append(node_tuple[1])
+
+        for edge_id in self.custom_edge_list[1:]:
+            node_tuple = self.edge_node_map[edge_id]
+            custom_node_id_list.append(node_tuple[1])
+
+        custom_node_id_set = set(custom_node_id_list)
+
+        camera_set = set(self.camera_list)
+        cameras_in_path = camera_set.intersection(custom_node_id_set)
+
+        print("Custom node id set ",custom_node_id_set)
+        print("Cameras path ",cameras_in_path)
+
+        self.lock.acquire()
+        curr_edge_id = traci.vehicle.getRoadID(self.ambulance_id)
+        self.lock.release()
+
+        print("The current edge the vehicle is in ", curr_edge_id)
+        node_1 = self.edge_node_map.get(curr_edge_id)[1]  # the ending node
+
+        # convert set to list
+        custom_node_id_list = list(custom_node_id_set)
+        cameras_in_path_list = list(cameras_in_path)
+
+        node1_index = custom_node_id_list.index(node_1)
+        end_index = node_1 + 3
+
+        if end_index > (len(custom_node_id_list) - 1):
+            end_index = (len(custom_node_id_list) - 1)
+
+        candidate_list = custom_node_id_list[node1_index:end_index]
+        print("start index ",node1_index," end index ", end_index)
+        print("Candidate list ",candidate_list)
+
+        for node_id in candidate_list:
+            for camera in cameras_in_path_list:
+
+                node_id_lat_long = self.node_to_lat_long_json[node_id]
+                camera_lat_long_pair = self.node_to_lat_long_json[camera]
+                distance = TestCameraPosistion.distance_in_meters(node_id_lat_long, camera_lat_long_pair)
+                if distance < (2 * 28):
+                    logging.debug("Sending message to camera", camera)
+
+
+    def send_message_to_everyone(self):
+        """
+        A place holder to call anveshak module
+        :return:
+        """
+        logging.debug("Got the message")
 
     def init_green_wave(self):
         """
@@ -339,6 +417,7 @@ class Sumo(threading.Thread):
 
         print("Traffic lanes are ", self.edge_traffic_state.get_traffic_id_list())
         print("Lanes controlled by traffic lights ", self.edge_traffic_state.get_traffic_id_lane_dict())
+        self.get_next_camera()
 
         return "Added a vehicle successfully"
 
@@ -552,6 +631,8 @@ class Sumo(threading.Thread):
                 self.lock.release()
 
                 logging.debug("simulation step " + str(step))
+
+                self.get_next_camera()
 
                 # self.set_reset_traffic_lights()
 
