@@ -390,7 +390,7 @@ class Sumo(threading.Thread):
         """
 
         custom_edge_list = self.custom_edge_list  # this will give me the edge list
-        custom_traffic_lights = self.get_traffic_lights_for_vehicle(self.ambulance_id) # THIS API HAS TO BE REPLACED
+        custom_traffic_lights = self.get_traffic_lights_for_vehicle(self.ambulance_id)  # THIS API HAS TO BE REPLACED
         # custom_traffic_lights = self.get_traffic_lights_between_src_dest()
         traffic_id_color_dict = {}
 
@@ -614,8 +614,16 @@ class Sumo(threading.Thread):
             camera_lat_long_pair = self.node_to_lat_long_json[camera]
             distance = TestCameraPosistion.distance_in_meters(node_id_lat_long, camera_lat_long_pair)
             if distance < (2 * 28):
-                print("Sending message to traffic signal ", str(camera), " the distance is ", distance)
-                break
+
+                node_id_index = custom_node_id_list.index(current_node_id[1])
+                camera_index = custom_node_id_list.index(camera)
+
+                if node_id_index <= camera_index:
+                    print("Sending message to traffic signal ", str(camera), " the distance is ", distance)
+                    break
+                else:
+                    print(
+                        "******************though distance is less, vehicle has already passed the signal******************")
 
     def reset_traffic_lights(self, end_index):
         """
