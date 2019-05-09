@@ -569,7 +569,7 @@ class Sumo(threading.Thread):
         camera_set = set(self.camera_list)
         cameras_in_path = camera_set.intersection(custom_node_id_set)
 
-        print("Custom node id set ", custom_node_id_set)
+        # print("Custom node id set ", custom_node_id_set)
         print("************ Cameras path ", cameras_in_path)
 
         print("The current edge the vehicle is in ", curr_edge_id)
@@ -615,7 +615,7 @@ class Sumo(threading.Thread):
             distance = TestCameraPosistion.distance_in_meters(node_id_lat_long, camera_lat_long_pair)
             if distance < (2 * 28):
 
-                node_id_index = custom_node_id_list.index(current_node_id[1])
+                node_id_index = custom_node_id_list.index(current_node_id[0])
                 camera_index = custom_node_id_list.index(camera)
 
                 if node_id_index <= camera_index:
