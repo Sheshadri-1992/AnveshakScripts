@@ -614,18 +614,24 @@ class Sumo(threading.Thread):
 
         current_node_id = self.edge_node_map[curr_edge_id]
 
+        speed = traci.vehicle.getSpeed(self.ambulance_id)
+        position_cart = traci.vehicle.getPosition(self.ambulance_id)
+
+        cart_x, cart_y = position_cart[0], position_cart[1]
+        position_geo = traci.simulation.convertGeo(cart_x, cart_y)
+        final_geo = (position_geo[1], position_geo[0])
+
         # for node_id in candidate_list:
         for camera in cameras_in_path_list:
 
             node_id_lat_long = self.node_to_lat_long_json[current_node_id[1]]
             camera_lat_long_pair = self.node_to_lat_long_json[camera]
-            distance = TestCameraPosistion.distance_in_meters(node_id_lat_long, camera_lat_long_pair)
+            distance = TestCameraPosistion.distance_in_meters(final_geo, camera_lat_long_pair)
             # self.lock.acquire()
-            speed = traci.vehicle.getSpeed(self.ambulance_id)
-            position = traci.vehicle.getPosition(self.ambulance_id)
+
             # self.lock.acquire()
             time_stamp = datetime.datetime.now()
-            print("************ speed = ", str(speed), " position = ", str(position), "********* time = ",
+            print("************ speed = ", str(speed), " position = ", str(final_geo), "********* time = ",
                   str(time_stamp))
             if distance < (2 * 28):
 
@@ -638,7 +644,7 @@ class Sumo(threading.Thread):
                     break
                 else:
                     print(
-                        "******************though distance is less, vehicle has already passed the signal******************")
+                        "************though distance is less, vehicle has already passed the signal**********")
 
     def reset_traffic_lights(self, end_index):
         """
@@ -772,10 +778,11 @@ class Sumo(threading.Thread):
         # self.lock.acquire()
         traci.simulationStep()  # this is an important step
         # self.lock.acquire()
-        self.curr = traci.vehicle.getDistance(self.ambulance_id)
-        distance = (self.curr - self.temp)
-        print("The distance travelled is ", distance, " : ", self.sim_step)
-        self.temp = self.curr
+        if long(self.ambulance_id)>0:
+            self.curr = traci.vehicle.getDistance(self.ambulance_id)
+            distance = (self.curr - self.temp)
+            print("The distance travelled is ", distance, " : ", self.sim_step)
+            self.temp = self.curr
 
         logging.debug("simulation step " + str(self.sim_step))
         self.get_next_camera()
