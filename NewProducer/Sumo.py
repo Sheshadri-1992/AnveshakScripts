@@ -47,6 +47,8 @@ class Sumo(threading.Thread):
         self.custom_locations = {}
         self.sim_step = 0
         self.edge_traffic_state = EdgeStateInfo()
+        self.temp = 0.0
+        self.curr = 0.0
 
         # start the simulation here
         traci.start(self.sumo_cmd)
@@ -141,7 +143,7 @@ class Sumo(threading.Thread):
 
             TestCameraPosistion.calculate_within_radius(geo_co_ord[1], geo_co_ord[0])  # lat, long in reverse order
 
-            logging.debug("The dictionary is " + str(ambulance_dict) +str(datetime.now()))
+            logging.debug("The dictionary is " + str(ambulance_dict) + str(datetime.now()))
 
         except Exception as e:
 
@@ -770,6 +772,10 @@ class Sumo(threading.Thread):
         # self.lock.acquire()
         traci.simulationStep()  # this is an important step
         # self.lock.acquire()
+        self.curr = traci.vehicle.getDistance(self.ambulance_id)
+        distance = (self.curr - self.temp)
+        print("The distance travelled is ", distance, " : ", self.sim_step)
+        self.temp = self.curr
 
         logging.debug("simulation step " + str(self.sim_step))
         self.get_next_camera()
