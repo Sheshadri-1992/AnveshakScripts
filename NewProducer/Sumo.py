@@ -570,21 +570,26 @@ class Sumo(threading.Thread):
         cameras_in_path = camera_set.intersection(custom_node_id_set)
 
         print("Custom node id set ", custom_node_id_set)
-        print("Cameras path ", cameras_in_path)
+        print("************ Cameras path ", cameras_in_path)
 
         print("The current edge the vehicle is in ", curr_edge_id)
         node_1 = self.edge_node_map.get(curr_edge_id)[1]  # the ending node
         print("The node 1 is ", node_1)
 
+        cameras_in_path_list = []
+        for custom_node_id in custom_node_id_list:
+            if custom_node_id in custom_node_id_set:
+                cameras_in_path_list.append(custom_node_id)
+
         # convert set to list
-        cameras_in_path_list = list(cameras_in_path)
+        # cameras_in_path_list = list(cameras_in_path)
 
         print("The custom node id list is ", custom_node_id_list)
         print("camera in path list is ", cameras_in_path)
 
         node1_index = 0
         for ele in custom_node_id_list:
-            if (node_1 == ele):
+            if node_1 == ele:
                 print("Element is found ", ele)
                 break
 
