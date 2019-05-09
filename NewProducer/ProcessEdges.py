@@ -93,6 +93,14 @@ class ProducerConsumer:
         logging.debug("Stopped sumo execution " + str(result))
         return result
 
+    def control_traffic_light_signals(self, json_string):
+        """
+
+        :param json_string: Sent by the zmq message
+        :return:
+        """
+        logging.debug("zmq message to set reset traffic ")
+
     def load_json(self):
         """
         test/utility method to see file loading etc.,

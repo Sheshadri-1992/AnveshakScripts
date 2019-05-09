@@ -62,13 +62,13 @@ class Sumo(threading.Thread):
         self.graph = json_graph.node_link_graph(data)  # this is the graph
 
         with open('./InputFiles/traffic_lights_anveshak.json', 'rb') as traffic_file:
-	    json_string = traffic_file.read()
+            json_string = traffic_file.read()
             self.traffic_lights_set = json.loads(json_string)
 
-	with open("./InputFiles/cameras_anveshak.json", 'rb') as camera_file:
+        with open("./InputFiles/cameras_anveshak.json", 'rb') as camera_file:
             json_string = camera_file.read()
-	    self.camera_list = json.loads(json_string)
-	
+            self.camera_list = json.loads(json_string)
+
         with open("./InputFiles/nodes_coord.json", 'rb') as json_file:
             node_to_xy_json = json.load(json_file)
             self.node_to_xy_json = node_to_xy_json
@@ -212,15 +212,12 @@ class Sumo(threading.Thread):
         """
         return None
 
-
-
     def send_message_to_everyone(self):
         """
         A place holder to call anveshak module
         :return:
         """
         logging.debug("Got the message")
-
 
     def init_green_wave(self):
         """
@@ -292,6 +289,7 @@ class Sumo(threading.Thread):
                             "-452366265#17", "-452366265#16", "-236531497#1", "-236531497#0", "46918817", "-42013627#7",
                             "-42013627#6", "-42013627#5", "46918821"]
 
+        # important , ambulance source, hospital dest is set
         self.amb_src = source
         self.amb_dest = dest
 
@@ -313,7 +311,8 @@ class Sumo(threading.Thread):
 
         # store all the traffic light ids
         self.lock.acquire()
-        traffic_light_sequence = traci.vehicle.getNextTLS(vehicle_id)  # Possible breaking point
+        # traffic_light_sequence = traci.vehicle.getNextTLS(vehicle_id)  # THIS API HAS TO BE REPLACED
+        traffic_light_sequence = self.get_traffic_lights_between_src_dest()
         self.lock.release()
 
         # all the upcoming traffic lights for the given vehicle
@@ -325,10 +324,14 @@ class Sumo(threading.Thread):
             traffic_light_list.append(traffic_light_id)
 
         traffic_id_phase_dict = {}
+        traffic_id_state_dict = {}
         for traffic_id in traffic_light_list:
             self.lock.acquire()
             traffic_phase = traci.trafficlight.getPhase(traffic_id)
             traffic_id_phase_dict[traffic_id] = traffic_phase
+
+            traffic_state = traci.trafficlight.getRedYellowGreenState(traffic_id)
+            traffic_id_state_dict[traffic_id] = traffic_state
             self.lock.release()
 
         traffic_id_lanes_dict = {}
@@ -357,6 +360,7 @@ class Sumo(threading.Thread):
         self.edge_traffic_state.set_traffic_id_lane_dict(traffic_id_lanes_dict)
         self.edge_traffic_state.set_edge_lane_dict(edge_lane_dict)
         self.edge_traffic_state.set_traffic_id_index_dict(traffic_id_index_dict)
+        self.edge_traffic_state.set_traffic_id_state_dict(traffic_id_state_dict)
 
         logging.debug("Added a vehicle successfully")
 
@@ -386,7 +390,8 @@ class Sumo(threading.Thread):
         """
 
         custom_edge_list = self.custom_edge_list  # this will give me the edge list
-        custom_traffic_lights = self.get_traffic_lights_for_vehicle(self.ambulance_id)
+        # custom_traffic_lights = self.get_traffic_lights_for_vehicle(self.ambulance_id) # THIS API HAS TO BE REPLACED
+        custom_traffic_lights = self.get_traffic_lights_between_src_dest()
         traffic_id_color_dict = {}
 
         for traffic_signal_id in custom_traffic_lights:
@@ -398,17 +403,33 @@ class Sumo(threading.Thread):
             for edge in custom_edge_list:
 
                 index = 0
+                matches = 0
                 for lane in traffic_lanes:
 
                     lane_to_edge_id = lane[:-2]
                     if lane_to_edge_id == edge:
                         self.lock.acquire()
                         color_state = traci.trafficlight.getRedYellowGreenState(traffic_signal_id)
+                        all_edge_lanes = traci.edge.getLaneNumber(edge)
+                        vehicle_lane_id = traci.vehicle.getLaneID(self.ambulance_id)
                         self.lock.release()
                         color = color_state[index]
                         traffic_id_color_dict[traffic_signal_id] = color
 
+                        print("*************************************************************")
+                        print("MATCH FOUND ", edge, lane_to_edge_id, " match count ", matches, " traffic signal",
+                              traffic_signal_id)
+                        print("MATCH FOUND ", all_edge_lanes, " match count ", matches, " traffic signal",
+                              traffic_signal_id)
+                        print("MATCH FOUND ", vehicle_lane_id, " match count ", matches, " traffic signal",
+                              traffic_signal_id)
+                        print("*************************************************************")
+                        matches = matches + 1
+
                     index = index + 1
+
+                if matches > 1:
+                    print("WARNING MORE THAN ONE LANE MATCHES EDGE ID!!", matches)
 
         print("The traffic id color dict is ", traffic_id_color_dict)
         return traffic_id_color_dict
@@ -438,6 +459,82 @@ class Sumo(threading.Thread):
         traci.vehicle.setLaneChangeMode(vehicle_id, 2218)  # 2218 is rouge mode
         self.lock.release()
 
+    def perform_reset_traffic_lights(self, reset_id_list):
+        """
+
+        :param reset_id_list:
+        :return:
+        """
+
+        for traffic_signal_id in reset_id_list:
+            traffic_id_state_dict = self.edge_traffic_state.get_traffic_id_state_dict()
+            old_state = ""
+
+            if traffic_signal_id in traffic_id_state_dict:
+                old_state = traffic_id_state_dict[traffic_signal_id]
+            else:
+                self.lock.acquire()
+                old_state = traci.trafficlight.getRedYellowGreenState(traffic_signal_id)
+                self.lock.release()
+
+            self.lock.acquire()
+            traci.trafficlight.setRedYellowGreenState(traffic_signal_id, old_state)
+            traci.trafficlight.setPhaseDuration(traffic_signal_id, 120)  # 120 seconds of prev state
+            self.lock.release()
+
+            print("Reset the traffic lights to old state ", old_state)
+
+    def return_lane_id_given_edge_id_and_traffic_id(self, edge_id, traffic_id):
+        """
+        Returns the lane id in the set of all lanes in the traffic id
+        :param edge_id The current edge id of the vehicle
+        :param traffic_id The current traffic id
+        :return:
+        """
+
+    def perform_set_traffic_lights(self, set_id_list):
+        """
+
+        :param set_id_list: the traffic id which i need to turn green
+        :return: nothing
+        """
+
+        for traffic_signal_id in set_id_list:
+            self.lock.acquire()
+            curr_state = traci.trafficlight.getRedYellowGreenState(traffic_signal_id)
+            self.lock.release()
+
+            traffic_id_state_dict = self.edge_traffic_state.get_traffic_id_state_dict()
+            traffic_id_state_dict[traffic_signal_id] = curr_state
+
+            state_length = len(curr_state)  # set everything to Green for now
+            new_state = 'G' * state_length
+
+            self.lock.acquire()
+            traci.trafficlight.setRedYellowGreenState(traffic_signal_id, new_state)
+            self.lock.release()
+
+            print("In the perform set traffic lights state set ", new_state)
+
+    def perform_set_reset_traffic_lights(self, json_string):
+        """
+
+        :param json_string: received by the zmqq messaage
+        :return:
+        """
+        set_reset_dict = json.loads(json_string)
+        set_id_list = []
+        reset_id_list = []
+
+        if 'set' in set_reset_dict:
+            print("Setting the following json ", set_id_list)
+            set_id_list = set_reset_dict['set']
+            self.perform_set_traffic_lights(set_id_list)
+        else:
+            print("Resetting the following json ", reset_id_list)
+            reset_id_list = set_reset_dict['reset']
+            self.perform_reset_traffic_lights(reset_id_list)
+
     def get_next_camera(self):
         """
         returns the id of the next camera id, in which a vehicle will feature or skip
@@ -448,13 +545,13 @@ class Sumo(threading.Thread):
             logging.debug("Ambulance id not yet set")
             return
 
-	self.lock.acquire()
+        self.lock.acquire()
         curr_edge_id = traci.vehicle.getRoadID(self.ambulance_id)
         self.lock.release()
 
-	if curr_edge_id[0]==":" :
-		print("Returning Internal Edge ",curr_edge_id)
-		return
+        if curr_edge_id[0] == ":":
+            print("Returning Internal Edge ", curr_edge_id)
+            return
 
         custom_node_id_list = []
         first_edge = self.custom_edge_list[0]
@@ -468,53 +565,52 @@ class Sumo(threading.Thread):
 
         custom_node_id_set = set(custom_node_id_list)
 
-	print("The camera list is ",self.camera_list)
+        print("The camera list is ", self.camera_list)
         camera_set = set(self.camera_list)
         cameras_in_path = camera_set.intersection(custom_node_id_set)
 
-        print("Custom node id set ",custom_node_id_set)
-        print("Cameras path ",cameras_in_path)
+        print("Custom node id set ", custom_node_id_set)
+        print("Cameras path ", cameras_in_path)
 
         print("The current edge the vehicle is in ", curr_edge_id)
         node_1 = self.edge_node_map.get(curr_edge_id)[1]  # the ending node
-	print("The node 1 is ",node_1)
+        print("The node 1 is ", node_1)
 
         # convert set to list
         cameras_in_path_list = list(cameras_in_path)
 
-	print("The custom node id list is ",custom_node_id_list)
-	print("camera in path list is ",cameras_in_path)
+        print("The custom node id list is ", custom_node_id_list)
+        print("camera in path list is ", cameras_in_path)
 
         node1_index = 0
-	for ele in custom_node_id_list:
-		if(node_1 == ele):
-			print("Element is found ",ele)
-			break		
+        for ele in custom_node_id_list:
+            if (node_1 == ele):
+                print("Element is found ", ele)
+                break
 
-		node1_index = node1_index + 1 
+            node1_index = node1_index + 1
         end_index = node1_index + 3
 
-	print("start index is ",node1_index," end_index ",end_index)
+        print("start index is ", node1_index, " end_index ", end_index)
 
         if end_index > (len(custom_node_id_list) - 1):
             end_index = (len(custom_node_id_list) - 1)
 
         candidate_list = custom_node_id_list[node1_index:end_index]
-        print("start index ",node1_index," end index ", end_index)
-        print("Candidate list ",candidate_list)
+        print("start index ", node1_index, " end index ", end_index)
+        print("Candidate list ", candidate_list)
 
-	current_node_id = self.edge_node_map[curr_edge_id]
-	
+        current_node_id = self.edge_node_map[curr_edge_id]
+
         # for node_id in candidate_list:
         for camera in cameras_in_path_list:
-		
-		node_id_lat_long = self.node_to_lat_long_json[current_node_id[1]]
-		camera_lat_long_pair = self.node_to_lat_long_json[camera]
-		distance = TestCameraPosistion.distance_in_meters(node_id_lat_long, camera_lat_long_pair)
-		if distance < (2 * 28):
-		    print("Sending message to traffic signal ", str(camera)," the distance is ",distance)
-		    break
 
+            node_id_lat_long = self.node_to_lat_long_json[current_node_id[1]]
+            camera_lat_long_pair = self.node_to_lat_long_json[camera]
+            distance = TestCameraPosistion.distance_in_meters(node_id_lat_long, camera_lat_long_pair)
+            if distance < (2 * 28):
+                print("Sending message to traffic signal ", str(camera), " the distance is ", distance)
+                break
 
     def reset_traffic_lights(self, end_index):
         """
@@ -655,7 +751,7 @@ class Sumo(threading.Thread):
                 logging.debug("simulation step " + str(step))
 
                 # self.set_reset_traffic_lights()
-		self.get_next_camera()
+                self.get_next_camera()
 
                 step = step + 1  # this is an important step
 
