@@ -56,6 +56,9 @@ def get_shortest_path_traffic(graph, traffic_lights, source, destination, foresi
 
     :return:
     """
+
+    source = '3756191723'
+    destination = '3370075981'
     path = nx.shortest_path(graph, source, destination, weight='weight')
     lights = []
     if set(path) & traffic_lights:

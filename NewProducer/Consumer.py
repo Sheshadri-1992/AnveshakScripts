@@ -415,7 +415,7 @@ class ConsumerThread(threading.Thread):
                         logging.debug("path topic set..sending message..only once")
                         locations_dict = self.sumo_obj.get_custom_locations()
                         locations_list = list(locations_dict.keys())
-                        traffic_id_list = self.sumo_obj.get_traffic_lights_for_vehicle(self.sumo_obj.get_ambulance_id())
+                        traffic_id_list = self.sumo_obj.get_traffic_lights_between_src_dest()
                         traffic_id_lat_long_list = self.get_traffic_id_lat_long_list(traffic_id_list)
 
                         traffic_id_lat_long_dict = {}
