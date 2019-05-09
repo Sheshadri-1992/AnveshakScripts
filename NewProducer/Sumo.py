@@ -141,7 +141,7 @@ class Sumo(threading.Thread):
 
             TestCameraPosistion.calculate_within_radius(geo_co_ord[1], geo_co_ord[0])  # lat, long in reverse order
 
-            logging.debug("The dictionary is " + str(ambulance_dict))
+            logging.debug("The dictionary is " + str(ambulance_dict) +str(datetime.now()))
 
         except Exception as e:
 

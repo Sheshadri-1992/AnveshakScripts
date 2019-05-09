@@ -402,13 +402,13 @@ class ConsumerThread(threading.Thread):
 
             mqtt_object.connect_to_broker()
 
-            # Wake up every second
+            # Wake up every sim step
             if self.ambulance_topic != "" and self.ambulance_topic in self.register_dict:
                 logging.debug("Ambulance topic set..sending message")
                 vehicle_stat_dict = self.sumo_obj.get_vehicle_stats()
                 mqtt_object.send_vertex_message(json.dumps(vehicle_stat_dict), self.ambulance_topic)
 
-            # Wake up every 2 seconds
+            # Wake up every 2 sim step
             if index % 2 == 0:
                 if self.path_topic != "" and self.path_topic in self.register_dict:
                     if self.register_dict[self.path_topic]:
@@ -446,60 +446,60 @@ class ConsumerThread(threading.Thread):
                     mqtt_object.send_traffic_color_topic_message(json.dumps(traffic_color_dict),
                                                                  self.traffic_color_topic)
 
-            # Wakeup every 5 seconds
-            if index % 5 == 0:
-                # Medium queue edges
-                while not self.medium_thread.medium_queue.empty():
-                    item = self.medium_thread.get_element_from_queue()
-                    if batch_count < MAX_BATCH and item.timestamp >= curr_time:
-                        medium_candidate_edges.append(item.get_edge_id())
-                        batch_count = batch_count + 1
-
-                    if batch_count >= MAX_BATCH:
-                        logging.debug("Hit the 1500 barrier")
-                        break
-
-                medium_candidate_edges = self.prepare_candidate_edges(medium_candidate_edges)
-                logging.debug("message medium producer " + str(batch_count) + " ,running counter " + str(running_counter))
-                logging.debug("The medium candidate edges are " + str(len(medium_candidate_edges)))
-
-                # traci calls are being made here
-                medium_dict = self.sumo_obj.return_traffic_density(medium_candidate_edges)
-                # aggregate stuff needed here
-                medium_dict = self.aggregate_edge_id_traffic(medium_dict)
-                color_medium = self.get_edge_color(medium_dict, 1)  # 1 is medium
-
-                if self.medium_topic in self.register_dict:
-                    logging.debug("Medium topic set..sending message, the label is " + str(running_counter) + " " + str(
-                        len(color_medium.keys())))
-                    # key = "id:" +
-                    color_medium['id'] = str(running_counter)
-                    # final_message[str(running_counter)] = color_medium
-                    mqtt_object.send_edge_message(json.dumps(color_medium), self.medium_topic)
-
-            # Wakeup every 10 seconds
-            if index%10 == 0:
-                # Large queue edges
-                while not self.large_thread.large_queue.empty():
-                    item = self.large_thread.get_element_from_queue()
-
-                    if batch_count < MAX_BATCH and (item.timestamp >= curr_time):
-                        large_candidate_edges.append(item.get_edge_id())
-                        batch_count = batch_count + 1
-
-                    if batch_count >= MAX_BATCH:
-                        break
-
-                # The original candidate id do not contain lane id
-                large_candidate_edges = self.prepare_candidate_edges(large_candidate_edges)
-                logging.debug("The large candidate edges are" + str(len(large_candidate_edges)))
-                large_dict = self.sumo_obj.return_traffic_density(large_candidate_edges)
-                large_dict = self.aggregate_edge_id_traffic(large_dict)
-                color_large = self.get_edge_color(large_dict, 0)  # 0 is small
-
-                if self.large_topic in self.register_dict:
-                    logging.debug("Large topic set..sending message")
-                    mqtt_object.send_edge_message(json.dumps(color_large), self.large_topic)
+            # # Wakeup every 5 seconds
+            # if index % 5 == 0:
+            #     # Medium queue edges
+            #     while not self.medium_thread.medium_queue.empty():
+            #         item = self.medium_thread.get_element_from_queue()
+            #         if batch_count < MAX_BATCH and item.timestamp >= curr_time:
+            #             medium_candidate_edges.append(item.get_edge_id())
+            #             batch_count = batch_count + 1
+            #
+            #         if batch_count >= MAX_BATCH:
+            #             logging.debug("Hit the 1500 barrier")
+            #             break
+            #
+            #     medium_candidate_edges = self.prepare_candidate_edges(medium_candidate_edges)
+            #     logging.debug("message medium producer " + str(batch_count) + " ,running counter " + str(running_counter))
+            #     logging.debug("The medium candidate edges are " + str(len(medium_candidate_edges)))
+            #
+            #     # traci calls are being made here
+            #     medium_dict = self.sumo_obj.return_traffic_density(medium_candidate_edges)
+            #     # aggregate stuff needed here
+            #     medium_dict = self.aggregate_edge_id_traffic(medium_dict)
+            #     color_medium = self.get_edge_color(medium_dict, 1)  # 1 is medium
+            #
+            #     if self.medium_topic in self.register_dict:
+            #         logging.debug("Medium topic set..sending message, the label is " + str(running_counter) + " " + str(
+            #             len(color_medium.keys())))
+            #         # key = "id:" +
+            #         color_medium['id'] = str(running_counter)
+            #         # final_message[str(running_counter)] = color_medium
+            #         mqtt_object.send_edge_message(json.dumps(color_medium), self.medium_topic)
+            #
+            # # Wakeup every 10 seconds
+            # if index%10 == 0:
+            #     # Large queue edges
+            #     while not self.large_thread.large_queue.empty():
+            #         item = self.large_thread.get_element_from_queue()
+            #
+            #         if batch_count < MAX_BATCH and (item.timestamp >= curr_time):
+            #             large_candidate_edges.append(item.get_edge_id())
+            #             batch_count = batch_count + 1
+            #
+            #         if batch_count >= MAX_BATCH:
+            #             break
+            #
+            #     # The original candidate id do not contain lane id
+            #     large_candidate_edges = self.prepare_candidate_edges(large_candidate_edges)
+            #     logging.debug("The large candidate edges are" + str(len(large_candidate_edges)))
+            #     large_dict = self.sumo_obj.return_traffic_density(large_candidate_edges)
+            #     large_dict = self.aggregate_edge_id_traffic(large_dict)
+            #     color_large = self.get_edge_color(large_dict, 0)  # 0 is small
+            #
+            #     if self.large_topic in self.register_dict:
+            #         logging.debug("Large topic set..sending message")
+            #         mqtt_object.send_edge_message(json.dumps(color_large), self.large_topic)
 
             mqtt_object.disconnect_broker()
             logging.debug("Consumer sleeping...")
