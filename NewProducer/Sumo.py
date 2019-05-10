@@ -421,14 +421,14 @@ class Sumo(threading.Thread):
                         color = color_state[index]
                         traffic_id_color_dict[traffic_signal_id] = color
 
-                        print("*************************************************************")
-                        print("MATCH FOUND ", edge, lane_to_edge_id, " match count ", matches, " traffic signal",
-                              traffic_signal_id)
-                        print("MATCH FOUND ", all_edge_lanes, " match count ", matches, " traffic signal",
-                              traffic_signal_id)
-                        print("MATCH FOUND ", vehicle_lane_id, " match count ", matches, " traffic signal",
-                              traffic_signal_id)
-                        print("*************************************************************")
+                        # print("*************************************************************")
+                        # print("MATCH FOUND ", edge, lane_to_edge_id, " match count ", matches, " traffic signal",
+                        #       traffic_signal_id)
+                        # print("MATCH FOUND ", all_edge_lanes, " match count ", matches, " traffic signal",
+                        #       traffic_signal_id)
+                        # print("MATCH FOUND ", vehicle_lane_id, " match count ", matches, " traffic signal",
+                        #       traffic_signal_id)
+                        # print("*************************************************************")
                         matches = matches + 1
 
                     index = index + 1
@@ -778,7 +778,7 @@ class Sumo(threading.Thread):
         # self.lock.acquire()
         traci.simulationStep()  # this is an important step
         # self.lock.acquire()
-        if int(self.ambulance_id)>0:
+        if int(self.ambulance_id) > 0:
             self.curr = traci.vehicle.getDistance(self.ambulance_id)
             distance = (self.curr - self.temp)
             print("The distance travelled is ", distance, " : ", self.sim_step)
