@@ -64,16 +64,17 @@ class ProducerConsumer:
             latency = ambulance_dict['latency']
             batch_size = ambulance_dict['batch_size']
             traffic_color_topic = ambulance_dict['traffic_color_topic']
+            anveshak = ambulance_dict['anveshak']
 
             logging.debug(
                 "Ambulance co-ordinates received " + str(ambulance) + " , " + str(hospital) + " , " + str(
                     sessionid) + " , latency " + str(latency) + " , batchsize " + str(
                     batch_size) + " ,position topic " + str(
                     position_topic) + " , path topic " + str(path_topic) + " , path traffic topic " + str(
-                    path_traffic_topic))
+                    path_traffic_topic)+" , Anveshak mode "+ str(anveshak))
 
             self.consumer_thread.ambulance_topic_and_produce("newid", position_topic, path_topic, path_traffic_topic,
-                                                             traffic_color_topic, ambulance, hospital)
+                                                             traffic_color_topic, anveshak, ambulance, hospital)
 
         except Exception as e:
             logging.debug("The exception message is " + str(e))

@@ -80,7 +80,7 @@ def start_global_viewport():
     my_state.register_topic(lat, lon, resource_topic, graphid)
 
     logging.debug(
-        "The parameters recevied are " + str(lat) + "  :  " + str(lon) + "  :  " + str(
+        "The parameters received are " + str(lat) + "  :  " + str(lon) + "  :  " + str(
             graphid) + "  :  " + resource_topic)
 
     return json.dumps({'message': 'Success'})
@@ -122,6 +122,7 @@ def start_ambulance():
     traffic_color_topic = my_json['traffic_color_topic']
     latency = my_json['latency']
     batch_size = my_json['batch_size']
+    anveshak = my_json['anveshak']
     # dest = request.args.get('dest', default=0.0, type=float)
     # batch_size = request.args.get('batchsize', default=0.0, type=float)
     # max_latency = request.args.get('maxlatency', default=0.0, type=float)
@@ -138,6 +139,7 @@ def start_ambulance():
     my_dict['traffic_color_topic'] = traffic_color_topic
     my_dict['latency'] = latency
     my_dict['batch_size'] = batch_size
+    my_dict['anveshak'] = anveshak
 
     logging.debug("The post request is "+str(my_dict))
 

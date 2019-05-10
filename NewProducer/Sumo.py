@@ -474,6 +474,10 @@ class Sumo(threading.Thread):
         :return:
         """
 
+        if reset_id_list is None or len(reset_id_list) == 0:
+            logging.debug("Nothing to reset")
+            return
+
         for traffic_signal_id in reset_id_list:
             traffic_id_state_dict = self.edge_traffic_state.get_traffic_id_state_dict()
             old_state = ""
@@ -534,14 +538,20 @@ class Sumo(threading.Thread):
         set_id_list = []
         reset_id_list = []
 
-        if 'set' in set_reset_dict:
-            print("Setting the following json ", set_id_list)
-            set_id_list = set_reset_dict['set']
-            self.perform_set_traffic_lights(set_id_list)
-        else:
-            print("Resetting the following json ", reset_id_list)
-            reset_id_list = set_reset_dict['reset']
-            self.perform_reset_traffic_lights(reset_id_list)
+        set_id_list = self.get_traffic_lights_between_src_dest()
+
+        logging.debug("Setting all the traffic lights to green")
+        self.perform_set_traffic_lights(set_id_list)
+        self.perform_reset_traffic_lights(reset_id_list)
+
+        # if 'set' in set_reset_dict:
+        #     print("Setting the following json ", set_id_list)
+        #     set_id_list = set_reset_dict['set']
+        #     self.perform_set_traffic_lights(set_id_list)
+        # else:
+        #     print("Resetting the following json ", reset_id_list)
+        #     reset_id_list = set_reset_dict['reset']
+        #     self.perform_reset_traffic_lights(reset_id_list)
 
     def get_next_camera(self):
         """
@@ -811,9 +821,10 @@ class Sumo(threading.Thread):
 
             print("The exception is ", e)
 
-    def update_simulation_step(self):
+    def update_simulation_step(self, anveshak):
         """
         Is called from Consumer, updates the simulation step
+        :param anveshak: Tells whether this is anveshak or not
         :return: nothing
         """
 
@@ -825,6 +836,9 @@ class Sumo(threading.Thread):
             distance = (self.curr - self.temp)
             print("**** DISTANCE TRAVELLED is *******", distance, " : ", self.sim_step)
             self.temp = self.curr
+
+            if anveshak == "1":
+                logging.debug("Anveshak mode on ")
 
         logging.debug("simulation step " + str(self.sim_step))
         self.get_next_camera()

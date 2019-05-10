@@ -77,6 +77,9 @@ class ConsumerThread(threading.Thread):
         self.amb_source = "-1"
         self.amb_dest = "-1"
 
+        # anveshak mode or not, 0 is normal, 1 is anveshak
+        self.anveshak = "0"
+
         # reset flag
         self.stop_thread = False
 
@@ -112,7 +115,7 @@ class ConsumerThread(threading.Thread):
             self.small_topic = topic
 
     def ambulance_topic_and_produce(self, ambulance_id, position_topic, path_topic, path_traffic_topic,
-                                    traffic_color_topic, source, dest):
+                                    traffic_color_topic, anveshak, source, dest):
         """
 
         :param traffic_color_topic:
@@ -120,6 +123,7 @@ class ConsumerThread(threading.Thread):
         :param position_topic: The topic to which we need to publish ambulance updates
         :param path_topic: This is where the lat long of custom edges should be published
         :param path_traffic_topic: This is where the raw traffic updates have to be updated, lane level no aggregation
+        :param anveshak: parameter which tells whether it is anveshak mode or not
         :param source: The location of ambulance
         :param dest: The location of hospital
         :return: nothing
@@ -135,6 +139,7 @@ class ConsumerThread(threading.Thread):
         # set source and destination for ambulance
         self.amb_source = source  # VERY IMPORTANT
         self.amb_dest = dest  # VERY IMPORTANT
+        self.anveshak = anveshak  # VERY IMPORTANT
 
         # topic is set for the ambulance
         self.ambulance_topic = position_topic
@@ -286,7 +291,7 @@ class ConsumerThread(threading.Thread):
 
         return final_return_dict
 
-    def get_edge_color_simple(self, edge_traffic_dict):
+    def get_edge_color_focus_path(self, edge_traffic_dict):
         """
 
         :param edge_traffic_dict: The key is edge id , value is traffic density
@@ -299,12 +304,13 @@ class ConsumerThread(threading.Thread):
             try:
 
                 num_vehicles = edge_traffic_dict[edge]
+                total_distance = self.edge_dist_dict[edge]
 
-                total_roads_for_this_road = self.edge_lane_dict[edge]  # this edge format is understood by shriram
-                total_distance = 0
+                # total_roads_for_this_road = self.edge_lane_dict[edge]  # this edge format is understood by shriram
+                # total_distance = 0
                 # total distance has to be recalculated
-                for road in total_roads_for_this_road:  # this road will be like 25554#1
-                    total_distance = total_distance + self.edge_dist_dict[road]
+                # for road in total_roads_for_this_road:  # this road will be like 25554#1
+                #     total_distance = total_distance + self.edge_dist_dict[road]
 
                 vehicles_per_meter = (num_vehicles * 4.0) / (total_distance * 1.0)
 
@@ -450,7 +456,7 @@ class ConsumerThread(threading.Thread):
                     locations_dict = self.sumo_obj.get_custom_locations()
                     candidate_edges = list(locations_dict.keys())
                     lane_traffic_dict = self.sumo_obj.return_traffic_density(candidate_edges)
-                    lane_traffic_dict = self.get_edge_color_simple(lane_traffic_dict)
+                    lane_traffic_dict = self.get_edge_color_focus_path(lane_traffic_dict)
                     mqtt_object.send_path_traffic_topic_message(json.dumps(lane_traffic_dict),
                                                                 self.path_traffic_topic)
 
@@ -462,7 +468,7 @@ class ConsumerThread(threading.Thread):
                     mqtt_object.send_traffic_color_topic_message(json.dumps(traffic_color_dict),
                                                                  self.traffic_color_topic)
 
-            # Wakeup every 5 seconds
+            # Wakeup every 5 sim step
             if index % 5 == 0:
                 # Medium queue edges
                 while not self.medium_thread.medium_queue.empty():
@@ -518,12 +524,12 @@ class ConsumerThread(threading.Thread):
                     logging.debug("Large topic set..sending message")
                     mqtt_object.send_edge_message(json.dumps(color_large), self.large_topic)
 
-                    mqtt_object.disconnect_broker()
-                    logging.debug("Consumer sleeping...")
-                    index = index + 1
-                    running_counter = running_counter + 1
+            mqtt_object.disconnect_broker()
+            logging.debug("Consumer sleeping...")
+            index = index + 1
+            running_counter = running_counter + 1
 
-            self.sumo_obj.update_simulation_step()
+            self.sumo_obj.update_simulation_step(self.anveshak)
 
             end_time = time.time()
             time_executing = (end_time - start_time)
