@@ -534,7 +534,7 @@ class Sumo(threading.Thread):
         :param json_string: received by the zmqq messaage
         :return:
         """
-        set_reset_dict = json.loads(json_string)
+        # set_reset_dict = json.loads(json_string)
         set_id_list = []
         reset_id_list = []
 
@@ -542,6 +542,8 @@ class Sumo(threading.Thread):
 
         logging.debug("Setting all the traffic lights to green")
         self.perform_set_traffic_lights(set_id_list)
+
+        logging.debug("Reset all the traffic lights to green")
         self.perform_reset_traffic_lights(reset_id_list)
 
         # if 'set' in set_reset_dict:
@@ -839,6 +841,7 @@ class Sumo(threading.Thread):
 
             if anveshak == "1":
                 logging.debug("Anveshak mode on ")
+                self.perform_set_reset_traffic_lights("")
 
         logging.debug("simulation step " + str(self.sim_step))
         self.get_next_camera()

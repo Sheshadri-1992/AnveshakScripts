@@ -141,7 +141,7 @@ class MqttPublish:
         logging.debug("Sending edge id " + str(len(edge_json)) + " topic is " + str(topic))
         ret = self.client_edge.publish(topic, edge_json, qos=0)
         ret.wait_for_publish()
-        logging.debug("The label sent is " + str(my_dict.keys()))
+        logging.debug("The keys sent are " + str(my_dict.keys()))
         logging.debug("The ret is " + str(ret))
 
     def send_path_topic_message(self, path_json, topic):
