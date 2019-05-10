@@ -224,7 +224,11 @@ class ConsumerThread(threading.Thread):
             try:
 
                 num_vehicles = edge_traffic_dict[edge]
-                total_distance = self.edge_dist_dict[edge]
+                total_roads_for_this_road = self.edge_lane_dict[edge]  # this edge format is understood by shriram
+                total_distance = 0
+                # total distance has to be recalculated
+                for road in total_roads_for_this_road:  # this road will be like 25554#1
+                    total_distance = total_distance + self.edge_dist_dict[road]
 
                 vehicles_per_meter = (num_vehicles * 4.0) / (total_distance * 1.0)
 
@@ -296,7 +300,11 @@ class ConsumerThread(threading.Thread):
 
                 num_vehicles = edge_traffic_dict[edge]
 
-                total_distance = self.edge_dist_dict[edge]
+                total_roads_for_this_road = self.edge_lane_dict[edge]  # this edge format is understood by shriram
+                total_distance = 0
+                # total distance has to be recalculated
+                for road in total_roads_for_this_road:  # this road will be like 25554#1
+                    total_distance = total_distance + self.edge_dist_dict[road]
 
                 vehicles_per_meter = (num_vehicles * 4.0) / (total_distance * 1.0)
 
