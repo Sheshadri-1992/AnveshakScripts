@@ -17,7 +17,7 @@ import sumolib
 from collections import OrderedDict
 import networkx as nx
 import types
-import datetime
+from datetime import datetime
 from networkx.readwrite import json_graph
 import gen_shortest_path
 from EdgeTrafficState import EdgeStateInfo
@@ -395,8 +395,8 @@ class Sumo(threading.Thread):
         """
 
         custom_edge_list = self.custom_edge_list  # this will give me the edge list
-        custom_traffic_lights = self.get_traffic_lights_for_vehicle(self.ambulance_id)  # THIS API HAS TO BE REPLACED
-        # custom_traffic_lights = self.get_traffic_lights_between_src_dest()
+        # custom_traffic_lights = self.get_traffic_lights_for_vehicle(self.ambulance_id)  # THIS API HAS TO BE REPLACED
+        custom_traffic_lights = self.get_traffic_lights_between_src_dest()
         traffic_id_color_dict = {}
 
         for traffic_signal_id in custom_traffic_lights:
@@ -630,7 +630,7 @@ class Sumo(threading.Thread):
             # self.lock.acquire()
 
             # self.lock.acquire()
-            time_stamp = datetime.datetime.now()
+            time_stamp = datetime.now()
             print("************ speed = ", str(speed), " position = ", str(final_geo), "********* time = ",
                   str(time_stamp))
             if distance < (2 * 28):
@@ -778,7 +778,7 @@ class Sumo(threading.Thread):
         # self.lock.acquire()
         traci.simulationStep()  # this is an important step
         # self.lock.acquire()
-        if long(self.ambulance_id)>0:
+        if int(self.ambulance_id)>0:
             self.curr = traci.vehicle.getDistance(self.ambulance_id)
             distance = (self.curr - self.temp)
             print("The distance travelled is ", distance, " : ", self.sim_step)

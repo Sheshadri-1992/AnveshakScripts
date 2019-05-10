@@ -61,13 +61,15 @@ def get_shortest_path_traffic(graph, traffic_lights, source, destination, foresi
     destination = '3370075981'
     path = nx.shortest_path(graph, source, destination, weight='weight')
     lights = []
-    if set(path) & traffic_lights:
-        s = set(path) & traffic_lights
+    if set(path) & set(traffic_lights):
+        s = set(path) & set(traffic_lights)
         for node in path:
             if node in s:
                 lights.append(node)
 
     if foresight == -1:
         return lights
+
+    print("total number of traffic lights are ",len(lights))
 
     return set(lights[:foresight])
