@@ -28,6 +28,7 @@ class ConsumerThread(threading.Thread):
         self.sumo_obj = None
         self.edge_dist_dict = {}
         self.edge_node_map = {}
+        self.sesionid = 0
 
         # mandatory file loads
         logging.debug("Loading the low_ways json ")
@@ -76,6 +77,7 @@ class ConsumerThread(threading.Thread):
         # source and destination for ambulance
         self.amb_source = "-1"
         self.amb_dest = "-1"
+        self.sesionid = 0
 
         # anveshak mode or not, 0 is normal, 1 is anveshak
         self.anveshak = "0"
@@ -115,7 +117,7 @@ class ConsumerThread(threading.Thread):
             self.small_topic = topic
 
     def ambulance_topic_and_produce(self, ambulance_id, position_topic, path_topic, path_traffic_topic,
-                                    traffic_color_topic, anveshak, source, dest):
+                                    traffic_color_topic, anveshak, sessionid, source, dest):
         """
 
         :param traffic_color_topic:
@@ -124,6 +126,7 @@ class ConsumerThread(threading.Thread):
         :param path_topic: This is where the lat long of custom edges should be published
         :param path_traffic_topic: This is where the raw traffic updates have to be updated, lane level no aggregation
         :param anveshak: parameter which tells whether it is anveshak mode or not
+        :param sessionid: sent by the webservice
         :param source: The location of ambulance
         :param dest: The location of hospital
         :return: nothing
@@ -132,14 +135,17 @@ class ConsumerThread(threading.Thread):
         logging.debug(
             "The parameters received are " + str(ambulance_id) + str(position_topic) + str(source) + str(dest))
 
+        self.sesionid = int(sessionid)
+
         # add new vehicle
-        self.sumo_obj.add_new_vehicle(str(self.vehicle_id), str(self.route_id), [], source,
+        self.sumo_obj.add_new_vehicle(str(self.vehicle_id), str(self.route_id), [], self.sessionid, source,
                                       dest)  # ambulance id and list of edges
 
         # set source and destination for ambulance
         self.amb_source = source  # VERY IMPORTANT
         self.amb_dest = dest  # VERY IMPORTANT
         self.anveshak = anveshak  # VERY IMPORTANT
+
 
         # topic is set for the ambulance
         self.ambulance_topic = position_topic
