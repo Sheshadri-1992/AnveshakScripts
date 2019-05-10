@@ -30,6 +30,6 @@ client.on_message=on_message
 
 client.connect(broker_address, port=tPort, keepalive=60, bind_address="")
 
-client.subscribe("medium-live-traffic")
+client.subscribe("medium")
 client.on_subscribe = on_subscribe
 client.loop_forever()

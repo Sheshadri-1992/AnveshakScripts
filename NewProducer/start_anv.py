@@ -44,6 +44,7 @@ def __send_message(msg, ip):
     :return: Nothing
     """
     try:
+        print(ip)
         buffer = msg.SerializeToString()
         zmq_context = zmq.Context()
         zmq_socket = zmq_context.socket(zmq.PUSH)
@@ -71,10 +72,10 @@ def start_anveshak(session_id, max_tol_lat, upper_limit_bs, source, destination,
     __send_message(msg, ip)
 
 
-def vehicle_enters_fov(session_id, camera_id):
+def vehicle_enters_fov(session_id, camera_id, data):
     camera_id = 'C_' + str(camera_id)
-    ip = 'tcp://'+cam_id_to_filter_map[camera_id]
-    msg = __make_message(camera_id, camera_id, pickle.dumps(True), session_id)
+    ip = 'tcp://'+fid_to_machineip[cam_id_to_filter_map[camera_id]]
+    msg = __make_message(camera_id, camera_id, pickle.dumps(True), session_id, data=data)
     __send_message(msg, ip)
 
 
@@ -88,5 +89,10 @@ def vehicle_exits_fov(session_id, camera_id):
     __send_message(msg, ip)
 """
 
-f = open('./InputFiles/cam_id_to_filter.pkl', 'rb')
+f = open('cam_id_to_filter.pkl', 'rb')
 cam_id_to_filter_map = pickle.load(f)
+f.close()
+f = open('./InputFiles/fid_to_machineip.pkl', 'rb')
+fid_to_machineip = pickle.load(f)
+f.close()
+

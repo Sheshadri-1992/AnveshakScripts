@@ -566,6 +566,7 @@ class Sumo(threading.Thread):
         :param sessionid The session sent by the web service
         :return:
         """
+
         print("Calling anveshak with cameraid ","C_", camera_id, " session id ", sessionid)
         start_anv.vehicle_enters_fov(sessionid, camera_id) # THIS IS IMPORTANT
 

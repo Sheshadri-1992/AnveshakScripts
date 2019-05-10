@@ -326,7 +326,7 @@ class ConsumerThread(threading.Thread):
                 print("Exception in focus path get color ", e, " the edge is ", edge)
                 edgeid_color_dict[edge] = 0
 
-	print("the FOCUS DICT IS ",edgeid_color_dict)
+        print("the FOCUS DICT IS ", edgeid_color_dict)
 
         return edgeid_color_dict
 
@@ -414,8 +414,8 @@ class ConsumerThread(threading.Thread):
             large_candidate_edges = []
             curr_time = datetime.now()
 
-	    # print the index value
-	    print("******************************* INDEX = ",index," *********************************")
+            # print the index value
+            print("******************************* INDEX = ", index, " *********************************")
 
             # time measurement for execution starts here
             start_time = time.time()
