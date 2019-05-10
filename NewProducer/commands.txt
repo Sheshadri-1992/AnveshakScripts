@@ -5,3 +5,5 @@ http://localhost:5000/start_view_port?p=5.0&q=4.8&graphid=0&topic=low
 update_view_port with args
 
 http://localhost:5000/update_view_port?p=5.0&q=4.8&graphid=0
+
+curl -i -H "Content-Type: application/json" -X POST -d '{"ambulance" : "1", "hospital" : "2" , "session" : "3" , "position_topic" : "ambulance", "path_topic" : "shortest_path", "path_traffic_topic" : "traffic", "traffic_color_topic" : "traffic_color_topic" , "latency" : "4", "batch_size" : "1" }' http://10.24.24.7:5000/start_simulation

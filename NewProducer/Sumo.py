@@ -435,6 +435,7 @@ class Sumo(threading.Thread):
 
                 if matches > 1:
                     print("WARNING MORE THAN ONE LANE MATCHES EDGE ID!!", matches)
+                    print(" EDGE ID AND TRAFFIC LANES ",edge, " : traffic LANES ", traffic_lanes)
 
         print("The traffic id color dict is ", traffic_id_color_dict)
         return traffic_id_color_dict
