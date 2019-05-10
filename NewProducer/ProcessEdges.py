@@ -54,7 +54,6 @@ class ProducerConsumer:
         """
 
         try:
-
             logging.debug("The ambulance dict is " + str(ambulance_dict))
             ambulance = ambulance_dict['ambulance']
             hospital = ambulance_dict['hospital']
@@ -64,6 +63,7 @@ class ProducerConsumer:
             path_traffic_topic = ambulance_dict['path_traffic_topic']
             latency = ambulance_dict['latency']
             batch_size = ambulance_dict['batch_size']
+            traffic_color_topic = ambulance_dict['traffic_color_topic']
 
             logging.debug(
                 "Ambulance co-ordinates received " + str(ambulance) + " , " + str(hospital) + " , " + str(
@@ -73,7 +73,7 @@ class ProducerConsumer:
                     path_traffic_topic))
 
             self.consumer_thread.ambulance_topic_and_produce("newid", position_topic, path_topic, path_traffic_topic,
-                                                             ambulance, hospital)
+                                                             traffic_color_topic, ambulance, hospital)
 
         except Exception as e:
             logging.debug("The exception message is " + str(e))

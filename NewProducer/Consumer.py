@@ -111,9 +111,11 @@ class ConsumerThread(threading.Thread):
             self.register_dict[topic] = True
             self.small_topic = topic
 
-    def ambulance_topic_and_produce(self, ambulance_id, position_topic, path_topic, path_traffic_topic, source, dest):
+    def ambulance_topic_and_produce(self, ambulance_id, position_topic, path_topic, path_traffic_topic,
+                                    traffic_color_topic, source, dest):
         """
 
+        :param traffic_color_topic:
         :param ambulance_id: The id of the vehicle to be inserted
         :param position_topic: The topic to which we need to publish ambulance updates
         :param path_topic: This is where the lat long of custom edges should be published
@@ -152,7 +154,7 @@ class ConsumerThread(threading.Thread):
         self.register_dict[self.path_traffic_topic] = True
 
         # this topic is for the traffic color updates
-        self.traffic_color_topic = "traffic_color"
+        self.traffic_color_topic = traffic_color_topic
         self.register_dict[self.traffic_color_topic] = True
 
         # increment vehicle id
@@ -437,23 +439,22 @@ class ConsumerThread(threading.Thread):
                         # need to set it to True again when there is a custom edge list which gets updated
                         self.register_dict[self.path_topic] = False
 
-                        if self.path_traffic_topic != "" and self.path_traffic_topic in self.register_dict:
-                            logging.debug("path traffic topic set.. sending message")
-                        locations_dict = self.sumo_obj.get_custom_locations()
-                        candidate_edges = list(locations_dict.keys())
-                        lane_traffic_dict = self.sumo_obj.return_traffic_density(candidate_edges)
-                        lane_traffic_dict = self.get_edge_color_simple(lane_traffic_dict)
-                        mqtt_object.send_path_traffic_topic_message(json.dumps(lane_traffic_dict),
-                                                                    self.path_traffic_topic)
+                if self.path_traffic_topic != "" and self.path_traffic_topic in self.register_dict:
+                    logging.debug("path traffic topic set.. sending message")
+                    locations_dict = self.sumo_obj.get_custom_locations()
+                    candidate_edges = list(locations_dict.keys())
+                    lane_traffic_dict = self.sumo_obj.return_traffic_density(candidate_edges)
+                    lane_traffic_dict = self.get_edge_color_simple(lane_traffic_dict)
+                    mqtt_object.send_path_traffic_topic_message(json.dumps(lane_traffic_dict),
+                                                                self.path_traffic_topic)
 
-                        traffic_color_dict = {}
-                        if self.traffic_color_topic != "" and self.traffic_color_topic in self.register_dict:
-                            traffic_color_dict = self.sumo_obj.prepare_traffic_color_payload()
-
-                        print("The number of traffic lights are ", len(traffic_color_dict.keys()))
-                        print("Getting the traffic color payload ", traffic_color_dict)
-                        mqtt_object.send_traffic_color_topic_message(json.dumps(traffic_color_dict),
-                                                                     self.traffic_color_topic)
+                traffic_color_dict = {}
+                if self.traffic_color_topic != "" and self.traffic_color_topic in self.register_dict:
+                    traffic_color_dict = self.sumo_obj.prepare_traffic_color_payload()
+                    print("The number of traffic lights are ", len(traffic_color_dict.keys()))
+                    print("Getting the traffic color payload ", traffic_color_dict)
+                    mqtt_object.send_traffic_color_topic_message(json.dumps(traffic_color_dict),
+                                                                 self.traffic_color_topic)
 
             # Wakeup every 5 seconds
             if index % 5 == 0:
