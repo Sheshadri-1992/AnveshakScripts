@@ -226,20 +226,18 @@ class ConsumerThread(threading.Thread):
                 num_vehicles = edge_traffic_dict[edge]
                 total_distance = self.edge_dist_dict[edge]
 
-                vehicles_per_meter = float(num_vehicles * 1.0) / float(total_distance * 1.0)
-                cat_1 = vehicles_per_meter / 3.0
-                cat_2 = (2.0 * vehicles_per_meter) / 3.0
+                vehicles_per_meter = (num_vehicles * 4.0) / (total_distance * 1.0)
 
                 # color bucket logic
-                if vehicles_per_meter <= cat_1:
-                    edgeid_color_dict[edge] = 0
-                elif cat_1 < vehicles_per_meter <= cat_2:
-                    edgeid_color_dict[edge] = 1
+                if vehicles_per_meter <= 0.4:
+                    edgeid_color_dict[edge] = [0, num_vehicles]
+                elif 0.4 < vehicles_per_meter <= 0.8:
+                    edgeid_color_dict[edge] = [1, num_vehicles]
                 else:
-                    edgeid_color_dict[edge] = 2
+                    edgeid_color_dict[edge] = [2, num_vehicles]
 
             except Exception as e:
-                # print("Exception in get color ", e, " the edge is ", edge)
+                print("Exception in get color ", e, " the edge is ", edge)
                 edgeid_color_dict[edge] = 0
 
         local_dict = {}
@@ -300,17 +298,15 @@ class ConsumerThread(threading.Thread):
 
                 total_distance = self.edge_dist_dict[edge]
 
-                vehicles_per_meter = float(num_vehicles * 1.0) / float(total_distance * 1.0)
-                cat_1 = vehicles_per_meter / 3.0
-                cat_2 = (2.0 * vehicles_per_meter) / 3.0
+                vehicles_per_meter = (num_vehicles * 4.0) / (total_distance * 1.0)
 
                 # color bucket logic
-                if vehicles_per_meter <= cat_1:
-                    edgeid_color_dict[edge] = 0
-                elif cat_1 < vehicles_per_meter <= cat_2:
-                    edgeid_color_dict[edge] = 1
+                if vehicles_per_meter <= 0.4:
+                    edgeid_color_dict[edge] = [0, num_vehicles]
+                elif 0.4 < vehicles_per_meter <= 0.8:
+                    edgeid_color_dict[edge] = [1, num_vehicles]
                 else:
-                    edgeid_color_dict[edge] = 2
+                    edgeid_color_dict[edge] = [2, num_vehicles]
 
             except Exception as e:
                 print("Exception in get color ", e, " the edge is ", edge)
