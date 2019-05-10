@@ -79,7 +79,6 @@ class ConsumerThread(threading.Thread):
 
         # anveshak mode or not, 0 is normal, 1 is anveshak
         self.anveshak = "0"
-        self.sessionid = 0
 
         # reset flag
         self.stop_thread = False
@@ -116,7 +115,7 @@ class ConsumerThread(threading.Thread):
             self.small_topic = topic
 
     def ambulance_topic_and_produce(self, ambulance_id, position_topic, path_topic, path_traffic_topic,
-                                    traffic_color_topic, anveshak, sessionid, source, dest):
+                                    traffic_color_topic, anveshak, source, dest):
         """
 
         :param traffic_color_topic:
@@ -125,21 +124,16 @@ class ConsumerThread(threading.Thread):
         :param path_topic: This is where the lat long of custom edges should be published
         :param path_traffic_topic: This is where the raw traffic updates have to be updated, lane level no aggregation
         :param anveshak: parameter which tells whether it is anveshak mode or not
-        :param sessionid: sessionid is sent by ambulance topic and produce
         :param source: The location of ambulance
         :param dest: The location of hospital
         :return: nothing
         """
 
         logging.debug(
-            "The parameters received are " + str(ambulance_id) + str(position_topic) + str(source) + str(
-                dest) + " sessionid " + str(sessionid))
-
-        # session id set
-        self.sessionid = sessionid
+            "The parameters received are " + str(ambulance_id) + str(position_topic) + str(source) + str(dest))
 
         # add new vehicle
-        self.sumo_obj.add_new_vehicle(str(self.vehicle_id), str(self.route_id), [], self.sessionid, source,
+        self.sumo_obj.add_new_vehicle(str(self.vehicle_id), str(self.route_id), [], source,
                                       dest)  # ambulance id and list of edges
 
         # set source and destination for ambulance
@@ -329,8 +323,10 @@ class ConsumerThread(threading.Thread):
                     edgeid_color_dict[edge] = [2, num_vehicles]
 
             except Exception as e:
-                print("Exception in get color ", e, " the edge is ", edge)
+                print("Exception in focus path get color ", e, " the edge is ", edge)
                 edgeid_color_dict[edge] = 0
+
+	print("the FOCUS DICT IS ",edgeid_color_dict)
 
         return edgeid_color_dict
 
@@ -417,6 +413,9 @@ class ConsumerThread(threading.Thread):
             medium_candidate_edges = []
             large_candidate_edges = []
             curr_time = datetime.now()
+
+	    # print the index value
+	    print("******************************* INDEX = ",index," *********************************")
 
             # time measurement for execution starts here
             start_time = time.time()
