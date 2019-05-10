@@ -401,6 +401,8 @@ class ConsumerThread(threading.Thread):
             medium_candidate_edges = []
             large_candidate_edges = []
             curr_time = datetime.now()
+
+            # time measurement for execution starts here
             start_time = time.time()
             mqtt_object.connect_to_broker()
 
@@ -519,14 +521,16 @@ class ConsumerThread(threading.Thread):
 
             self.sumo_obj.update_simulation_step()
 
-            # end_time = time.time()
-            # time_executing = (end_time - start_time)
-            #
-            # # Sleep based on how much time has elapsed
-            # time_to_sleep = 0
-            #
-            # if time_executing <= 1:
-            #     time_to_sleep = 1 - time_executing
+            end_time = time.time()
+            time_executing = (end_time - start_time)
 
-            # logging.debug("Consumer is sleeping for " + str(time_to_sleep) + " seconds")
-            time.sleep(1)
+            # sleep value cannot be zero
+            time_to_sleep = 1 - time_executing
+
+            if time_to_sleep > 0:
+                logging.debug("Consumer is sleeping for " + str(time_to_sleep) + " seconds")
+                time.sleep(time_to_sleep)
+            else:
+                logging.debug(
+                    "Consumer does not sleep because time execution is > 1 " + str(time_executing) + " : " + str(
+                        time_to_sleep))

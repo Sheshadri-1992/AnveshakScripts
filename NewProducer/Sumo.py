@@ -781,7 +781,7 @@ class Sumo(threading.Thread):
         if int(self.ambulance_id) > 0:
             self.curr = traci.vehicle.getDistance(self.ambulance_id)
             distance = (self.curr - self.temp)
-            print("The distance travelled is ", distance, " : ", self.sim_step)
+            print("**** DISTANCE TRAVELLED is *******", distance, " : ", self.sim_step)
             self.temp = self.curr
 
         logging.debug("simulation step " + str(self.sim_step))
