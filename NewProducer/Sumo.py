@@ -17,6 +17,7 @@ import sumolib
 from collections import OrderedDict
 import networkx as nx
 import types
+import start_anv
 from datetime import datetime
 from networkx.readwrite import json_graph
 import gen_shortest_path
@@ -41,6 +42,7 @@ class Sumo(threading.Thread):
         self.edge_list = []  # not used, remove after review
         self.ambulance_id = "-1"
         self.amb_src = ""
+        self.sessionid = 0
         self.amb_dest = ""
         self.edge_node_map = {}
         self.custom_edge_list = []
@@ -272,13 +274,14 @@ class Sumo(threading.Thread):
 
             print("Excpetion in initi green wave " + e)
 
-    def add_new_vehicle(self, vehicle_id, new_route_id, custom_edge_list, source, dest):
+    def add_new_vehicle(self, vehicle_id, new_route_id, custom_edge_list, sessionid, source, dest):
         """
         This method needs to add a vehicle and a set of routes it will follow
         The vehicle is an ambulance, the new route is the set of sumo edges
         :param vehicle_id: id of the ambulance
         :param new_route_id for adding new route
         :param custom_edge_list: the custom edge list for the new route
+        :param sessionid: Session id passed from the user
         :return:
         """
 
@@ -296,6 +299,7 @@ class Sumo(threading.Thread):
         # important , ambulance source, hospital dest is set
         self.amb_src = source
         self.amb_dest = dest
+        self.sessionid = sessionid  # THIS IS VERY IMPORTANT
 
         custom_edge_list, locations, edge_node_map = gen_shortest_path.compute_shortest_path(source, dest, self.graph)
         self.custom_edge_list = custom_edge_list
@@ -555,6 +559,16 @@ class Sumo(threading.Thread):
         #     reset_id_list = set_reset_dict['reset']
         #     self.perform_reset_traffic_lights(reset_id_list)
 
+    def make_a_call_to_anveshak(self, camera_id, sessionid):
+        """
+
+        :param camera_id The camera to be activated
+        :param sessionid The session sent by the web service
+        :return:
+        """
+        print("Calling anveshak with cameraid ", camera_id, " session id ", sessionid)
+        # start_anv.vehicle_enters_fov(sessionid, camera_id) # THIS IS IMPORTANT
+
     def get_next_camera(self):
         """
         returns the id of the next camera id, in which a vehicle will feature or skip
@@ -653,7 +667,11 @@ class Sumo(threading.Thread):
                 print("NODE INDEX ", node_id_index, " CAMERA INDEX ", camera_index)
 
                 if node_id_index <= camera_index:
-                    print("Sending message to traffic signal ", str(camera), " the distance is ", distance)
+                    print("Sending message to camera ", str(camera), " the distance is ", distance)
+
+                    # call to anveshak, needed parameters are camera and sessionid
+                    self.make_a_call_to_anveshak(camera, self.sessionid)
+
                     break
                 else:
                     print(
@@ -840,11 +858,12 @@ class Sumo(threading.Thread):
             self.temp = self.curr
 
             if anveshak == "1":
-                logging.debug("Anveshak mode on ")
+                print("Anveshak mode on , the session id is ", self.sessionid)
+                self.get_next_camera()
                 self.perform_set_reset_traffic_lights("")
 
         logging.debug("simulation step " + str(self.sim_step))
-        self.get_next_camera()
+
         self.sim_step = self.sim_step + 1
 
     # def run(self):

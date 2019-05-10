@@ -7,6 +7,7 @@ from random import randint
 import Queue
 from Consumer import ConsumerThread
 # import numpy as np
+import start_anv
 from Sumo import Sumo
 
 # Global variables & constants
@@ -24,6 +25,8 @@ class ProducerConsumer:
         self.sumo_obj = Sumo()
         self.flag = True
         self.sumo_flag = True
+        self.max_latency = 0
+        self.batch_size = 0
         self.consumer_thread = ConsumerThread(name='consumer')
         self.consumer_thread.update_sumo_object(self.sumo_obj)
 
@@ -71,10 +74,17 @@ class ProducerConsumer:
                     sessionid) + " , latency " + str(latency) + " , batchsize " + str(
                     batch_size) + " ,position topic " + str(
                     position_topic) + " , path topic " + str(path_topic) + " , path traffic topic " + str(
-                    path_traffic_topic)+" , Anveshak mode "+ str(anveshak))
+                    path_traffic_topic) + " , Anveshak mode " + str(anveshak))
 
             self.consumer_thread.ambulance_topic_and_produce("newid", position_topic, path_topic, path_traffic_topic,
-                                                             traffic_color_topic, anveshak, ambulance, hospital)
+                                                             traffic_color_topic, anveshak, sessionid, ambulance,
+                                                             hospital)
+
+            self.max_latency = latency
+            self.batch_size = batch_size
+
+            # start_anv.start_anveshak(int(sessionid), int(latency), int(batch_size), ambulance, hospital,
+            #                          "tcp://10.244.17.8:9000")
 
         except Exception as e:
             logging.debug("The exception message is " + str(e))
