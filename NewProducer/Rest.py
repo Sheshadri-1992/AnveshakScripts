@@ -119,6 +119,7 @@ def start_ambulance():
     position_topic = my_json['position_topic']
     path_topic = my_json['path_topic']
     path_traffic_topic = my_json['path_traffic_topic']
+    traffic_color_topic = my_json['traffic_color_topic']
     latency = my_json['latency']
     batch_size = my_json['batch_size']
     # dest = request.args.get('dest', default=0.0, type=float)
@@ -134,6 +135,7 @@ def start_ambulance():
     my_dict['position_topic'] = position_topic
     my_dict['path_topic'] = path_topic
     my_dict['path_traffic_topic'] = path_traffic_topic
+    my_dict['traffic_color_topic'] = traffic_color_topic
     my_dict['latency'] = latency
     my_dict['batch_size'] = batch_size
 
