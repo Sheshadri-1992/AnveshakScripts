@@ -435,7 +435,7 @@ class Sumo(threading.Thread):
 
                 if matches > 1:
                     print("WARNING MORE THAN ONE LANE MATCHES EDGE ID!!", matches)
-                    print(" EDGE ID AND TRAFFIC LANES ",edge, " : traffic LANES ", traffic_lanes)
+                    print(" EDGE ID AND TRAFFIC LANES ", edge, " : traffic LANES ", traffic_lanes)
 
         print("The traffic id color dict is ", traffic_id_color_dict)
         return traffic_id_color_dict
@@ -687,6 +687,29 @@ class Sumo(threading.Thread):
             traci.trafficlight.setPhaseDuration(traffic_id, 100)
             # self.lock.acquire()
 
+    def get_traffic_color_given_edge_id_and_traffic_id(self, edge_id, traffic_signal_id):
+        """
+
+        :param edge_id: The edge id that we are interested
+        :param traffic_signal_id: The traffic signal id that manages the current edge id
+        :return:
+        """
+
+        traffic_lanes = traci.trafficlight.getControlledLanes(traffic_signal_id)
+        # lane_index
+
+        final_color = ""
+        for lane in traffic_lanes:
+
+            lane_to_edge_id = lane[:-2]
+            if lane_to_edge_id == edge_id:
+                final_color = final_color + 'G'
+            else:
+                final_color = final_color + 'r'
+
+        print("####################### The final color ", final_color)
+        return final_color
+
     def set_traffic_lights(self, start_index, end_index):
         """
 
@@ -703,32 +726,50 @@ class Sumo(threading.Thread):
 
         candidate_edge_list = self.custom_edge_list[start_index:end_index]
 
-        if len(candidate_edge_list) == 0:
+        if candidate_edge_list is None or len(candidate_edge_list) == 0:
             logging.debug("set_traffic_lights nothing to set")
             return
 
         nodes_to_be_checked = []
 
-        for edge_id in candidate_edge_list:
+        first_edge_id = candidate_edge_list[0]
+        node_tuple = self.edge_node_map[first_edge_id]
+        nodes_to_be_checked.append(node_tuple[0])
+        nodes_to_be_checked.append(node_tuple[1])
+
+        for i in range(1, len(candidate_edge_list)):
+            edge_id = candidate_edge_list[i]
             node_tuple = self.edge_node_map[edge_id]
-            nodes_to_be_checked.append(node_tuple[0])
             nodes_to_be_checked.append(node_tuple[1])
 
         traffic_light_to_be_set = []
+        corresponding_edge_id_controlled_by_traffic_id = []
 
         all_traffic_id_list = self.get_traffic_lights_between_src_dest()
 
+        edge_id_index = 0
         for node_id in nodes_to_be_checked:
+
             for traffic_id in all_traffic_id_list:
                 if node_id == traffic_id:
                     traffic_light_to_be_set.append(traffic_id)
+                    corresponding_edge_id_controlled_by_traffic_id.append(candidate_edge_list[edge_id_index])
 
+            edge_id_index = edge_id_index + 1
+
+        print("CANDIDATE EDGE ID LENGTH ", len(corresponding_edge_id_controlled_by_traffic_id))
+        print("CANDIDATE TRAFFIC ID LENGTH ", len(traffic_light_to_be_set))
+
+        edge_id_index = 0
         for traffic_id in traffic_light_to_be_set:
             # self.lock.acquire()
             curr_state = traci.trafficlight.getRedYellowGreenState(traffic_id)
             state_length = len(curr_state)
-            new_state = 'G' * state_length
+
+            edge_id = corresponding_edge_id_controlled_by_traffic_id[edge_id_index]
+            new_state = self.get_traffic_color_given_edge_id_and_traffic_id(edge_id, traffic_id)
             traci.trafficlight.setRedYellowGreenState(traffic_id, new_state)
+            edge_id_index = edge_id_index + 1
             # self.lock.acquire()
 
     def set_reset_traffic_lights(self):
