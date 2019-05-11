@@ -148,7 +148,6 @@ class ConsumerThread(threading.Thread):
         self.amb_dest = dest  # VERY IMPORTANT
         self.anveshak = anveshak  # VERY IMPORTANT
 
-
         # topic is set for the ambulance
         self.ambulance_topic = position_topic
         self.register_dict[self.ambulance_topic] = True

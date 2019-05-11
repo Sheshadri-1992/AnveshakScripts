@@ -6,7 +6,7 @@ import traceback
 import socket
 import json
 import os, sys
-import traci
+# import traci
 import time
 import logging
 import TestCameraPosistion
@@ -26,6 +26,13 @@ from ZmqPull import MqttPubSub
 
 logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-9s) %(message)s', )
 
+if 'SUMO_HOME' in os.environ:
+    tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
+    sys.path.append(tools)
+else:
+    sys.exit("please declare environment variable 'SUMO_HOME'")
+
+import traci
 
 class Sumo(threading.Thread):
     sumo_cmd = None
@@ -52,16 +59,10 @@ class Sumo(threading.Thread):
         self.edge_traffic_state = EdgeStateInfo()
         self.temp = 0.0
         self.curr = 0.0
-        self.zmqClient = MqttPubSub()
+        # self.zmqClient = MqttPubSub()
 
         # start the simulation here
         traci.start(self.sumo_cmd)
-
-        if 'SUMO_HOME' in os.environ:
-            tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
-            sys.path.append(tools)
-        else:
-            sys.exit("please declare environment variable 'SUMO_HOME'")
 
         with open("./InputFiles/sumo_mid_graph.json", 'rb') as f:
             data = f.read()
@@ -374,7 +375,7 @@ class Sumo(threading.Thread):
         self.edge_traffic_state.set_traffic_id_state_dict(traffic_id_state_dict)
 
         # zmqq receive thread start
-        self.zmqClient.start()
+        # self.zmqClient.start()
 
         logging.debug("Added a vehicle successfully")
 
@@ -869,9 +870,9 @@ class Sumo(threading.Thread):
                 print("Anveshak mode on , the session id is ", self.sessionid)
                 self.get_next_camera()
 
-            item = self.zmqClient.get_object_from_queue()
-            if item is not None:
-                self.perform_set_reset_traffic_lights(item)
+            # item = self.zmqClient.get_object_from_queue()
+            # if item is not None:
+            self.perform_set_reset_traffic_lights("")
 
         logging.debug("simulation step " + str(self.sim_step))
 
