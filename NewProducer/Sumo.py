@@ -22,6 +22,7 @@ from datetime import datetime
 from networkx.readwrite import json_graph
 import gen_shortest_path
 from EdgeTrafficState import EdgeStateInfo
+from ZmqPull import MqttPubSub
 
 logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-9s) %(message)s', )
 
@@ -51,6 +52,7 @@ class Sumo(threading.Thread):
         self.edge_traffic_state = EdgeStateInfo()
         self.temp = 0.0
         self.curr = 0.0
+        self.zmqClient = MqttPubSub()
 
         # start the simulation here
         traci.start(self.sumo_cmd)
@@ -371,6 +373,9 @@ class Sumo(threading.Thread):
         self.edge_traffic_state.set_traffic_id_index_dict(traffic_id_index_dict)
         self.edge_traffic_state.set_traffic_id_state_dict(traffic_id_state_dict)
 
+        # zmqq receive thread start
+        self.zmqClient.start()
+
         logging.debug("Added a vehicle successfully")
 
         print("Traffic lanes are ", self.edge_traffic_state.get_traffic_id_list())
@@ -539,6 +544,8 @@ class Sumo(threading.Thread):
         :return:
         """
         # set_reset_dict = json.loads(json_string)
+        print("The json string is ",str(json_string))
+
         set_id_list = []
         reset_id_list = []
 
@@ -861,7 +868,10 @@ class Sumo(threading.Thread):
             if anveshak == "1":
                 print("Anveshak mode on , the session id is ", self.sessionid)
                 self.get_next_camera()
-                self.perform_set_reset_traffic_lights("")
+
+            item = self.zmqClient.get_object_from_queue()
+            if item is not None:
+                self.perform_set_reset_traffic_lights(item)
 
         logging.debug("simulation step " + str(self.sim_step))
 
