@@ -490,7 +490,12 @@ class ConsumerThread(threading.Thread):
                         candidate_edges = list(locations_dict.keys())
                         lane_traffic_dict = self.sumo_obj.return_traffic_density(candidate_edges)
                         lane_traffic_dict = self.get_edge_color_focus_path(lane_traffic_dict)
-                        mqtt_object.send_path_traffic_topic_message(json.dumps(lane_traffic_dict),
+
+                        payload_dict = {}
+                        payload_dict['path_edge_traffic_color'] = lane_traffic_dict
+                        payload_dict['path_node_list'] = self.sumo_obj.get_custom_nodes()
+
+                        mqtt_object.send_path_traffic_topic_message(json.dumps(payload_dict),
                                                                     self.path_traffic_topic)
 
                     traffic_color_dict = {}

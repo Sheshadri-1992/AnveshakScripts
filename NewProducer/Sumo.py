@@ -49,6 +49,7 @@ class Sumo(threading.Thread):
         self.sumo_cmd = [self.sumo_binary, "--collision.action", "none", "-c", "testconfig.sumocfg"]
         self.lock = threading.Lock()
         self.edge_list = []  # not used, remove after review
+        self.custom_nodes_list = [] # item needed by path_traffic
         self.ambulance_id = "-1"
         self.amb_src = ""
         self.sessionid = 0
@@ -312,11 +313,12 @@ class Sumo(threading.Thread):
         self.amb_dest = dest
         self.sessionid = sessionid  # THIS IS VERY IMPORTANT
 
-        custom_edge_list, locations, edge_node_map, custom_nodes = gen_shortest_path.compute_shortest_path(source, dest,
+        custom_edge_list, locations, edge_node_map, custom_nodes_list = gen_shortest_path.compute_shortest_path(source, dest,
                                                                                                            self.graph)
         self.custom_edge_list = custom_edge_list
         self.custom_locations = locations
         self.edge_node_map = edge_node_map
+        self.custom_nodes_list = custom_nodes_list
 
         self.edge_traffic_state.set_edge_list(self.custom_edge_list)  # set the edge list
 
@@ -406,6 +408,7 @@ class Sumo(threading.Thread):
 
         :return:
         """
+        return self.custom_nodes_list
 
     def get_custom_route_list(self):
         """
@@ -895,10 +898,10 @@ class Sumo(threading.Thread):
         self.lock.release()
 
         if self.start_listening_to_anv_updates is False:
-            my_queue = Queue.Queue()
-            anv_thread = threading.Thread(target=start_anv.get_traffic_updates, args=(my_queue,))
-            anv_thread.start()
-
+            # my_queue = Queue.Queue()
+            # anv_thread = threading.Thread(target=start_anv.get_traffic_updates, args=(my_queue,))
+            # anv_thread.start()
+            logging.debug("Starting to listen to anveshak updates..")
             self.start_listening_to_anv_updates = True
 
         if int(self.ambulance_id) > 0:
