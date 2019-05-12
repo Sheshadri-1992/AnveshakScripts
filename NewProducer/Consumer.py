@@ -88,6 +88,9 @@ class ConsumerThread(threading.Thread):
         # reset flag
         self.stop_publishing = False
 
+        # producer start dict
+        self.producer_state_dict = {}
+
         logging.debug("Started all the producers...")
 
     def update_sumo_object(self, sumo_obj):
@@ -106,13 +109,19 @@ class ConsumerThread(threading.Thread):
 
             self.large_topic = topic
             self.register_dict[self.large_topic] = True
-            self.large_thread.start()
+
+            if 'large-thread' not in self.producer_state_dict:
+                self.large_thread.start()
+                self.producer_state_dict['large-thread'] = True
 
         elif int(graphid) == 1:
 
             self.medium_topic = topic
             self.register_dict[self.medium_topic] = True
-            self.medium_thread.start()
+
+            if 'medium-thread' not in self.producer_state_dict:
+                self.medium_thread.start()
+                self.producer_state_dict['medium-thread'] = True
 
         elif int(graphid) == 2:
 
@@ -419,150 +428,157 @@ class ConsumerThread(threading.Thread):
 
         while True:
 
-            logging.debug("Entered the consumer..")
+            try:
 
-            if self.stop_publishing:
-                logging.debug("The reset flag has been called, stopped consuming ")
-                time.sleep(4)
-                continue
+                logging.debug("Entered the consumer..")
 
-            batch_count = 0
-            medium_candidate_edges = []
-            large_candidate_edges = []
-            curr_time = datetime.now()
+                if self.stop_publishing:
+                    logging.debug("The reset flag has been called, stopped consuming ")
+                    time.sleep(4)
+                    continue
 
-            # print the index value
-            print("******************************* INDEX = ", index, " *********************************")
+                batch_count = 0
+                medium_candidate_edges = []
+                large_candidate_edges = []
+                curr_time = datetime.now()
 
-            # time measurement for execution starts here
-            start_time = time.time()
-            mqtt_object.connect_to_broker()
+                # print the index value
+                print("******************************* INDEX = ", index, " *********************************")
 
-            # Wake up every sim step
-            if self.ambulance_topic != "" and self.ambulance_topic in self.register_dict:
-                logging.debug("Ambulance topic set..sending message")
-                vehicle_stat_dict = self.sumo_obj.get_vehicle_stats()
-                mqtt_object.send_vertex_message(json.dumps(vehicle_stat_dict), self.ambulance_topic)
+                # time measurement for execution starts here
+                start_time = time.time()
+                mqtt_object.connect_to_broker()
 
-            # Wake up every 2 sim step
-            if index % 2 == 0:
-                if self.path_topic != "" and self.path_topic in self.register_dict:
-                    if self.register_dict[self.path_topic]:
-                        logging.debug("path topic set..sending message..only once")
+                # Wake up every sim step
+                if self.ambulance_topic != "" and self.ambulance_topic in self.register_dict:
+                    logging.debug("Ambulance topic set..sending message")
+                    vehicle_stat_dict = self.sumo_obj.get_vehicle_stats()
+                    mqtt_object.send_vertex_message(json.dumps(vehicle_stat_dict), self.ambulance_topic)
+
+                # Wake up every 2 sim step
+                if index % 2 == 0:
+                    if self.path_topic != "" and self.path_topic in self.register_dict:
+                        if self.register_dict[self.path_topic]:
+                            logging.debug("path topic set..sending message..only once")
+                            locations_dict = self.sumo_obj.get_custom_locations()
+                            locations_list = list(locations_dict.keys())
+                            traffic_id_list = self.sumo_obj.get_traffic_lights_between_src_dest()
+                            traffic_id_lat_long_list = self.get_traffic_id_lat_long_list(traffic_id_list)
+
+                            traffic_id_lat_long_dict = {}
+                            for i in range(0, len(traffic_id_list)):
+                                traffic_id_lat_long_dict[traffic_id_list[i]] = traffic_id_lat_long_list[i]
+
+                            len_traffic_lis = len(traffic_id_lat_long_list)
+                            logging.debug(
+                                "******************* Traffic id list " + str(
+                                    len(traffic_id_list)) + "traffic lat long " + str(len_traffic_lis))
+
+                            payload_dict = {}
+                            payload_dict['traffic_signals'] = traffic_id_lat_long_dict
+                            payload_dict['distance'] = self.get_total_edge_weight(locations_list)
+                            payload_dict['path'] = locations_dict
+
+                            mqtt_object.send_path_topic_message(json.dumps(payload_dict), self.path_topic)
+                            # this is important to send it only once
+                            # need to set it to True again when there is a custom edge list which gets updated
+                            self.register_dict[self.path_topic] = False
+
+                    if self.path_traffic_topic != "" and self.path_traffic_topic in self.register_dict:
+                        logging.debug("path traffic topic set.. sending message")
                         locations_dict = self.sumo_obj.get_custom_locations()
-                        locations_list = list(locations_dict.keys())
-                        traffic_id_list = self.sumo_obj.get_traffic_lights_between_src_dest()
-                        traffic_id_lat_long_list = self.get_traffic_id_lat_long_list(traffic_id_list)
+                        candidate_edges = list(locations_dict.keys())
+                        lane_traffic_dict = self.sumo_obj.return_traffic_density(candidate_edges)
+                        lane_traffic_dict = self.get_edge_color_focus_path(lane_traffic_dict)
+                        mqtt_object.send_path_traffic_topic_message(json.dumps(lane_traffic_dict),
+                                                                    self.path_traffic_topic)
 
-                        traffic_id_lat_long_dict = {}
-                        for i in range(0, len(traffic_id_list)):
-                            traffic_id_lat_long_dict[traffic_id_list[i]] = traffic_id_lat_long_list[i]
+                    traffic_color_dict = {}
+                    if self.traffic_color_topic != "" and self.traffic_color_topic in self.register_dict:
+                        traffic_color_dict = self.sumo_obj.prepare_traffic_color_payload()
+                        print("The number of traffic lights are ", len(traffic_color_dict.keys()))
+                        print("Getting the traffic color payload ", traffic_color_dict)
+                        mqtt_object.send_traffic_color_topic_message(json.dumps(traffic_color_dict),
+                                                                     self.traffic_color_topic)
 
-                        len_traffic_lis = len(traffic_id_lat_long_list)
+                # Wakeup every 5 sim step
+                if index % 5 == 0:
+                    # Medium queue edges
+                    while not self.medium_thread.medium_queue.empty():
+                        item = self.medium_thread.get_element_from_queue()
+                        if batch_count < MAX_BATCH and item.timestamp >= curr_time:
+                            medium_candidate_edges.append(item.get_edge_id())
+                            batch_count = batch_count + 1
+
+                        if batch_count >= MAX_BATCH:
+                            logging.debug("Hit the 1500 barrier")
+                            break
+
+                    medium_candidate_edges = self.prepare_candidate_edges(medium_candidate_edges)
+                    logging.debug(
+                        "message medium producer " + str(batch_count) + " ,running counter " + str(running_counter))
+                    logging.debug("The medium candidate edges are " + str(len(medium_candidate_edges)))
+
+                    # traci calls are being made here
+                    medium_dict = self.sumo_obj.return_traffic_density(medium_candidate_edges)
+                    # aggregate stuff needed here
+                    medium_dict = self.aggregate_edge_id_traffic(medium_dict)
+                    color_medium = self.get_edge_color(medium_dict, 1)  # 1 is medium
+
+                    if self.medium_topic in self.register_dict:
                         logging.debug(
-                            "******************* Traffic id list " + str(
-                                len(traffic_id_list)) + "traffic lat long " + str(len_traffic_lis))
+                            "Medium topic set..sending message, the label is " + str(running_counter) + " " + str(
+                                len(color_medium.keys())))
+                        # key = "id:" +
+                        color_medium['id'] = str(running_counter)
+                        # final_message[str(running_counter)] = color_medium
+                        mqtt_object.send_edge_message(json.dumps(color_medium), self.medium_topic)
 
-                        payload_dict = {}
-                        payload_dict['traffic_signals'] = traffic_id_lat_long_dict
-                        payload_dict['distance'] = self.get_total_edge_weight(locations_list)
-                        payload_dict['path'] = locations_dict
+                # Wakeup every 10 seconds
+                if index % 10 == 0:
+                    # Large queue edges
+                    while not self.large_thread.large_queue.empty():
+                        item = self.large_thread.get_element_from_queue()
 
-                        mqtt_object.send_path_topic_message(json.dumps(payload_dict), self.path_topic)
-                        # this is important to send it only once
-                        # need to set it to True again when there is a custom edge list which gets updated
-                        self.register_dict[self.path_topic] = False
+                        if batch_count < MAX_BATCH and (item.timestamp >= curr_time):
+                            large_candidate_edges.append(item.get_edge_id())
+                            batch_count = batch_count + 1
 
-                if self.path_traffic_topic != "" and self.path_traffic_topic in self.register_dict:
-                    logging.debug("path traffic topic set.. sending message")
-                    locations_dict = self.sumo_obj.get_custom_locations()
-                    candidate_edges = list(locations_dict.keys())
-                    lane_traffic_dict = self.sumo_obj.return_traffic_density(candidate_edges)
-                    lane_traffic_dict = self.get_edge_color_focus_path(lane_traffic_dict)
-                    mqtt_object.send_path_traffic_topic_message(json.dumps(lane_traffic_dict),
-                                                                self.path_traffic_topic)
+                        if batch_count >= MAX_BATCH:
+                            break
 
-                traffic_color_dict = {}
-                if self.traffic_color_topic != "" and self.traffic_color_topic in self.register_dict:
-                    traffic_color_dict = self.sumo_obj.prepare_traffic_color_payload()
-                    print("The number of traffic lights are ", len(traffic_color_dict.keys()))
-                    print("Getting the traffic color payload ", traffic_color_dict)
-                    mqtt_object.send_traffic_color_topic_message(json.dumps(traffic_color_dict),
-                                                                 self.traffic_color_topic)
+                    # The original candidate id do not contain lane id
+                    large_candidate_edges = self.prepare_candidate_edges(large_candidate_edges)
+                    logging.debug("The large candidate edges are" + str(len(large_candidate_edges)))
+                    large_dict = self.sumo_obj.return_traffic_density(large_candidate_edges)
+                    large_dict = self.aggregate_edge_id_traffic(large_dict)
+                    color_large = self.get_edge_color(large_dict, 0)  # 0 is small
 
-            # Wakeup every 5 sim step
-            if index % 5 == 0:
-                # Medium queue edges
-                while not self.medium_thread.medium_queue.empty():
-                    item = self.medium_thread.get_element_from_queue()
-                    if batch_count < MAX_BATCH and item.timestamp >= curr_time:
-                        medium_candidate_edges.append(item.get_edge_id())
-                        batch_count = batch_count + 1
+                    if self.large_topic in self.register_dict:
+                        logging.debug("Large topic set..sending message")
+                        mqtt_object.send_edge_message(json.dumps(color_large), self.large_topic)
 
-                    if batch_count >= MAX_BATCH:
-                        logging.debug("Hit the 1500 barrier")
-                        break
+                mqtt_object.disconnect_broker()
+                logging.debug("Consumer sleeping...")
+                index = index + 1
+                running_counter = running_counter + 1
 
-                medium_candidate_edges = self.prepare_candidate_edges(medium_candidate_edges)
-                logging.debug(
-                    "message medium producer " + str(batch_count) + " ,running counter " + str(running_counter))
-                logging.debug("The medium candidate edges are " + str(len(medium_candidate_edges)))
+                self.sumo_obj.update_simulation_step(self.anveshak)
 
-                # traci calls are being made here
-                medium_dict = self.sumo_obj.return_traffic_density(medium_candidate_edges)
-                # aggregate stuff needed here
-                medium_dict = self.aggregate_edge_id_traffic(medium_dict)
-                color_medium = self.get_edge_color(medium_dict, 1)  # 1 is medium
+                end_time = time.time()
+                time_executing = (end_time - start_time)
 
-                if self.medium_topic in self.register_dict:
-                    logging.debug("Medium topic set..sending message, the label is " + str(running_counter) + " " + str(
-                        len(color_medium.keys())))
-                    # key = "id:" +
-                    color_medium['id'] = str(running_counter)
-                    # final_message[str(running_counter)] = color_medium
-                    mqtt_object.send_edge_message(json.dumps(color_medium), self.medium_topic)
+                # sleep value cannot be zero
+                time_to_sleep = 1 - time_executing
 
-            # Wakeup every 10 seconds
-            if index % 10 == 0:
-                # Large queue edges
-                while not self.large_thread.large_queue.empty():
-                    item = self.large_thread.get_element_from_queue()
+                if time_to_sleep > 0:
+                    logging.debug("Consumer is sleeping for " + str(time_to_sleep) + " seconds")
+                    time.sleep(time_to_sleep)
+                else:
+                    logging.debug(
+                        "Consumer does not sleep because time execution is > 1 " + str(time_executing) + " : " + str(
+                            time_to_sleep))
 
-                    if batch_count < MAX_BATCH and (item.timestamp >= curr_time):
-                        large_candidate_edges.append(item.get_edge_id())
-                        batch_count = batch_count + 1
-
-                    if batch_count >= MAX_BATCH:
-                        break
-
-                # The original candidate id do not contain lane id
-                large_candidate_edges = self.prepare_candidate_edges(large_candidate_edges)
-                logging.debug("The large candidate edges are" + str(len(large_candidate_edges)))
-                large_dict = self.sumo_obj.return_traffic_density(large_candidate_edges)
-                large_dict = self.aggregate_edge_id_traffic(large_dict)
-                color_large = self.get_edge_color(large_dict, 0)  # 0 is small
-
-                if self.large_topic in self.register_dict:
-                    logging.debug("Large topic set..sending message")
-                    mqtt_object.send_edge_message(json.dumps(color_large), self.large_topic)
-
-            mqtt_object.disconnect_broker()
-            logging.debug("Consumer sleeping...")
-            index = index + 1
-            running_counter = running_counter + 1
-
-            self.sumo_obj.update_simulation_step(self.anveshak)
-
-            end_time = time.time()
-            time_executing = (end_time - start_time)
-
-            # sleep value cannot be zero
-            time_to_sleep = 1 - time_executing
-
-            if time_to_sleep > 0:
-                logging.debug("Consumer is sleeping for " + str(time_to_sleep) + " seconds")
-                time.sleep(time_to_sleep)
-            else:
-                logging.debug(
-                    "Consumer does not sleep because time execution is > 1 " + str(time_executing) + " : " + str(
-                        time_to_sleep))
+            except Exception as e:
+                print("In the Consumer main loop The exception is ", e)
+                self.stop_publishing = True
