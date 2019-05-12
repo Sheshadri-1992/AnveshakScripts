@@ -31,6 +31,7 @@ class ConsumerThread(threading.Thread):
         self.edge_dist_dict = {}
         self.edge_node_map = {}
         self.sessionid = 0
+        self.stop_publishing = False
 
         # mandatory file loads
         logging.debug("Loading the low_ways json ")
@@ -85,7 +86,7 @@ class ConsumerThread(threading.Thread):
         self.anveshak = "0"
 
         # reset flag
-        self.stop_thread = False
+        self.stop_publishing = False
 
         logging.debug("Started all the producers...")
 
@@ -345,19 +346,15 @@ class ConsumerThread(threading.Thread):
 
         try:
 
-            self.medium_thread.kill_thread()
-            self.large_thread.kill_thread()
+            self.medium_thread.stop_producer()
 
             self.medium_thread.join()
             logging.debug("Medium thread has stopped")
-            self.large_thread.join()
-            logging.debug("Large Thread has been stopped")
 
-            self.stop_thread = True
             logging.debug("All producer threads are stopped")
 
         except Exception as e:
-            print("The exception is ", e)
+            print("The Medium Thread exception is ", e)
 
     def get_traffic_id_lat_long_list(self, traffic_signal_list):
         """
@@ -394,17 +391,17 @@ class ConsumerThread(threading.Thread):
         logging.debug("The total weight is " + str(total))
         return total
 
-    def set_resources(self):
+    def stop_consumer(self):
         """
         Resets the reset flag
         :return:
         """
-        self.stop_thread = False
+        self.stop_publishing = True
 
     def run(self):
         mqtt_object = MqttPublish()
         mqtt_object.print_variables()
-        self.stop_thread = False
+        self.stop_publishing = False
         running_counter = 0
         index = 0
 
@@ -412,7 +409,7 @@ class ConsumerThread(threading.Thread):
 
             logging.debug("Entered the consumer..")
 
-            if self.stop_thread:
+            if self.stop_publishing:
                 logging.debug("The reset flag has been called ")
                 break
 

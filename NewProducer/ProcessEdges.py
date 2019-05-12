@@ -97,7 +97,9 @@ class ProducerConsumer:
         :return:
         """
         logging.debug("Stopping simulation")
+
         self.consumer_thread.stop_producers()
+        self.consumer_thread.stop_consumer()
         self.consumer_thread.join()
         logging.debug("Consumer thread is stopped")
 

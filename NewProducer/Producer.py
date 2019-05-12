@@ -20,6 +20,7 @@ class LargeProducer(threading.Thread):
         self.large_queue = Queue.Queue()
         self.large_edge_list = []
         self.global_edge_dict = edge_dict
+        self.stop_publishing = False
 
         logging.debug("Loading the high_ways json ")
         with open("./InputFiles/high_ways_p.json") as json_file:
@@ -75,6 +76,7 @@ class MediumProducer(threading.Thread):
         self.medium_queue = Queue.Queue()
         self.medium_edge_list = []
         self.global_edge_dict = edge_dict
+        self.stop_publishing = False
 
         logging.debug("Loading the mid_ways json ")
         with open("./InputFiles/mid_ways_p.json") as json_file:
@@ -87,8 +89,13 @@ class MediumProducer(threading.Thread):
 
         index = 0
         length = len(self.medium_edge_list)
+        self.stop_publishing = False
 
         while True:
+
+            if self.stop_publishing:
+                logging.debug("Medium Thread will be stopping any publish ",self.stop_publishing)
+                break
 
             while index < length:
                 edge_id = self.medium_edge_list[index % length]
@@ -119,6 +126,13 @@ class MediumProducer(threading.Thread):
             return item
 
         return None
+
+    def stop_producer(self):
+        """
+        Stop producing any content
+        :return:
+        """
+        self.stop_publishing = True
 
 
 class SmallProducer(threading.Thread):
