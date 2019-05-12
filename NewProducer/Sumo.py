@@ -129,6 +129,8 @@ class Sumo(threading.Thread):
             speed = traci.vehicle.getSpeed(self.ambulance_id)
             # self.lock.acquire()
 
+            distance = traci.vehicle.getDistance(self.ambulance_id)
+
             # self.lock.acquire()
             position = traci.vehicle.getPosition(self.ambulance_id)
             # self.lock.acquire()
@@ -145,6 +147,7 @@ class Sumo(threading.Thread):
             ambulance_dict["vehicleid"] = str(self.ambulance_id)
             ambulance_dict["speed"] = speed
             ambulance_dict["position"] = rev_co_ord
+            ambulance_dict["distance"] = distance
 
             TestCameraPosistion.calculate_within_radius(geo_co_ord[1], geo_co_ord[0])  # lat, long in reverse order
 
@@ -576,7 +579,7 @@ class Sumo(threading.Thread):
         """
 
         print("Calling anveshak with cameraid ","C_", camera_id, " session id ", sessionid)
-        start_anv.vehicle_enters_fov(sessionid, camera_id) # THIS IS IMPORTANT
+        # start_anv.vehicle_enters_fov(sessionid, camera_id) # THIS IS IMPORTANT
 
     def get_next_camera(self):
         """
@@ -859,6 +862,8 @@ class Sumo(threading.Thread):
 
         # self.lock.acquire()
         traci.simulationStep()  # this is an important step
+	num_vehicles =  traci.vehicle.getIDCount()
+	print("total number of active vehicles ",num_vehicles)
         # self.lock.acquire()
         if int(self.ambulance_id) > 0:
             self.curr = traci.vehicle.getDistance(self.ambulance_id)
@@ -872,7 +877,7 @@ class Sumo(threading.Thread):
 
             # item = self.zmqClient.get_object_from_queue()
             # if item is not None:
-            self.perform_set_reset_traffic_lights("")
+            # self.perform_set_reset_traffic_lights("")
 
         logging.debug("simulation step " + str(self.sim_step))
 

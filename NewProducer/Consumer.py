@@ -30,7 +30,7 @@ class ConsumerThread(threading.Thread):
         self.sumo_obj = None
         self.edge_dist_dict = {}
         self.edge_node_map = {}
-        self.sesionid = 0
+        self.sessionid = 0
 
         # mandatory file loads
         logging.debug("Loading the low_ways json ")
@@ -79,7 +79,7 @@ class ConsumerThread(threading.Thread):
         # source and destination for ambulance
         self.amb_source = "-1"
         self.amb_dest = "-1"
-        self.sesionid = 0
+        self.sessionid = 0
 
         # anveshak mode or not, 0 is normal, 1 is anveshak
         self.anveshak = "0"
@@ -137,7 +137,7 @@ class ConsumerThread(threading.Thread):
         logging.debug(
             "The parameters received are " + str(ambulance_id) + str(position_topic) + str(source) + str(dest))
 
-        self.sesionid = int(sessionid)
+        self.sessionid = int(sessionid)
 
         # add new vehicle
         self.sumo_obj.add_new_vehicle(str(self.vehicle_id), str(self.route_id), [], self.sessionid, source,
@@ -245,9 +245,9 @@ class ConsumerThread(threading.Thread):
                 vehicles_per_meter = (num_vehicles * 4.0) / (total_distance * 1.0)
 
                 # color bucket logic
-                if vehicles_per_meter <= 0.4:
+                if vehicles_per_meter <= 0.1:
                     edgeid_color_dict[edge] = [0, num_vehicles]
-                elif 0.4 < vehicles_per_meter <= 0.8:
+                elif 0.1 < vehicles_per_meter <= 0.6:
                     edgeid_color_dict[edge] = [1, num_vehicles]
                 else:
                     edgeid_color_dict[edge] = [2, num_vehicles]
@@ -322,9 +322,9 @@ class ConsumerThread(threading.Thread):
                 vehicles_per_meter = (num_vehicles * 4.0) / (total_distance * 1.0)
 
                 # color bucket logic
-                if vehicles_per_meter <= 0.4:
+                if vehicles_per_meter <= 0.1:
                     edgeid_color_dict[edge] = [0, num_vehicles]
-                elif 0.4 < vehicles_per_meter <= 0.8:
+                elif 0.1 < vehicles_per_meter <= 0.6:
                     edgeid_color_dict[edge] = [1, num_vehicles]
                 else:
                     edgeid_color_dict[edge] = [2, num_vehicles]
