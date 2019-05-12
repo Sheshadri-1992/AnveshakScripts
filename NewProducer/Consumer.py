@@ -536,10 +536,10 @@ class ConsumerThread(threading.Thread):
                         # final_message[str(running_counter)] = color_medium
                         mqtt_object.send_edge_message(json.dumps(color_medium), self.medium_topic)
 
-                if index % 6 == 0:
-                    global_traffic_dict = self.sumo_obj.get_global_traffic_updates()
-                    mqtt_object.send_traffic_color_topic_message(json.dumps(global_traffic_dict),
-                                                                 'global_traffic_update')
+                # if index % 6 == 0:
+                #     global_traffic_dict = self.sumo_obj.get_global_traffic_updates()
+                #     mqtt_object.send_traffic_color_topic_message(json.dumps(global_traffic_dict),
+                #                                                  'global_traffic_update')
 
                 # Wakeup every 10 seconds
                 if index % 10 == 0:

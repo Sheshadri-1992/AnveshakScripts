@@ -399,7 +399,7 @@ class Sumo(threading.Thread):
         # Make a call to swapnil
         self.mqtt_object.custom_connect_to_broker()
         camera_list = self.get_camera_in_path_list()
-        self.mqtt_object.send_camera_feed_topic_message(json.dumps(camera_list), 'cam-feed')
+        self.mqtt_object.send_camera_feed_topic_message(json.dumps(camera_list), 'cam_feed')
         self.mqtt_object.custom_disconnect_broker()
 
         return "Added a vehicle successfully"
@@ -694,7 +694,7 @@ class Sumo(threading.Thread):
 
         print("Calling anveshak with cameraid ", "C_", camera_id, " session id ", sessionid)
         self.mqtt_object.custom_connect_to_broker()
-        self.mqtt_object.send_camera_blend_topic_message(json.dumps(camera_id), 'blend-feed')
+        self.mqtt_object.send_camera_blend_topic_message(json.dumps(camera_id), 'blend_feed')
         self.mqtt_object.custom_disconnect_broker()
         # start_anv.vehicle_enters_fov(sessionid, camera_id) # THIS IS IMPORTANT
 
