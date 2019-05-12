@@ -79,12 +79,11 @@ class ProducerConsumer:
             self.consumer_thread.ambulance_topic_and_produce("newid", position_topic, path_topic, path_traffic_topic,
                                                              traffic_color_topic, anveshak, sessionid, ambulance,
                                                              hospital)
-
             self.max_latency = latency
             self.batch_size = batch_size
 
-            start_anv.start_anveshak(int(sessionid), int(latency), int(batch_size), ambulance, hospital,
-                                     "tcp://10.244.17.8:9000")
+            # start_anv.start_anveshak(int(sessionid), int(latency), int(batch_size), ambulance, hospital,
+                                     #"tcp://10.244.17.8:9000")
 
         except Exception as e:
             logging.debug("The exception message is " + str(e))

@@ -174,6 +174,10 @@ class ConsumerThread(threading.Thread):
         self.vehicle_id = self.vehicle_id + 1
         self.route_id = self.route_id + 1
 
+        # set producers flag to true
+        self.medium_thread.resume_producer()
+        self.resume_consumer()
+
     def update_edge_list(self, edge_list):
         """
 
@@ -398,6 +402,14 @@ class ConsumerThread(threading.Thread):
         """
         self.stop_publishing = True
 
+    def resume_consumer(self):
+        """
+        Resume the consumer
+        :return:
+        """
+        self.stop_publishing = False
+        logging.debug("Resuming the consumer...")
+
     def run(self):
         mqtt_object = MqttPublish()
         mqtt_object.print_variables()
@@ -412,7 +424,7 @@ class ConsumerThread(threading.Thread):
             if self.stop_publishing:
                 logging.debug("The reset flag has been called, stopped consuming ")
                 time.sleep(4)
-		continue
+                continue
 
             batch_count = 0
             medium_candidate_edges = []

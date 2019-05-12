@@ -929,3 +929,7 @@ class Sumo(threading.Thread):
         logging.debug("Request to stop simulation")
         traci.close(False)  # important
         return "Sumo stopped"
+
+    def resume_sumo(self):
+        logging.debug("Resuming sumo..")
+        traci.start(self.sumo_cmd)

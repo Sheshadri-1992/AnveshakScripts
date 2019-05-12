@@ -94,9 +94,9 @@ class MediumProducer(threading.Thread):
         while True:
 
             if self.stop_publishing:
-                print("Medium Thread will be stopping any publish ",self.stop_publishing)
-		time.sleep(2)
-               	continue 
+                print("Medium Thread will be stopping any publish ", self.stop_publishing)
+                time.sleep(2)
+                continue
 
             while index < length:
                 edge_id = self.medium_edge_list[index % length]
@@ -134,6 +134,14 @@ class MediumProducer(threading.Thread):
         :return:
         """
         self.stop_publishing = True
+
+    def resume_producer(self):
+        """
+        Resume Producing content
+        :return:
+        """
+        self.stop_publishing = False
+        logging.debug(" Resuming to produce..")
 
 
 class SmallProducer(threading.Thread):
