@@ -417,6 +417,31 @@ class Sumo(threading.Thread):
         """
         return self.custom_edge_list
 
+    def get_camera_in_path_list(self):
+        """
+        Retrieves the cameras present in the traffic path
+        :return: list of cameras in focus path
+        """
+        custom_node_id_list = []
+        first_edge = self.custom_edge_list[0]
+        node_tuple = self.edge_node_map[first_edge]
+        custom_node_id_list.append(str(node_tuple[0]))
+        custom_node_id_list.append(str(node_tuple[1]))
+
+        for edge_id in self.custom_edge_list[1:]:
+            node_tuple = self.edge_node_map[edge_id]
+            custom_node_id_list.append(str(node_tuple[1]))
+
+        custom_node_id_set = set(custom_node_id_list)
+
+        # print("The camera list is ", self.camera_list)
+        camera_set = set(self.camera_list)
+        cameras_in_path = camera_set.intersection(custom_node_id_set)
+
+        print("The cameras in path are ", cameras_in_path)
+
+        return list(cameras_in_path)
+
     def prepare_traffic_color_payload(self):
         """
         prepare a payload and send every second
@@ -573,7 +598,8 @@ class Sumo(threading.Thread):
         :return:
         """
         # set_reset_dict = json.loads(json_string)
-        json_string = start_anv.get_traffic_light_item_from_queue()
+        # json_string = start_anv.get_traffic_light_item_from_queue()
+        json_string = ""
         print("The json string is ", str(json_string))
         if json_string == "":
             logging.debug("json string is empty returning..")

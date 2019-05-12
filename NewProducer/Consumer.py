@@ -478,6 +478,8 @@ class ConsumerThread(threading.Thread):
                             payload_dict['traffic_signals'] = traffic_id_lat_long_dict
                             payload_dict['distance'] = self.get_total_edge_weight(locations_list)
                             payload_dict['path'] = locations_dict
+                            payload_dict['nodes'] = self.sumo_obj.get_custom_nodes()
+                            payload_dict['camera'] = self.sumo_obj.get_camera_in_path_list()
 
                             mqtt_object.send_path_topic_message(json.dumps(payload_dict), self.path_topic)
                             # this is important to send it only once
@@ -490,12 +492,7 @@ class ConsumerThread(threading.Thread):
                         candidate_edges = list(locations_dict.keys())
                         lane_traffic_dict = self.sumo_obj.return_traffic_density(candidate_edges)
                         lane_traffic_dict = self.get_edge_color_focus_path(lane_traffic_dict)
-
-                        payload_dict = {}
-                        payload_dict['path_edge_traffic_color'] = lane_traffic_dict
-                        payload_dict['path_node_list'] = self.sumo_obj.get_custom_nodes()
-
-                        mqtt_object.send_path_traffic_topic_message(json.dumps(payload_dict),
+                        mqtt_object.send_path_traffic_topic_message(json.dumps(lane_traffic_dict),
                                                                     self.path_traffic_topic)
 
                     traffic_color_dict = {}
