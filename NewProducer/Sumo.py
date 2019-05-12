@@ -17,6 +17,7 @@ import sumolib
 from collections import OrderedDict
 import networkx as nx
 import types
+from MqttPublish import MqttPublish
 import start_anv
 from datetime import datetime
 from networkx.readwrite import json_graph
@@ -62,6 +63,7 @@ class Sumo(threading.Thread):
         self.temp = 0.0
         self.curr = 0.0
         self.start_listening_to_anv_updates = False
+        self.mqtt_object = MqttPublish()
         # self.zmqClient = MqttPubSub()
 
         # start the simulation here
@@ -394,6 +396,12 @@ class Sumo(threading.Thread):
         print("Traffic lanes are ", self.edge_traffic_state.get_traffic_id_list())
         print("Lanes controlled by traffic lights ", self.edge_traffic_state.get_traffic_id_lane_dict())
 
+        # Make a call to swapnil
+        self.mqtt_object.custom_connect_to_broker()
+        camera_list = self.get_camera_in_path_list()
+        self.mqtt_object.send_camera_feed_topic_message(json.dumps(camera_list), 'cam-feed')
+        self.mqtt_object.custom_disconnect_broker()
+
         return "Added a vehicle successfully"
 
     def get_custom_locations(self):
@@ -634,6 +642,9 @@ class Sumo(threading.Thread):
         """
 
         print("Calling anveshak with cameraid ", "C_", camera_id, " session id ", sessionid)
+        self.mqtt_object.custom_connect_to_broker()
+        self.mqtt_object.send_camera_blend_topic_message(json.dumps(camera_id), 'blend-feed')
+        self.mqtt_object.custom_disconnect_broker()
         # start_anv.vehicle_enters_fov(sessionid, camera_id) # THIS IS IMPORTANT
 
     def get_next_camera(self):

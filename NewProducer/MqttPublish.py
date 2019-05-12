@@ -18,6 +18,8 @@ class MqttPublish:
     client_path_topic = None
     client_path_traffic_topic = None
     client_traffic_color_topic = None
+    client_cam_feed = None
+    client_cam_blend = None
 
     def __init__(self):
         logging.debug("the constructor method is called")
@@ -75,6 +77,35 @@ class MqttPublish:
         """
         logging.debug("Vertex data published")
 
+    def on_publish_cam_feed(self):
+        """
+
+        :return:
+        """
+        logging.debug("On publish cam feed")
+
+    def on_publish_cam_blend(self):
+        """
+
+        :return:
+        """
+        logging.debug("On publish cam blend")
+
+    def custom_connect_to_broker(self):
+        """
+
+        :return:
+        """
+        self.client_cam_feed = mqtt.Client("P52", transport=self.tTransport)
+        self.client_cam_feed.username_pw_set(username="dreamlabanveshak", password="dream119")
+        self.client_cam_feed.on_publish = self.on_publish_cam_feed
+        self.client_cam_feed.connect(self.broker_address, port=self.tPort, keepalive=60, bind_address="")
+
+        self.client_cam_blend = mqtt.Client("P53", transport=self.tTransport)
+        self.client_cam_blend.username_pw_set(username="dreamlabanveshak", password="dream119")
+        self.client_cam_blend.on_publish = self.on_publish_cam_blend
+        self.client_cam_blend.connect(self.broker_address, port=self.tPort, keepalive=60, bind_address="")
+
     def connect_to_broker(self):
         """
         Connect to the mqtt broker
@@ -116,6 +147,14 @@ class MqttPublish:
         self.client_path_topic.disconnect()
         self.client_path_traffic_topic.disconnect()
         self.client_traffic_color_topic.disconnect()
+
+    def custom_disconnect_broker(self):
+        """
+
+        :return:
+        """
+        self.client_cam_feed.disconnect()
+        self.client_cam_blend.disconnect()
 
     def send_vertex_message(self, vertex_json, topic):
         """
@@ -180,3 +219,27 @@ class MqttPublish:
         ret = self.client_traffic_color_topic.publish(topic, traffic_color_json, qos=0)
         ret.wait_for_publish()
         logging.debug("The ret is " + str(ret))
+
+    def send_camera_feed_topic_message(self, cam_feed_json, topic):
+        """
+
+        :param cam_feed_json:
+        :param topic:
+        :return:
+        """
+        print("Sending cam feed topic json ", cam_feed_json, "topic is ",topic)
+        ret = self.client_cam_feed.publish(topic, cam_feed_json, qos=0)
+        ret.wait_for_publish()
+        logging.debug("The ret is "+str(ret))
+
+    def send_camera_blend_topic_message(self, cam_blend_json, topic):
+        """
+
+        :param cam_blend_json:
+        :param topic:
+        :return:
+        """
+        print("Sending cam blend topic json ", cam_blend_json," topic is ", topic)
+        ret = self.client_cam_blend.publish(topic, cam_blend_json)
+        ret.wait_for_publish()
+        logging.debug("The ret is "+str(ret))
