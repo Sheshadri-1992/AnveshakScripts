@@ -99,12 +99,23 @@ class ProducerConsumer:
         logging.debug("Stopping simulation")
 
         self.consumer_thread.stop_producers()
-        self.consumer_thread.stop_consumer()
-        self.consumer_thread.join()
-        logging.debug("Consumer thread is stopped")
 
-        result = self.sumo_obj.stop()
-        logging.debug("Stopped sumo execution " + str(result))
+        try
+            self.consumer_thread.stop_consumer()
+            self.consumer_thread.join()
+            print("Consumer thread is stopped")
+
+        except Exception as e:
+            print("Consumer thread is stopped", e)
+
+        result  = -1
+        try:
+
+            result = self.sumo_obj.stop()
+            logging.debug("Stopped sumo execution " + str(result))
+        except Exception as e :
+            print("Exception im stopping sumo ",e)
+
         return result
 
     def control_traffic_light_signals(self, json_string):
