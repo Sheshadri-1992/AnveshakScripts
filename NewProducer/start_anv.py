@@ -3,9 +3,11 @@ import time
 import traceback
 import zmq
 import pickle
+from Queue import Queue
+import json
 
 
-def __make_message(module_id, key, value, query_id, data=None):
+def __make_message(module_id, key, value, query_id, format, data=None):
     """
     This method is run only on the source and is used to make messages of messageSchema format. It also
     assigns the startTimeStamp which will be used for all future drops and batching.
@@ -21,7 +23,7 @@ def __make_message(module_id, key, value, query_id, data=None):
         message.startTimeStamp = int(time.time()*1000)  # timestamp in milliseconds
         message.bitMask = query_id
         message.boundOverride = False
-        message.type = messageSchema_pb2.msg.START
+        message.type = format
         message.id = module_id
         message.sender = ''
         message.receiver = module_id
@@ -68,16 +70,44 @@ def start_anveshak(session_id, max_tol_lat, upper_limit_bs, source, destination,
     """
     data = {'max_tol_lat': max_tol_lat, 'upper_limit_bs': upper_limit_bs, 'new_query_id': session_id,
             'source': source, 'destination': destination, 'last_seen_ts': int(time.time() * 1000), 'request': 'start'}
-    msg = __make_message('DU_0', 'start', pickle.dumps(data), session_id, data=data)
+    f = messageSchema_pb2.msg.START
+    msg = __make_message('DU_0', 'start', pickle.dumps(data), session_id, f, data=data)
     __send_message(msg, ip)
 
 
 def vehicle_enters_fov(session_id, camera_id, data):
     camera_id = 'C_' + str(camera_id)
     ip = 'tcp://'+fid_to_machineip[cam_id_to_filter_map[camera_id]]
-    msg = __make_message(camera_id, camera_id, pickle.dumps(True), session_id, data=data)
+    f = messageSchema_pb2.msg.CHOKE
+    msg = __make_message(camera_id, camera_id, pickle.dumps(True), session_id, f, data=data)
     __send_message(msg, ip)
 
+
+@staticmethod
+def __deserialize_message(serialized_message):
+    """
+    This method deserializes protobuf messages using messageSchema.proto
+
+    :param serialized_message: This is the serialized protobuf ZMQ message
+    :return: deserialized protobuf message
+    """
+    try:
+        message = messageSchema_pb2.msg()
+        message.ParseFromString(serialized_message)
+        return message
+    except Exception:
+        print("ERROR in parsing message")
+
+
+def get_traffic_updates(queue, ip='tcp://0.0.0.0:8000'):
+    zmq_context2 = zmq.Context()
+    incoming_zmq = zmq_context2.socket(zmq.PULL)
+    incoming_zmq.bind(ip)
+    while True:
+        msg = incoming_zmq.recv()
+        received_message = __deserialize_message(msg)
+        traffic_json = json.loads(received_message.value)
+        queue.put(traffic_json)
 
 """
 ***deprecated***
