@@ -590,6 +590,57 @@ class Sumo(threading.Thread):
 
             print("In the perform set traffic lights state set ", new_state)
 
+    def get_global_traffic_updates(self):
+        """
+        Returns the global traffic updates of all the traffic sigals
+        :return: Returns the global traffic updates of all the traffic sigals
+        """
+        custom_edge_list = self.custom_edge_list  # this will give me the edge list
+        # custom_traffic_lights = self.get_traffic_lights_for_vehicle(self.ambulance_id)  # THIS API HAS TO BE REPLACED
+        custom_traffic_lights = traci.trafficlight.getIDList()
+        traffic_id_color_dict = {}
+
+        for traffic_signal_id in custom_traffic_lights:
+
+            self.lock.acquire()
+            traffic_lanes = traci.trafficlight.getControlledLanes(traffic_signal_id)
+            self.lock.release()
+
+            for edge in custom_edge_list:
+
+                index = 0
+                matches = 0
+                for lane in traffic_lanes:
+
+                    lane_to_edge_id = lane[:-2]
+                    if lane_to_edge_id == edge:
+                        self.lock.acquire()
+                        color_state = traci.trafficlight.getRedYellowGreenState(traffic_signal_id)
+                        all_edge_lanes = traci.edge.getLaneNumber(edge)
+                        vehicle_lane_id = traci.vehicle.getLaneID(self.ambulance_id)
+                        self.lock.release()
+                        color = color_state[index]
+                        traffic_id_color_dict[traffic_signal_id] = color
+
+                        # print("*************************************************************")
+                        # print("MATCH FOUND ", edge, lane_to_edge_id, " match count ", matches, " traffic signal",
+                        #       traffic_signal_id)
+                        # print("MATCH FOUND ", all_edge_lanes, " match count ", matches, " traffic signal",
+                        #       traffic_signal_id)
+                        # print("MATCH FOUND ", vehicle_lane_id, " match count ", matches, " traffic signal",
+                        #       traffic_signal_id)
+                        # print("*************************************************************")
+                        matches = matches + 1
+
+                    index = index + 1
+
+                # if matches > 1:
+                    # print("WARNING MORE THAN ONE LANE MATCHES EDGE ID!!", matches)
+                    # print(" EDGE ID AND TRAFFIC LANES ", edge, " : traffic LANES ", traffic_lanes)
+
+        print("The traffic id color dict is ", traffic_id_color_dict)
+        return traffic_id_color_dict
+
     @staticmethod
     def start_listening_to_anveshak_thread(json_string):
         """

@@ -399,7 +399,7 @@ class ConsumerThread(threading.Thread):
                 total = total + float(self.edge_dist_dict[edge])
             except Exception as e:
                 total = total + 0
-                print("Excpetion is ", e)
+                print("Exception is ", e)
 
         logging.debug("The total weight is " + str(total))
         return total
@@ -536,6 +536,11 @@ class ConsumerThread(threading.Thread):
                         # final_message[str(running_counter)] = color_medium
                         mqtt_object.send_edge_message(json.dumps(color_medium), self.medium_topic)
 
+                if index % 6 == 0:
+                    global_traffic_dict = self.sumo_obj.get_global_traffic_updates()
+                    mqtt_object.send_traffic_color_topic_message(json.dumps(global_traffic_dict),
+                                                                 'global_traffic_update')
+
                 # Wakeup every 10 seconds
                 if index % 10 == 0:
                     # Large queue edges
@@ -583,4 +588,4 @@ class ConsumerThread(threading.Thread):
 
             except Exception as e:
                 print("In the Consumer main loop The exception is ", e)
-                self.stop_publishing = True
+                # self.stop_publishing = True
