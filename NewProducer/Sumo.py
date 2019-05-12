@@ -951,9 +951,10 @@ class Sumo(threading.Thread):
             print("**** DISTANCE TRAVELLED is *******", distance, " : ", self.sim_step)
             self.temp = self.curr
 
-            if anveshak == "1":
+            if anveshak is True:
                 print("Anveshak mode on , the session id is ", self.sessionid)
                 self.get_next_camera()
+                self.perform_set_reset_traffic_lights("")
 
             # item = self.zmqClient.get_object_from_queue()
             # if item is not None:
