@@ -60,6 +60,7 @@ class Sumo(threading.Thread):
         self.edge_traffic_state = EdgeStateInfo()
         self.temp = 0.0
         self.curr = 0.0
+        self.start_listening_to_anv_updates = False
         # self.zmqClient = MqttPubSub()
 
         # start the simulation here
@@ -311,7 +312,8 @@ class Sumo(threading.Thread):
         self.amb_dest = dest
         self.sessionid = sessionid  # THIS IS VERY IMPORTANT
 
-        custom_edge_list, locations, edge_node_map = gen_shortest_path.compute_shortest_path(source, dest, self.graph)
+        custom_edge_list, locations, edge_node_map, custom_nodes = gen_shortest_path.compute_shortest_path(source, dest,
+                                                                                                           self.graph)
         self.custom_edge_list = custom_edge_list
         self.custom_locations = locations
         self.edge_node_map = edge_node_map
@@ -374,7 +376,6 @@ class Sumo(threading.Thread):
 
             edge_lane_dict[edge_id] = lane_list
 
-
         # structures which will be referred to later
         self.edge_traffic_state.set_traffic_id_list(traffic_light_list)
         self.edge_traffic_state.set_traffic_phase_dict(traffic_id_phase_dict)
@@ -399,6 +400,12 @@ class Sumo(threading.Thread):
         :return: This method returns the custom locations
         """
         return self.custom_locations
+
+    def get_custom_nodes(self):
+        """
+
+        :return:
+        """
 
     def get_custom_route_list(self):
         """
@@ -547,14 +554,27 @@ class Sumo(threading.Thread):
 
             print("In the perform set traffic lights state set ", new_state)
 
-    def perform_set_reset_traffic_lights(self, json_string):
+    @staticmethod
+    def start_listening_to_anveshak_thread(json_string):
+        """
+
+        :param json_string: called from the anveshak module
+        :return:
+        """
+        print("The json string put is ", json_string)
+
+    def perform_set_reset_traffic_lights(self):
         """
 
         :param json_string: received by the zmqq messaage
         :return:
         """
         # set_reset_dict = json.loads(json_string)
+        json_string = start_anv.get_traffic_light_item_from_queue()
         print("The json string is ", str(json_string))
+        if json_string == "":
+            logging.debug("json string is empty returning..")
+            return
 
         set_id_list = []
         reset_id_list = []
@@ -873,6 +893,13 @@ class Sumo(threading.Thread):
         num_vehicles = traci.vehicle.getIDCount()
         print("total number of active vehicles ", num_vehicles)
         self.lock.release()
+
+        if self.start_listening_to_anv_updates is False:
+            my_queue = Queue.Queue()
+            anv_thread = threading.Thread(target=start_anv.get_traffic_updates, args=(my_queue,))
+            anv_thread.start()
+
+            self.start_listening_to_anv_updates = True
 
         if int(self.ambulance_id) > 0:
 

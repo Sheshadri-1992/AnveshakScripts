@@ -11,4 +11,4 @@ sock.bind("tcp://0.0.0.0:8000")
 while True:
     message = sock.recv()
     sock.send("Echo: " + message)
-    print "Echo: " + message
+    print("Echo: " + message)

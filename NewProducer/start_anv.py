@@ -5,8 +5,10 @@ import zmq
 import pickle
 from Queue import Queue
 import json
+import Sumo
 
 
+traffic_light_queue = Queue.Queue()
 def __make_message(module_id, key, value, query_id, format, data=None):
     """
     This method is run only on the source and is used to make messages of messageSchema format. It also
@@ -104,10 +106,23 @@ def get_traffic_updates(queue, ip='tcp://0.0.0.0:8000'):
     incoming_zmq = zmq_context2.socket(zmq.PULL)
     incoming_zmq.bind(ip)
     while True:
-        msg = incoming_zmq.recv()
+        msg = incoming_zmq.recv()  # this must be a blocking call
         received_message = __deserialize_message(msg)
         traffic_json = json.loads(received_message.value)
-        queue.put(traffic_json)
+        traffic_light_queue.put(traffic_json)
+        print("The traffic json is ",traffic_json)
+
+
+def get_traffic_light_item_from_queue():
+    """
+    Retrieve traffic item from the queue
+    :return: queue item which contains json string
+    """
+    json_string = ""
+    if traffic_light_queue.empty() is False:
+        json_string = traffic_light_queue.get()
+
+    return json_string
 
 """
 ***deprecated***

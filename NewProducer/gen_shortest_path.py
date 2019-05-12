@@ -48,7 +48,7 @@ def compute_shortest_path(origin, dest, graph):
 
     edges = edges[1:]
 
-    return edges, locations, edge_node_map
+    return edges, locations, edge_node_map, path
 
 
 def get_shortest_path_traffic(graph, traffic_lights, source, destination, foresight):
