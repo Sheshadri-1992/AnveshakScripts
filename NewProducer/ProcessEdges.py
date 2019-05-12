@@ -100,7 +100,7 @@ class ProducerConsumer:
 
         self.consumer_thread.stop_producers()
 
-        try
+        try:
             self.consumer_thread.stop_consumer()
             self.consumer_thread.join()
             print("Consumer thread is stopped")
@@ -108,13 +108,13 @@ class ProducerConsumer:
         except Exception as e:
             print("Consumer thread is stopped", e)
 
-        result  = -1
+        result = -1
         try:
 
             result = self.sumo_obj.stop()
             logging.debug("Stopped sumo execution " + str(result))
-        except Exception as e :
-            print("Exception im stopping sumo ",e)
+        except Exception as e:
+            print("Exception im stopping sumo ", e)
 
         return result
 

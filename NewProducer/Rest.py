@@ -157,7 +157,7 @@ def stop_sumo():
     logging.debug("In the stop simulation method")
 
     my_state = current_app.config['state']
-    result = my_state.stop_sumo()
+    result = my_state.reset_simulation()
     return json.dumps({'message': result})
 
 # 308453207 3451683332
