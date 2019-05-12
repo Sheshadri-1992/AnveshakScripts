@@ -8,7 +8,7 @@ import json
 import Sumo
 
 
-traffic_light_queue = Queue.Queue()
+traffic_light_queue = Queue()
 def __make_message(module_id, key, value, query_id, format, data=None):
     """
     This method is run only on the source and is used to make messages of messageSchema format. It also
