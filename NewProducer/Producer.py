@@ -94,8 +94,9 @@ class MediumProducer(threading.Thread):
         while True:
 
             if self.stop_publishing:
-                logging.debug("Medium Thread will be stopping any publish ",self.stop_publishing)
-                break
+                print("Medium Thread will be stopping any publish ",self.stop_publishing)
+		time.sleep(2)
+               	continue 
 
             while index < length:
                 edge_id = self.medium_edge_list[index % length]

@@ -348,8 +348,8 @@ class ConsumerThread(threading.Thread):
 
             self.medium_thread.stop_producer()
 
-            self.medium_thread.join()
-            logging.debug("Medium thread has stopped")
+            # self.medium_thread.join()
+            logging.debug("Medium thread is paused")
 
             logging.debug("All producer threads are stopped")
 
@@ -410,8 +410,9 @@ class ConsumerThread(threading.Thread):
             logging.debug("Entered the consumer..")
 
             if self.stop_publishing:
-                logging.debug("The reset flag has been called ")
-                break
+                logging.debug("The reset flag has been called, stopped consuming ")
+                time.sleep(4)
+		continue
 
             batch_count = 0
             medium_candidate_edges = []

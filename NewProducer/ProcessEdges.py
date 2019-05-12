@@ -102,11 +102,11 @@ class ProducerConsumer:
 
         try:
             self.consumer_thread.stop_consumer()
-            self.consumer_thread.join()
-            print("Consumer thread is stopped")
+            # self.consumer_thread.join()
+            print("Consumer thread is paused")
 
         except Exception as e:
-            print("Consumer thread is stopped", e)
+            print("Consumer thread is paused", e)
 
         result = -1
         try:
