@@ -89,7 +89,7 @@ def vehicle_exits_fov(session_id, camera_id):
     __send_message(msg, ip)
 """
 
-f = open('cam_id_to_filter.pkl', 'rb')
+f = open('./InputFiles/cam_id_to_filter.pkl', 'rb')
 cam_id_to_filter_map = pickle.load(f)
 f.close()
 f = open('./InputFiles/fid_to_machineip.pkl', 'rb')
