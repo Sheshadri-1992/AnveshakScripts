@@ -136,7 +136,7 @@ class MediumProducer(threading.Thread):
         """
         self.stop_publishing = True
         logging.debug("Exiting Medium Producer...")
-        sys.exit(0)
+
 
     def resume_producer(self):
         """

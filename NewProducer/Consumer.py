@@ -418,7 +418,6 @@ class ConsumerThread(threading.Thread):
         """
         self.stop_publishing = True
         logging.debug("Exiting consumer...")
-        sys.exit(0)
 
     def resume_consumer(self):
         """
