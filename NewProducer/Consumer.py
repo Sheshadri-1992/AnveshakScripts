@@ -130,8 +130,9 @@ class ConsumerThread(threading.Thread):
             self.register_dict[topic] = True
             self.small_topic = topic
 
-        logging.debug("Resume consumer ")
-        self.resume_consumer()
+        if self.stop_publishing:
+            logging.debug("Resume consumer ")
+            self.resume_consumer()
 
     def ambulance_topic_and_produce(self, ambulance_id, position_topic, path_topic, path_traffic_topic,
                                     traffic_color_topic, anveshak, sessionid, source, dest):
@@ -421,6 +422,9 @@ class ConsumerThread(threading.Thread):
         Resume the consumer
         :return:
         """
+        self.sumo_obj.resume_sumo()
+        logging.debug("Waiting for sumo to start..10 seconds ")
+        time.sleep(10)
         self.stop_publishing = False
         logging.debug("Resuming the consumer...")
 
