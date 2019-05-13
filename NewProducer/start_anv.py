@@ -109,7 +109,7 @@ def get_traffic_updates(queue, ip='tcp://0.0.0.0:8000'):
         msg = incoming_zmq.recv()  # this must be a blocking call
         received_message = __deserialize_message(msg)
         traffic_json = json.loads(received_message.value)
-        traffic_light_queue.put(traffic_json)
+        queue.put(traffic_json)
         print("The traffic json is ", traffic_json)
 
 

@@ -17,6 +17,7 @@ import sumolib
 from collections import OrderedDict
 import networkx as nx
 import types
+import Queue
 from MqttPublish import MqttPublish
 import start_anv
 from datetime import datetime
@@ -64,6 +65,7 @@ class Sumo(threading.Thread):
         self.curr = 0.0
         self.start_listening_to_anv_updates = False
         self.mqtt_object = MqttPublish()
+        self.my_queue = Queue.Queue()
         # self.zmqClient = MqttPubSub()
 
         # start the simulation here
@@ -658,7 +660,6 @@ class Sumo(threading.Thread):
         print("The traffic id color dict is ", traffic_id_color_dict)
         return traffic_id_color_dict
 
-
     # @staticmethod
     # def start_listening_to_anveshak_thread(json_string):
     #     """
@@ -667,17 +668,20 @@ class Sumo(threading.Thread):
     #     :return:
     #     """
     #     print("The json string put is ", json_string)
-        
 
-    def perform_set_reset_traffic_lights(self):
+    def perform_set_reset_traffic_lights(self, json_string):
         """
 
         :param json_string: received by the zmqq messaage
         :return:
         """
+        json_string = ""
+
+        if not self.my_queue.empty():
+            json_string = self.my_queue.get()
         # set_reset_dict = json.loads(json_string)
         # json_string = start_anv.get_traffic_light_item_from_queue()
-        json_string = ""
+
         print("The json string is ", str(json_string))
         if json_string == "":
             logging.debug("json string is empty returning..")
@@ -713,8 +717,9 @@ class Sumo(threading.Thread):
         """
 
         print("Calling anveshak with cameraid ", "C_", camera_id, " session id ", sessionid)
+        list_camera = [str(camera_id)]
         self.mqtt_object.custom_connect_to_broker()
-        self.mqtt_object.send_camera_blend_topic_message(json.dumps(camera_id), 'blend_feed')
+        self.mqtt_object.send_camera_blend_topic_message(json.dumps(list_camera), 'blend_feed')
         self.mqtt_object.custom_disconnect_broker()
         # start_anv.vehicle_enters_fov(sessionid, camera_id) # THIS IS IMPORTANT
 
@@ -1033,7 +1038,7 @@ class Sumo(threading.Thread):
                 self.get_next_camera()
                 self.perform_set_reset_traffic_lights("")
 
-            # item = self.zmqClient.get_object_from_queue()
+            threading.thread(target=start_anv.get_traffic_updates, args=self.my_queue)
             # if item is not None:
             # self.perform_set_reset_traffic_lights("")
 
