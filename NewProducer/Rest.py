@@ -158,6 +158,7 @@ def stop_sumo():
 
     my_state = current_app.config['state']
     result = my_state.reset_simulation()
+
     return json.dumps({'message': result})
 
 # 308453207 3451683332

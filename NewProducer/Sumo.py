@@ -680,7 +680,7 @@ class Sumo(threading.Thread):
 
         if not self.my_queue.empty():
             json_string = self.my_queue.get()
-        # set_reset_dict = json.loads(json_string)
+        set_reset_dict = json.loads(json_string)
         # json_string = start_anv.get_traffic_light_item_from_queue()
 
         print("The json string is ", str(json_string))
@@ -688,8 +688,8 @@ class Sumo(threading.Thread):
             logging.debug("json string is empty returning..")
             return
 
-        set_id_list = []
-        reset_id_list = []
+        set_id_list = set_reset_dict['set']
+        reset_id_list = set_reset_dict['reset']
 
         set_id_list = self.get_traffic_lights_between_src_dest()
 

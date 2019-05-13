@@ -368,6 +368,7 @@ class ConsumerThread(threading.Thread):
 
             self.medium_thread.stop_producer()
 
+            self.medium_thread._stop()
             # self.medium_thread.join()
             logging.debug("Medium thread is paused")
 
