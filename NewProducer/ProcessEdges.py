@@ -5,6 +5,7 @@ import logging
 import time
 from random import randint
 import Queue
+import sys
 from Consumer import ConsumerThread
 # import numpy as np
 import start_anv
@@ -114,6 +115,9 @@ class ProducerConsumer:
             logging.debug("Stopped sumo execution " + str(result))
         except Exception as e:
             print("Exception im stopping sumo ", e)
+
+        logging.debug("Exiting Process Edges..")
+        sys.exit(0)
 
         return result
 

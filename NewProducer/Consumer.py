@@ -4,6 +4,7 @@ import json
 import logging
 import threading
 import time
+import sys
 import ZmqPull
 from datetime import datetime
 from MqttPublish import MqttPublish
@@ -416,6 +417,8 @@ class ConsumerThread(threading.Thread):
         :return:
         """
         self.stop_publishing = True
+        logging.debug("Exiting consumer...")
+        sys.exit(0)
 
     def resume_consumer(self):
         """
