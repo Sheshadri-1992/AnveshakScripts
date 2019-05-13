@@ -122,11 +122,16 @@ class ConsumerThread(threading.Thread):
             if 'medium-thread' not in self.producer_state_dict:
                 self.medium_thread.start()
                 self.producer_state_dict['medium-thread'] = True
+            else:
+                self.medium_thread.resume_producer()
 
         elif int(graphid) == 2:
 
             self.register_dict[topic] = True
             self.small_topic = topic
+
+        logging.debug("Resume consumer ")
+        self.resume_consumer()
 
     def ambulance_topic_and_produce(self, ambulance_id, position_topic, path_topic, path_traffic_topic,
                                     traffic_color_topic, anveshak, sessionid, source, dest):
