@@ -367,11 +367,8 @@ class ConsumerThread(threading.Thread):
         try:
 
             self.medium_thread.stop_producer()
-
-            self.medium_thread._stop()
-            # self.medium_thread.join()
+            self.medium_thread.join(1)
             logging.debug("Medium thread is paused")
-
             logging.debug("All producer threads are stopped")
 
         except Exception as e:

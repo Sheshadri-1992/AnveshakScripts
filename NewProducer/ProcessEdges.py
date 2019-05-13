@@ -102,7 +102,7 @@ class ProducerConsumer:
 
         try:
             self.consumer_thread.stop_consumer()
-            self.consumer_thread._stop()
+            self.consumer_thread.join(1)
             # self.consumer_thread.join()
             print("Consumer thread is paused")
 
