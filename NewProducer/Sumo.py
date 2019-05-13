@@ -66,6 +66,7 @@ class Sumo(threading.Thread):
         self.start_listening_to_anv_updates = False
         self.mqtt_object = MqttPublish()
         self.my_queue = Queue.Queue()
+        self.start_anveshak_listening = False
         # self.zmqClient = MqttPubSub()
 
         # start the simulation here
@@ -1036,9 +1037,11 @@ class Sumo(threading.Thread):
             if anveshak is True:
                 print("Anveshak mode on , the session id is ", self.sessionid)
                 self.get_next_camera()
-                self.perform_set_reset_traffic_lights("")
+                if self.start_listening_to_anv_updates is False:
+                    threading.thread(target=start_anv.get_traffic_updates, args=self.my_queue)
+                    self.start_listening_to_anv_updates = True
 
-            threading.thread(target=start_anv.get_traffic_updates, args=self.my_queue)
+                self.perform_set_reset_traffic_lights("")
             # if item is not None:
             # self.perform_set_reset_traffic_lights("")
 

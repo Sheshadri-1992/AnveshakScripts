@@ -600,4 +600,6 @@ class ConsumerThread(threading.Thread):
 
             except Exception as e:
                 print("In the Consumer main loop The exception is ", e)
+                if self.stop_publishing:
+                    logging.debug("Exiting gracefully")
                 # self.stop_publishing = True
