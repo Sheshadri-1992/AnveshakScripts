@@ -413,14 +413,12 @@ class Sumo(threading.Thread):
 
         return "Added a vehicle successfully"
 
-
     def get_custom_locations(self):
         """
         This method returns the custom locations, which contain lat lon pair for each edges
         :return: This method returns the custom locations
         """
         return self.custom_locations
-
 
     def get_custom_nodes(self):
         """
@@ -429,14 +427,12 @@ class Sumo(threading.Thread):
         """
         return self.custom_nodes_list
 
-
     def get_custom_route_list(self):
         """
         This method returns the route followed in between source and destination
         :return: Returns the custom route list
         """
         return self.custom_edge_list
-
 
     def get_camera_in_path_list(self):
         """
@@ -462,7 +458,6 @@ class Sumo(threading.Thread):
         print("The cameras in path are ", cameras_in_path)
 
         return list(cameras_in_path)
-
 
     def prepare_traffic_color_payload(self):
         """
@@ -516,7 +511,6 @@ class Sumo(threading.Thread):
         print("The traffic id color dict is ", traffic_id_color_dict)
         return traffic_id_color_dict
 
-
     def get_vehicle_speed(self, vehicle_id):
         """
 
@@ -528,7 +522,6 @@ class Sumo(threading.Thread):
         self.lock.release()
 
         return speed
-
 
     def set_vehicle_speed(self, vehicle_id, speed):
         """
@@ -544,7 +537,6 @@ class Sumo(threading.Thread):
         # traci.vehicle.setSpeedMode(vehicle_id, 0)  # 0 is rouge mode
         # traci.vehicle.setLaneChangeMode(vehicle_id, 2218)  # 2218 is rouge mode
         self.lock.release()
-
 
     def perform_reset_traffic_lights(self, reset_id_list):
         """
@@ -575,7 +567,6 @@ class Sumo(threading.Thread):
 
             print("Reset the traffic lights to old state ", old_state)
 
-
     def return_lane_id_given_edge_id_and_traffic_id(self, edge_id, traffic_id):
         """
         Returns the lane id in the set of all lanes in the traffic id
@@ -583,7 +574,6 @@ class Sumo(threading.Thread):
         :param traffic_id The current traffic id
         :return:
         """
-
 
     def perform_set_traffic_lights(self, set_id_list):
         """
@@ -608,7 +598,6 @@ class Sumo(threading.Thread):
             self.lock.release()
 
             print("In the perform set traffic lights state set ", new_state)
-
 
     def get_global_traffic_updates(self):
         """
@@ -680,13 +669,16 @@ class Sumo(threading.Thread):
 
         if not self.my_queue.empty():
             json_string = self.my_queue.get()
-        set_reset_dict = json.loads(json_string)
+            set_reset_dict = json.loads(json_string)
+
         # json_string = start_anv.get_traffic_light_item_from_queue()
 
         print("The json string is ", str(json_string))
         if json_string == "":
             logging.debug("json string is empty returning..")
             return
+
+        print("******************************* GOT MSG FROM ANVESHAK ********************************", json_string)
 
         set_id_list = set_reset_dict['set']
         reset_id_list = set_reset_dict['reset']
@@ -708,7 +700,6 @@ class Sumo(threading.Thread):
         #     reset_id_list = set_reset_dict['reset']
         #     self.perform_reset_traffic_lights(reset_id_list)
 
-
     def make_a_call_to_anveshak(self, camera_id, sessionid):
         """
 
@@ -719,11 +710,16 @@ class Sumo(threading.Thread):
 
         print("Calling anveshak with cameraid ", "C_", camera_id, " session id ", sessionid)
         list_camera = [str(camera_id)]
-        self.mqtt_object.custom_connect_to_broker()
-        self.mqtt_object.send_camera_blend_topic_message(json.dumps(list_camera), 'blend_feed')
-        self.mqtt_object.custom_disconnect_broker()
-        # start_anv.vehicle_enters_fov(sessionid, camera_id) # THIS IS IMPORTANT
+        # self.mqtt_object.custom_connect_to_broker()
+        # self.mqtt_object.send_camera_blend_topic_message(json.dumps(list_camera), 'blend_feed')
+        # self.mqtt_object.custom_disconnect_broker()
+        my_dict = {}
+        my_dict['upper_limit_bs'] = 5
+        my_dict['max_tol_lat'] = 10
 
+        print("********************  The payload being sent  => ", my_dict)
+        # FAILURE POINT 2
+        start_anv.vehicle_enters_fov(sessionid, camera_id, my_dict)  # THIS IS IMPORTANT data is latency abd max batch
 
     def get_next_camera(self):
         """
@@ -833,7 +829,6 @@ class Sumo(threading.Thread):
                     print(
                         "************though distance is less, vehicle has already passed the signal**********")
 
-
     def reset_traffic_lights(self, end_index):
         """
 
@@ -874,7 +869,6 @@ class Sumo(threading.Thread):
             traci.trafficlight.setPhaseDuration(traffic_id, 100)
             self.lock.release()
 
-
     def get_traffic_color_given_edge_id_and_traffic_id(self, edge_id, traffic_signal_id):
         """
 
@@ -900,7 +894,6 @@ class Sumo(threading.Thread):
 
         print("####################### The final color ", final_color)
         return final_color
-
 
     def set_traffic_lights(self, start_index, end_index):
         """
@@ -963,7 +956,6 @@ class Sumo(threading.Thread):
             edge_id_index = edge_id_index + 1
             self.lock.release()
 
-
     def set_reset_traffic_lights(self):
         """
 
@@ -1003,7 +995,6 @@ class Sumo(threading.Thread):
 
             print("The exception is ", e)
 
-
     def update_simulation_step(self, anveshak):
         """
         Is called from Consumer, updates the simulation step
@@ -1038,6 +1029,8 @@ class Sumo(threading.Thread):
                 print("Anveshak mode on , the session id is ", self.sessionid)
                 self.get_next_camera()
                 if self.start_listening_to_anv_updates is False:
+
+                    # FAILURE POINT 3
                     threading.thread(target=start_anv.get_traffic_updates, args=self.my_queue)
                     self.start_listening_to_anv_updates = True
 
@@ -1048,7 +1041,6 @@ class Sumo(threading.Thread):
         logging.debug("simulation step " + str(self.sim_step))
 
         self.sim_step = self.sim_step + 1
-
 
     # def run(self):
     #     """
@@ -1083,7 +1075,6 @@ class Sumo(threading.Thread):
         logging.debug("Request to stop simulation")
         traci.close(False)  # important
         return "Sumo stopped"
-
 
     def resume_sumo(self):
         logging.debug("Resuming sumo..")

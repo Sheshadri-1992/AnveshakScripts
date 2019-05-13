@@ -83,8 +83,9 @@ class ProducerConsumer:
             self.max_latency = latency
             self.batch_size = batch_size
 
-            # start_anv.start_anveshak(int(sessionid), int(latency), int(batch_size), ambulance, hospital,
-                                     #"tcp://10.244.17.8:9000")
+            # FAILURE POINT 1, 3 ints , 3 strings
+            start_anv.start_anveshak(int(sessionid), int(latency), int(batch_size), ambulance, hospital,
+                                     "tcp://10.244.17.8:9000")
 
         except Exception as e:
             logging.debug("The exception message is " + str(e))

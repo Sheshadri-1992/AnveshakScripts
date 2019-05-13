@@ -102,6 +102,9 @@ def __deserialize_message(serialized_message):
 
 
 def get_traffic_updates(queue, ip='tcp://0.0.0.0:8000'):
+
+    print("***************************GOT A CALL FROM SUMO************************")
+
     zmq_context2 = zmq.Context()
     incoming_zmq = zmq_context2.socket(zmq.PULL)
     incoming_zmq.bind(ip)
@@ -110,7 +113,7 @@ def get_traffic_updates(queue, ip='tcp://0.0.0.0:8000'):
         received_message = __deserialize_message(msg)
         traffic_json = json.loads(received_message.value)
         queue.put(traffic_json)
-        print("The traffic json is ", traffic_json)
+        print("************** The traffic json is*****************************", traffic_json)
 
 
 def get_traffic_light_item_from_queue():
