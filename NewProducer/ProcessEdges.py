@@ -117,9 +117,9 @@ class ProducerConsumer:
             print("Exception im stopping sumo ", e)
 
         logging.debug("Exiting Process Edges..")
-        sys.exit(0)
+        return "Ending"
 
-        return result
+        # return result
 
     def control_traffic_light_signals(self, json_string):
         """

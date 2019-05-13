@@ -446,8 +446,9 @@ class ConsumerThread(threading.Thread):
 
                 if self.stop_publishing:
                     logging.debug("The reset flag has been called, stopped consuming ")
-                    time.sleep(4)
-                    continue
+                    return
+                    # time.sleep(4)
+
 
                 batch_count = 0
                 medium_candidate_edges = []
