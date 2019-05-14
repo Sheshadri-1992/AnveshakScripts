@@ -5,15 +5,12 @@ import zmq
 import pickle
 from Queue import Queue
 import json
-import Sumo
 
 
-traffic_light_queue = Queue()
 def __make_message(module_id, key, value, query_id, format, data=None):
     """
     This method is run only on the source and is used to make messages of messageSchema format. It also
     assigns the startTimeStamp which will be used for all future drops and batching.
-
     :param module_id: Module id of the source. eg: Filter_1
     :param key: key sent in the kafka message
     :param value: Generally the image to be sent
@@ -43,7 +40,6 @@ def __send_message(msg, ip):
     """
     This method accepts a protobuf object, serializes it sends it over to the sender specified in the message using
     the _instance_to_endpoint_map.
-
     :param msg: Protobuf message
     :return: Nothing
     """
@@ -61,7 +57,6 @@ def __send_message(msg, ip):
 def start_anveshak(session_id, max_tol_lat, upper_limit_bs, source, destination, ip):
     """
     This method should be called from the Python server that runs Anveshak
-
     :param session_id: Session ID from the UI
     :param max_tol_lat: Maximum Latency from the UI
     :param upper_limit_bs: Maximum Batch Size from the UI
@@ -85,11 +80,9 @@ def vehicle_enters_fov(session_id, camera_id, data):
     __send_message(msg, ip)
 
 
-@staticmethod
 def __deserialize_message(serialized_message):
     """
     This method deserializes protobuf messages using messageSchema.proto
-
     :param serialized_message: This is the serialized protobuf ZMQ message
     :return: deserialized protobuf message
     """
@@ -101,41 +94,32 @@ def __deserialize_message(serialized_message):
         print("ERROR in parsing message")
 
 
-def get_traffic_updates(queue, ip='tcp://0.0.0.0:8000'):
-
-    print("***************************GOT A CALL FROM SUMO************************")
-
+def get_traffic_updates(queue, ip='tcp://10.244.0.20:8000'):
+    print("*********************Executing thread target****************************")
     zmq_context2 = zmq.Context()
     incoming_zmq = zmq_context2.socket(zmq.PULL)
     incoming_zmq.bind(ip)
+    print("************************CHANGED TO BIND*************************************")
     while True:
-        msg = incoming_zmq.recv()  # this must be a blocking call
+        print("********************I am blocked***************************")
+        msg = incoming_zmq.recv()
+        print("***************GOT A MESSAGE FROM ANVESHAK********************")
         received_message = __deserialize_message(msg)
-        traffic_json = json.loads(received_message.value)
+        print("********************* RECEIVED MESSAGE ",received_message)
+        traffic_json = json.loads(received_message.value.decode('utf-8'))
+        print("***************TRAFFIC JSON*****************",traffic_json)
         queue.put(traffic_json)
-        print("************** The traffic json is*****************************", traffic_json)
+        print("*************THE SIZE OF QUEUE *****************",queue.qsize())
 
 
-def get_traffic_light_item_from_queue():
-    """
-    Retrieve traffic item from the queue
-    :return: queue item which contains json string
-    """
-    json_string = ""
-    if traffic_light_queue.empty() is False:
-        json_string = traffic_light_queue.get()
+#"""
+#***deprecated***
+#def vehicle_exits_fov(session_id, camera_id):
+#    ip = ''
+#    camera_id = 'C_' + str(camera_id)
+#    msg = __make_message(camera_id, camera_id, pickle.dumps(False), session_id)
+#    __send_message(msg, ip)
 
-    return json_string
-
-"""
-***deprecated***
-
-def vehicle_exits_fov(session_id, camera_id):
-    ip = ''
-    camera_id = 'C_' + str(camera_id)
-    msg = __make_message(camera_id, camera_id, pickle.dumps(False), session_id)
-    __send_message(msg, ip)
-"""
 
 f = open('./InputFiles/cam_id_to_filter.pkl', 'rb')
 cam_id_to_filter_map = pickle.load(f)

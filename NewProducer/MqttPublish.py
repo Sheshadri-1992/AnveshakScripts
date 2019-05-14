@@ -8,9 +8,9 @@ logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-9s) %(message)s'
 
 
 class MqttPublish:
-    broker_address = "10.24.24.2"
+    broker_address = "10.24.24.4"
     tTransport = "websockets"
-    tPort = 10001
+    tPort = 10002
     vehicle_topic = ""
     edge_topic = ""
     client_edge = None
@@ -23,9 +23,9 @@ class MqttPublish:
 
     def __init__(self):
         logging.debug("the constructor method is called")
-        self.broker_address = "10.24.24.2"
+        self.broker_address = "10.24.24.4"
         self.tTransport = "websockets"
-        self.tPort = 10001
+        self.tPort = 10002
         self.vehicle_topic = "vechiclestats"
         self.edge_topic = "trafficstats"
 

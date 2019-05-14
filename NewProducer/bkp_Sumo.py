@@ -17,7 +17,6 @@ import random
 from collections import OrderedDict
 import networkx as nx
 import types
-import Queue
 from MqttPublish import MqttPublish
 import start_anv
 from datetime import datetime
@@ -65,8 +64,6 @@ class Sumo(threading.Thread):
         self.curr = 0.0
         self.start_listening_to_anv_updates = False
         self.mqtt_object = MqttPublish()
-        self.my_queue = Queue.Queue()
-        self.anveshak_updates_thread = None
         # self.zmqClient = MqttPubSub()
 
         # start the simulation here
@@ -509,9 +506,9 @@ class Sumo(threading.Thread):
 
                     index = index + 1
 
-                #if matches > 1:
-                #    print("WARNING MORE THAN ONE LANE MATCHES EDGE ID!!", matches)
-                #    print(" EDGE ID AND TRAFFIC LANES ", edge, " : traffic LANES ", traffic_lanes)
+                if matches > 1:
+                    print("WARNING MORE THAN ONE LANE MATCHES EDGE ID!!", matches)
+                    print(" EDGE ID AND TRAFFIC LANES ", edge, " : traffic LANES ", traffic_lanes)
 
         print("The traffic id color dict is ", traffic_id_color_dict)
         return traffic_id_color_dict
@@ -591,8 +588,6 @@ class Sumo(threading.Thread):
         :param set_id_list: the traffic id which i need to turn green
         :return: nothing
         """
-
-        print("***********************SET ID LIST CALLED*************************",set_id_list)
 
         for traffic_signal_id in set_id_list:
             self.lock.acquire()
@@ -680,39 +675,23 @@ class Sumo(threading.Thread):
         :param json_string: received by the zmqq messaage
         :return:
         """
-
-        print("***************************** CAME TO PERFORM SET RESET *********************************************")
-        json_string = ""
-        set_reset_dict = {}
-
-        if not self.my_queue.empty():
-            print("*************************************** IN HERE *************************************************")
-            json_dict = self.my_queue.get()
-            set_reset_dict = json_dict
-            print("THE DICT US ",set_reset_dict)
-
+        # set_reset_dict = json.loads(json_string)
         # json_string = start_anv.get_traffic_light_item_from_queue()
-
-        if len(set_reset_dict.keys()) == 0  :
-            logging.debug("Sent dict  is empty returning..")
-            return
-
-        print("******************************* GOT MSG FROM ANVESHAK ********************************", set_reset_dict)
+        json_string = ""
+        print("The json string is ", str(json_string))
+        #if json_string == "":
+        #    logging.debug("json string is empty returning..")
+        #    return
 
         set_id_list = []
         reset_id_list = []
-        set_id_list = set_reset_dict['set']
-        reset_id_list = set_reset_dict['reset']
 
-        print("The set list is ",set_id_list)
-        print("the reset list is ",reset_id_list)
+        set_id_list = self.get_traffic_lights_between_src_dest()
 
-        # set_id_list = self.get_traffic_lights_between_src_dest()
-
-        logging.debug("**************************Setting all the traffic lights to green**************************************")
+        logging.debug("Setting all the traffic lights to green")
         self.perform_set_traffic_lights(set_id_list)
 
-        logging.debug("**************************Reset all the traffic lights ****************************************")
+        logging.debug("Reset all the traffic lights to green")
         self.perform_reset_traffic_lights(reset_id_list)
 
         # if 'set' in set_reset_dict:
@@ -734,18 +713,12 @@ class Sumo(threading.Thread):
         """
 
 	camera_list = []
-        print("******************************************Calling anveshak with cameraid ", "C_", camera_id, " session id ", sessionid)
+        print("Calling anveshak with cameraid ", "C_", camera_id, " session id ", sessionid)
 	camera_list.append(camera_id)
         self.mqtt_object.custom_connect_to_broker()
         self.mqtt_object.send_camera_blend_topic_message(json.dumps(camera_list), 'blend_feed')
         self.mqtt_object.custom_disconnect_broker()
-        my_dict = {}
-        my_dict['upper_limit_bs'] = 5 
-        my_dict['max_tol_lat'] = 10
-
-        print("*******************CALLING ANVESHAK CAMERA *********************************")
-
-        start_anv.vehicle_enters_fov(sessionid, camera_id, my_dict) # THIS IS IMPORTANT
+        # start_anv.vehicle_enters_fov(sessionid, camera_id) # THIS IS IMPORTANT
 
 
     def get_next_camera(self):
@@ -754,8 +727,6 @@ class Sumo(threading.Thread):
         but never takes a wrong decision
         :return: return camera id
         """
-
-        print("****************************IN GET NEXT CAMERA***************************************")
         if self.ambulance_id == "-1":
             logging.debug("Ambulance id not yet set")
             return
@@ -767,8 +738,6 @@ class Sumo(threading.Thread):
         if curr_edge_id[0] == ":":
             print("Returning Internal Edge ", curr_edge_id)
             return
-
-        print("************************** IN GET NEXT CAMERA ****************************")
 
         custom_node_id_list = []
         first_edge = self.custom_edge_list[0]
@@ -833,8 +802,6 @@ class Sumo(threading.Thread):
         final_geo = (position_geo[1], position_geo[0])
         self.lock.release()
 
-        print("********************************* CAMERA PATH LIST ",cameras_in_path_list)
-
         # for node_id in candidate_list:
         for camera in cameras_in_path_list:
 
@@ -851,7 +818,7 @@ class Sumo(threading.Thread):
                 camera_index = custom_node_id_list.index(camera)
                 print("NODE INDEX ", node_id_index, " CAMERA INDEX ", camera_index)
 
-                if node_id_index < camera_index:
+                if node_id_index <= camera_index:
                     print("Sending message to camera ", str(camera), " the distance is ", distance)
 
                     # call to anveshak, needed parameters are camera and sessionid
@@ -1046,12 +1013,12 @@ class Sumo(threading.Thread):
         print("total number of active vehicles ", num_vehicles)
         self.lock.release()
 
-        #if self.start_listening_to_anv_updates is False:
+        if self.start_listening_to_anv_updates is False:
             # my_queue = Queue.Queue()
             # anv_thread = threading.Thread(target=start_anv.get_traffic_updates, args=(my_queue,))
             # anv_thread.start()
-        #    logging.debug("Starting to listen to anveshak updates..")
-        #    self.start_listening_to_anv_updates = True
+            logging.debug("Starting to listen to anveshak updates..")
+            self.start_listening_to_anv_updates = True
 
         if int(self.ambulance_id) > 0:
 
@@ -1066,24 +1033,16 @@ class Sumo(threading.Thread):
             if anveshak is True:
                 print("Anveshak mode on , the session id is ", self.sessionid)
                 self.get_next_camera()
-                if self.start_listening_to_anv_updates is False:
-
-                    print("**********************CALLED ONLY ONCE ",self.start_listening_to_anv_updates)
-
-                    # FAILURE POINT 3
-                    self.anveshak_updates_thread = threading.Thread(target=start_anv.get_traffic_updates, args=(self.my_queue,))
-                    print("*******************************STARTING THE THREAD***************************************")
-                    self.anveshak_updates_thread.start()
-                    self.start_listening_to_anv_updates = True
-                
                 self.perform_set_reset_traffic_lights("")
-            
+
+            # item = self.zmqClient.get_object_from_queue()
             # if item is not None:
             # self.perform_set_reset_traffic_lights("")
 
         logging.debug("simulation step " + str(self.sim_step))
 
-        self.sim_step = self.sim_step + 1 
+        self.sim_step = self.sim_step + 1
+
 
     # def run(self):
     #     """

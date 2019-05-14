@@ -5,7 +5,6 @@ import logging
 import time
 from random import randint
 import Queue
-import sys
 from Consumer import ConsumerThread
 # import numpy as np
 import start_anv
@@ -83,9 +82,10 @@ class ProducerConsumer:
             self.max_latency = latency
             self.batch_size = batch_size
 
-            # FAILURE POINT 1, 3 ints , 3 strings
+	    print("***********************I AM CALLIN ANVESHAK*********************")
+
             start_anv.start_anveshak(int(sessionid), int(latency), int(batch_size), ambulance, hospital,
-                                     "tcp://10.244.17.8:9000")
+                                     "tcp://10.244.17.13:9000")
 
         except Exception as e:
             logging.debug("The exception message is " + str(e))
@@ -99,11 +99,10 @@ class ProducerConsumer:
         """
         logging.debug("Stopping simulation")
 
-        self.consumer_thread.stop_producers()
+        # self.consumer_thread.stop_producers()
 
         try:
-            self.consumer_thread.stop_consumer()
-            self.consumer_thread.join(1)
+            # self.consumer_thread.stop_consumer()
             # self.consumer_thread.join()
             print("Consumer thread is paused")
 
@@ -113,15 +112,12 @@ class ProducerConsumer:
         result = -1
         try:
 
-            result = self.sumo_obj.stop()
+            # result = self.sumo_obj.stop()
             logging.debug("Stopped sumo execution " + str(result))
         except Exception as e:
             print("Exception im stopping sumo ", e)
 
-        logging.debug("Exiting Process Edges..")
-        return "Ending"
-
-        # return result
+        return result
 
     def control_traffic_light_signals(self, json_string):
         """

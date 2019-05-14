@@ -6,7 +6,7 @@ import json
 import pickle
 import xmltodict
 import random
-import sumolib
+#import sumolib
 
 
 def compute_shortest_path(origin, dest, graph):
@@ -17,8 +17,8 @@ def compute_shortest_path(origin, dest, graph):
     :param graph: The network graph
     :return: the shortest path (set of edges) and locations dict which has lat long for the shortest path
     """
-    # origin = '3756191723'
-    # dest = '3370075981'
+    origin = '254665578'
+    dest = '461789813'
 
     print("The origin is ", origin, " destination is ", dest)
     path = nx.shortest_path(graph, origin, dest, weight='weight')  # LIST OF NODES
@@ -57,8 +57,8 @@ def get_shortest_path_traffic(graph, traffic_lights, source, destination, foresi
     :return:
     """
 
-    # source = '3756191723'
-    # destination = '3370075981'
+    source = '254665578'
+    destination = '461789813'
     path = nx.shortest_path(graph, source, destination, weight='weight')
     lights = []
     if set(path) & set(traffic_lights):

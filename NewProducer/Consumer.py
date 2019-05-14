@@ -4,7 +4,6 @@ import json
 import logging
 import threading
 import time
-import sys
 import ZmqPull
 from datetime import datetime
 from MqttPublish import MqttPublish
@@ -123,17 +122,11 @@ class ConsumerThread(threading.Thread):
             if 'medium-thread' not in self.producer_state_dict:
                 self.medium_thread.start()
                 self.producer_state_dict['medium-thread'] = True
-            else:
-                self.medium_thread.resume_producer()
 
         elif int(graphid) == 2:
 
             self.register_dict[topic] = True
             self.small_topic = topic
-
-        if self.stop_publishing:
-            logging.debug("Resume consumer ")
-            self.resume_consumer()
 
     def ambulance_topic_and_produce(self, ambulance_id, position_topic, path_topic, path_traffic_topic,
                                     traffic_color_topic, anveshak, sessionid, source, dest):
@@ -191,8 +184,8 @@ class ConsumerThread(threading.Thread):
         self.route_id = self.route_id + 1
 
         # set producers flag to true
-        self.medium_thread.resume_producer()
-        self.resume_consumer()
+        # self.medium_thread.resume_producer()
+        # self.resume_consumer()
 
     def update_edge_list(self, edge_list):
         """
@@ -367,8 +360,10 @@ class ConsumerThread(threading.Thread):
         try:
 
             self.medium_thread.stop_producer()
-            self.medium_thread.join(1)
+
+            # self.medium_thread.join()
             logging.debug("Medium thread is paused")
+
             logging.debug("All producer threads are stopped")
 
         except Exception as e:
@@ -414,18 +409,14 @@ class ConsumerThread(threading.Thread):
         Resets the reset flag
         :return:
         """
-        self.stop_publishing = True
-        logging.debug("Exiting consumer...")
+        # self.stop_publishing = True
 
     def resume_consumer(self):
         """
         Resume the consumer
         :return:
         """
-        self.sumo_obj.resume_sumo()
-        logging.debug("Waiting for sumo to start..10 seconds ")
-        time.sleep(10)
-        self.stop_publishing = False
+        # self.stop_publishing = False
         logging.debug("Resuming the consumer...")
 
     def run(self):
@@ -443,9 +434,8 @@ class ConsumerThread(threading.Thread):
 
                 if self.stop_publishing:
                     logging.debug("The reset flag has been called, stopped consuming ")
-                    return
-                    # time.sleep(4)
-
+                    time.sleep(4)
+                    continue
 
                 batch_count = 0
                 medium_candidate_edges = []
@@ -598,6 +588,4 @@ class ConsumerThread(threading.Thread):
 
             except Exception as e:
                 print("In the Consumer main loop The exception is ", e)
-                if self.stop_publishing:
-                    logging.debug("Exiting gracefully")
                 # self.stop_publishing = True

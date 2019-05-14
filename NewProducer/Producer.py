@@ -4,7 +4,6 @@ import logging
 import threading
 import time
 import Queue
-import sys
 from MqttPublish import MqttPublish
 from Query import QueryStruct
 
@@ -96,8 +95,8 @@ class MediumProducer(threading.Thread):
 
             if self.stop_publishing:
                 print("Medium Thread will be stopping any publish ", self.stop_publishing)
-                # time.sleep(2)
-                return
+                time.sleep(2)
+                continue
 
             while index < length:
                 edge_id = self.medium_edge_list[index % length]
@@ -135,7 +134,6 @@ class MediumProducer(threading.Thread):
         :return:
         """
         self.stop_publishing = True
-        logging.debug("Exiting Medium Producer...")
 
     def resume_producer(self):
         """

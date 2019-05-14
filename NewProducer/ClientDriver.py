@@ -17,7 +17,7 @@ if __name__ == '__main__':
     initialize_state()
 
     rest_app = Rest.create_rest_app(my_state)
-    rest_app.run(host='0.0.0.0')
+    rest_app.run(host='0.0.0.0', port=10001)
 
     while True:
         time.sleep(1)
